@@ -28,8 +28,9 @@ public class GetTripList {
 		result = new JSONObject();
 	}
 
+	
+	
 	public JSONObject execute() {
-
 		SharedPreferences pref = PreferenceManager
 				.getDefaultSharedPreferences(mContext);
 		String uid = pref.getString("sid", null);
@@ -54,14 +55,14 @@ public class GetTripList {
 				if(rawResult.isEmpty()){
 					// do not proceed if there's no result
 					// also just return the empty jsonobject
-					return result;
+					return null;
 				}
 				// if there's at least one result, trim the excess stuff for jsontokner
 				String trimResult = rawResult.substring(1, rawResult.length()-2);
-				Log.e("raw", trimResult);
+//				Log.e("raw", trimResult);
 //				Log.e("gettriplist", "result=" + result.toString());
 				result = new JSONObject(new JSONTokener(trimResult));
-//				Log.e("gettriplist", "result=" + result.toString());
+				Log.e("gettriplist", "result=" + result.toString());
 			} catch (ClientProtocolException e) {
 				e.printStackTrace();
 			} catch (IOException e) {

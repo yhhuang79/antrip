@@ -9,6 +9,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.webkit.ConsoleMessage;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -34,8 +35,15 @@ public class ANTripActivity extends Activity {
 		mWebSettings.setJavaScriptEnabled(true);
 //		mWebSettings.setDomStorageEnabled(true);
 		mWebView.setWebViewClient(new WebViewClient());
-		mWebView.setWebChromeClient(new WebChromeClient());
-		mWebView.addJavascriptInterface(new JSInterface(), "android");
+		mWebView.setWebChromeClient(new WebChromeClient(){
+			@Override
+			public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+				Log.e("consolemsg", consoleMessage.message() + ", " + consoleMessage.lineNumber() + ", " + consoleMessage.sourceId());
+				return true;
+			}
+		});
+//		mWebView.addJavascriptInterface(new JSInterface(), "aa");
+		mWebView.addJavascriptInterface(new jsinter(), "aa");
 		mWebView.loadUrl("file:///android_asset/index.html");
 		
 		/* mWebView.setWebViewClient(new WebViewClient(){
@@ -55,9 +63,24 @@ public class ANTripActivity extends Activity {
 		
 	}
 	
+//	private class jsinter implements JavaScriptCallback{
+//		public void hello(){
+//			Toast.makeText(mContext, "hello", Toast.LENGTH_LONG).show();
+//		}
+//		
+//		public void saveSid(String sid){
+//			Toast.makeText(mContext, "save sid " + sid, Toast.LENGTH_LONG).show();
+//		}
+//		
+//		public JSONObject getTripList(){
+//			Toast.makeText(mContext, "get trip list", Toast.LENGTH_LONG).show();
+//			return null;
+//		}
+//	}
+	
 	public interface JavaScriptCallback{}
 	
-	private class JSInterface implements JavaScriptCallback{
+	private class jsinter implements JavaScriptCallback{
 		public void hello(String sid){
 			Toast.makeText(mContext, "hola~ " + sid, Toast.LENGTH_LONG).show();
 		}
@@ -73,8 +96,8 @@ public class ANTripActivity extends Activity {
 		}
 		
 		//save userid from a successful login responce message
-		public void saveSid(Object sid){
-			PreferenceManager.getDefaultSharedPreferences(mContext).edit().putString("sid", sid.toString()).commit();
+		public void saveSid(String sid){
+			PreferenceManager.getDefaultSharedPreferences(mContext).edit().putString("sid", sid).commit();
 			Log.e("saveSid", "= " + sid);
 		}
 		
@@ -83,13 +106,14 @@ public class ANTripActivity extends Activity {
 		// need a function to store check-in values
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
-		public JSONObject getTripList(){
+		public String getTripList(){
 			JSONObject result = null;
 			Toast.makeText(mContext, "start gettriplist", Toast.LENGTH_SHORT).show();
 			result = new GetTripList(mContext).execute();
 			Toast.makeText(mContext, "done gettriplist", Toast.LENGTH_SHORT).show();
 			if(result != null){
-				return result;
+				Log.e("gettriplist", result.toString());
+				return result.toString();
 			} else{
 				return null;
 			}
