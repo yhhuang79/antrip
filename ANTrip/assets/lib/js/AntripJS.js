@@ -161,25 +161,25 @@
 		g_isForMobile=true;
 		// Platform checking...
 
-		if(android || iOS || touchOS || g_isForMobile==true)
-		{
+	//	if(android || iOS || touchOS || g_isForMobile==true)
+	//	{
 			//alert("U are using with Android, iPad or iPhone...");
 			//alert(document.body.clientHeight);
 			//alert(document.body.clientWidth);
-			g_isForMobile=true;
+		//	g_isForMobile=true;
 			//alert("AntripJS.min.js");
 			//require("lib/jq_includes/jquery-1.7.2.min.js");
-			require("lib/js/AntripJS.min.js");
-			require("lib/js/MapRecorder.js");			
-		}
-		else{
+			//require("lib/js/AntripJS.min.js");
+		//	require("lib/js/MapRecorder.js");			
+	//	}
+	/*	else{
 			//loadjscssfile("lib/css/jquery.ui.all.css", "css");
 
-			require("lib/js/AlbumSlider.js");
+	/*		require("lib/js/AlbumSlider.js");
 			require("lib/js/MapEditing.js");
 			loadjscssfile("lib/css/pcframe.css", "css");
 		}
-			require("lib/jq_includes/jquery.bgiframe-2.1.2.js");
+	/*		require("lib/jq_includes/jquery.bgiframe-2.1.2.js");
 			require("lib/jq_includes/jquery.ui.core.js");
 			require("lib/jq_includes/jquery.ui.widget.js");
 			require("lib/jq_includes/jquery.ui.mouse.js");
@@ -188,7 +188,7 @@
 			require("lib/jq_includes/jquery.ui.position.js");
 			require("lib/jq_includes/jquery.ui.resizable.js");
 			require("lib/jq_includes/jquery.ui.dialog.js");
-			require("lib/jq_includes/jquery.effects.core.js");
+			require("lib/jq_includes/jquery.effects.core.js");*/
 		//reset image path
 		back_img = im+"background-img.png";
 		scroll_img = im+"scroll2.png";
@@ -225,7 +225,7 @@
 
 		//ChangeToUsedIcon($('#ub_trip_history'),false);
 
-		//ChangeToUsedIcon($('#ub_home'));
+		ChangeToUsedIcon($('#ub_home'));
 		$('#body').css("background-image", url+back_img+")");
 		$('#Stage').css("background-image", url+scroll_img+")");
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
@@ -615,15 +615,10 @@
 			if(result.sid != "0"){ 
 				$.cookie("sid", result.sid);
 				$.cookie("usrname", username);
-				if(window.android){
-					alert("login is good");
-					window.android.saveSid(result.sid);
-				} else{
-					alert("false");
-				}
-				
 				ChangeToUsedIcon($("#ub_trip_history"));
-				
+				if(window.android){
+					window.android.saveSid(result.sid);
+				}
 			} else { 
 				alert("Login Fail");
 			}
