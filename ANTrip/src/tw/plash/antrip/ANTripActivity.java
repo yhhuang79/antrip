@@ -43,7 +43,7 @@ public class ANTripActivity extends Activity {
 			}
 		});
 //		mWebView.addJavascriptInterface(new JSInterface(), "aa");
-		mWebView.addJavascriptInterface(new jsinter(), "aa");
+		mWebView.addJavascriptInterface(new jsinter(), "antrip");
 		mWebView.loadUrl("file:///android_asset/index.html");
 		
 		/* mWebView.setWebViewClient(new WebViewClient(){
@@ -62,21 +62,6 @@ public class ANTripActivity extends Activity {
 		
 		
 	}
-	
-//	private class jsinter implements JavaScriptCallback{
-//		public void hello(){
-//			Toast.makeText(mContext, "hello", Toast.LENGTH_LONG).show();
-//		}
-//		
-//		public void saveSid(String sid){
-//			Toast.makeText(mContext, "save sid " + sid, Toast.LENGTH_LONG).show();
-//		}
-//		
-//		public JSONObject getTripList(){
-//			Toast.makeText(mContext, "get trip list", Toast.LENGTH_LONG).show();
-//			return null;
-//		}
-//	}
 	
 	public interface JavaScriptCallback{}
 	
