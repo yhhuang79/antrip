@@ -1,0 +1,393 @@
+	#body {
+		text-align:center;
+		overflow:scroll;
+		overflow-x:hidden;
+		margin:0;padding:0;
+		background-repeat:repeat-x;
+		background-position:left bottom;
+		background-attachment:fixed;
+		width: 100%;
+	}
+
+	#body.cutMode { 
+		cursor: url('images/cut-icon.cur');
+	}
+	#Stage {
+		float:left;
+		margin:-5px 0px;
+		background-repeat: no-repeat;
+		background-position: top center;
+		background-attachment:scroll;
+		width: 100%;
+		height: 1695px;
+	}
+	#sym_logingroup{
+		margin-top:300px;
+		padding-top:150px;
+		float:center;
+		width: 1100px;
+		height: 1000px;
+		background-repeat: no-repeat;
+		background-position: top center;
+		background-attachment:scroll;
+	}
+	#sym_login{
+		float:left;
+		margin-top:0px;
+		width: 500px;
+		height: 150px;
+	}
+	#sym_loginarea{
+		background-repeat: no-repeat;
+		background-position: bottom center;
+		border:2px solid #555;
+		width: 480px;
+		height:186px;
+	}
+	#sym_logintext{
+		font-size:20px;
+	}
+	#sym_video{
+		float:left;
+		width: 500px;
+		height: 400px;
+	}
+	#sym_topbtnGroup{
+		float:center;
+		margin-top:30px;
+		width: 1300px;
+	}
+	#Symbol_download{
+		visibility:visible;
+	}
+	#banner_logo{
+		float:left;
+		margin-top:-50px;
+		margin-left:-30px;
+		padding-right:30px;
+		width: 400px; 
+	}
+	#banner_text{
+		position: relative;
+		float:left;
+		text-align:left;
+		color:#fff;
+		margin-top:-50px;
+		margin-left:-310px;
+		width: 400px;
+		font-weight:normal;
+	}
+	#map_canvas{
+		float:center;
+		position: relative;
+		margin-top:0px;
+		margin-left:0px;
+		border:10px solid #555;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+		width: 1000px; 
+		height: 600px;
+	}
+	#sym_edit_bt_list{
+		margin-top:0px;
+		margin-left:-90px;
+		margin-right:-50px;
+		float:left;
+		position: relative;
+		z-index: 100;
+		width:129px;
+		text-align:left;
+	}
+	#end_Text{
+		position: absolute;
+		margin-top:-50px;
+		width: 100%;
+		text-align: center;
+	}
+	#sym_triplist, #sym_friends{
+		float:left;
+		margin-top:-100px;
+	}
+	#sym_editpage{
+		margin-top:0px;
+		width: 100%;
+	}
+	#about_page{
+		background:rgba(255,255,255,0.5);
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+		border:2px solid #555;
+		float:center;
+		margin-top:-60px;
+		width: 100%; 
+		height: 800px;
+		visibility:visible;
+	}
+	.content_Text{
+		text-align:center,
+		font-family:Verdana, Geneva, sans-serif;
+		font-size:12px;
+		font-weight:bold;
+		font-style:none;
+		color:rgba(0,0,0,1);
+	}
+	div.class_top_bt{
+		margin:70px 0px;
+		float:left; 
+	}
+	img.class_top_bt{
+		cursor: pointer;
+	}
+	div.class_left_bt{
+		z-index: 3;
+		float:none;
+		position:static;
+		text-align:left;
+	}
+	img.class_left_bt{
+		cursor: pointer;
+		margin-left:-20px;
+		z-index: 1000;
+		float:none;
+		position:static;
+	}
+	.class_paper{
+		float:left;
+		margin-left:-100px;
+		margin-top: -50px;
+		z-index: 1;
+	}
+	.class_scroll{
+		float:right;
+		left: 400px;
+		top: -950px;
+		width:532px;
+		height:700px; 
+		padding-top: 20px;
+		padding-left: -50px;
+		position: relative;
+		background-repeat: no-repeat;
+		background-position: top left;
+		background-attachment:scroll;
+		text-align:center;
+		z-index: 3;
+	}
+	.class_float_div{
+		float:left;
+		margin-left: 170px;
+	}
+	#images_scroll_content{
+		float:left;
+		overflow: hidden;
+		width:3800px;
+		height:700px;
+	}
+	#scroll_to_left{
+		float:left;
+		position: absolute;
+		margin-top: 100px;
+		margin-left: 30px;
+		width:50px;
+		word-wrap: break-word;
+		word-break: break-all;
+		text-decoration:none;
+	}
+	#scroll_to_right{
+		float:right;
+		position: absolute;
+		margin-top: -670px;
+		margin-left: 310px;
+		width:50px;
+		word-wrap: break-word;
+		word-break: break-all;
+		text-decoration:none;
+	}
+	#view_scroll{
+		overflow: hidden;
+		width:280px;
+		height:700px;
+		margin-left: 70px;
+		-webkit-transform: perspective( 900px ) rotateX(30deg) rotateZ(-13deg);
+       -moz-transform: perspective( 900px ) rotateX(30deg) rotateZ(-13deg);
+        -ms-transform: perspective( 900px ) rotateX(30deg) rotateZ(-13deg);
+         -o-transform: perspective( 900px ) rotateX(30deg) rotateZ(-13deg);
+            transform: perspective( 900px ) rotateX(30deg) rotateZ(-13deg);
+	}
+	.class_imagesOfAlbum{
+		width:250px;
+		height:150px;
+		margin-left: 0px;
+		margin-top: 0px;
+		border:10px solid #555;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+	}
+	.class_ants{
+		float:right;
+		left: 600px;
+		top: -450px;
+		position: relative;
+		z-index: 4;
+	}
+	.tip
+	{
+		color: #000;
+		background-repeat: no-repeat;
+		background-position: top left;
+		padding: 0px;
+		position: absolute;
+		z-index: 1000;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+		font-size:15px;
+		font-family:Verdana, Geneva, sans-serif;
+		font-weight:bold;
+		visibility:hidden;
+		width: 300px;
+		height: 200px;
+		text-align:left;
+	}
+
+	.ui-icon-login {
+		background-image: url("./images/btnline.png");
+	}
+
+	/*! List View CSS */
+	* {
+		margin:0;
+		padding:0;
+		border:none;
+		outline:none;
+		font-size:14px;
+	}
+	
+	a.listview:link{text-decoration: none; color:#000000; } 
+	a.listview:visited{text-decoration: none; color:#e60000; } 
+	a.listview:active{text-decoration: none ; color:#e60000; } 
+	a.listview:hover{text-decoration: none ; color:#e60000;}
+
+	#products.listview {
+		font-family:Arial,Verdana,Sans-serif;
+		text-align:left;
+		padding:30px 0;
+		line-height:20px;
+		margin-top:-20px;
+	}
+	h1,h2,h3,h4,h5,p {
+		padding-bottom:13px;
+	}
+	#wrapper {
+		width:1200px;
+		margin:0 auto;
+		text-align:left;
+	}
+	#products,.product,.wrapper,.listview_image,.listview_description {
+		float:left;
+	}
+	#products,.product {
+		width:100%;
+	}
+	.product {
+		padding:13px 0;
+		/*! background-color:#fff;
+		border:2px solid #555;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px; */
+	}
+	.listview_image {
+		width:180px;
+		margin-top:15px;
+		margin-left:30px;
+	}
+	.listview_description {
+		text-align:center;
+		width:850px;
+	}
+	.grid .product {
+		padding:10px;
+		text-align:left;
+		border:none;
+		margin-bottom:10px;
+	}
+	.grid .product,.grid .wrapper,.grid .listview_image,.grid .listview_description {
+		width:180px;
+	}	
+	.grid .listview_image {
+		margin-bottom:7px;
+	}
+	.grid .wrapper {
+		padding-top:10px;
+		border:solid 1px #aaa;
+	}
+	.grid .listview_description p {
+		display:none;
+	}
+
+	.class_login_bt, .class_logout_bt, .class_takemarker_bt{
+		width:40%;
+	}
+
+	.class_prepage_bt, .class_nextpage_bt, .class_pretrip_bt, .class_nextrip_bt{
+		float:left;
+		width:20%;
+		margin-top:0px;
+		visibility:visible;
+	}
+
+	#tripsum{
+		float:right;
+		width:20%;
+		margin-top:50px;
+	}
+
+	.trip_prenext_bt{
+		float:left;
+		width:100%;
+		margin-top:-100px;
+	}
+
+	.class_friend_bt{
+		width:150px;
+		text-align:center;
+		border:0px;
+		background-position: top center;
+		color:#000;
+	}
+
+	.validateTips{ 
+		border: 1px solid transparent;
+		padding: 0.3em; 
+	}
+
+	#markplacewindow{
+		float:none;
+		position: static;
+		margin-top: 0px;
+		margin-left:0px;
+		display:none;
+	}
+
+	#emotion_compass{
+		float:left;
+		position: relative;
+		margin-top:-620px;
+		margin-left:0px;
+		display:none;
+	}
+
+	#div_langOption{
+		width:10%;
+		float:right;
+		position: absolute;
+		margin-top:-20px;
+		margin-left:1050px;
+		padding-bottom:0px;
+		color:#fff;
+		display:block;
+	}
+	
