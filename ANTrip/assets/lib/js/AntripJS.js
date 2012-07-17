@@ -54,7 +54,7 @@
 	var g_triplist_width="1200px";
 	var g_triplist_height="800";
 
-	var g_enableDebugMode = true;
+	var g_enableDebugMode = false;
 	var g_enablewithoutLogin=false;
 	var g_lang="English";
 	var g_ready=false;
@@ -421,6 +421,17 @@
 
 	function ChangeToUsedIcon(object, msg){
 			sid = $.cookie("sid");
+			if(g_enableDebugMode==true)
+			{	
+				alert(object.attr('src'));
+				alert((im+object.attr('name')+"_r.png"));
+			}
+			// do not click button again except home button
+			if(object.attr('src')==(im+object.attr('name')+"_r.png") &&  object.attr('name')!=$("#ub_home").attr('name'))
+			{
+				return;
+			}
+			
 			if( g_enablewithoutLogin==true || sid!=null || object.attr('name')==$("#ub_home").attr('name')){
 				TopBtChangeToDefaultImg(object.attr('name'));
 				MM_swapImage(object.attr('name'),'',im+object.attr('name')+'_r.png',1);
@@ -750,7 +761,7 @@
 				if(result.friend_list.length==0){
 					var str_noFriend = "You have no friend!";
 					alert(str_noFriend);
-					var appendcontent="<div align=center style='margin:auto;width:100%;height:100%;text-align:center;display:table-cell;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
+					var appendcontent="<div style='margin:auto;width:100%;height:100%;text-align:center;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
 					$("#friend_list").append(appendcontent);
 				}
 				$.each(result.friend_list, function(i,data){

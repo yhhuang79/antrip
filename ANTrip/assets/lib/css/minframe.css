@@ -271,6 +271,10 @@
 		width:40%;
 	}
 
+	.class_logout_bt{
+		margin-top:100px;
+	}
+
 	.class_prepage_bt, .class_nextpage_bt, .class_pretrip_bt, .class_nextrip_bt{
 		float:left;
 		width:20%;
