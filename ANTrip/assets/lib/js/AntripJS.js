@@ -37,7 +37,7 @@
 
 	var url = "url(";
 	var g_page=1;
-	var g_mode="login";
+	var g_mode= null;
 	var g_numsofpage=5;
 	var g_tripnum=0;
 	var g_triplength=0;
@@ -54,6 +54,7 @@
 	var g_triplist_width="1200px";
 	var g_triplist_height="800";
 
+	var g_enableDebugMode = true;
 	var g_enablewithoutLogin=false;
 	var g_lang="English";
 	var g_ready=false;
@@ -157,38 +158,8 @@
 
 	}
 	function PreloadandSet(){
-		
 		g_isForMobile=true;
-		// Platform checking...
-
-	//	if(android || iOS || touchOS || g_isForMobile==true)
-	//	{
-			//alert("U are using with Android, iPad or iPhone...");
-			//alert(document.body.clientHeight);
-			//alert(document.body.clientWidth);
-		//	g_isForMobile=true;
-			//alert("AntripJS.min.js");
-			//require("lib/jq_includes/jquery-1.7.2.min.js");
-			//require("lib/js/AntripJS.min.js");
-		//	require("lib/js/MapRecorder.js");			
-	//	}
-	/*	else{
-			//loadjscssfile("lib/css/jquery.ui.all.css", "css");
-
-	/*		require("lib/js/AlbumSlider.js");
-			require("lib/js/MapEditing.js");
-			loadjscssfile("lib/css/pcframe.css", "css");
-		}
-	/*		require("lib/jq_includes/jquery.bgiframe-2.1.2.js");
-			require("lib/jq_includes/jquery.ui.core.js");
-			require("lib/jq_includes/jquery.ui.widget.js");
-			require("lib/jq_includes/jquery.ui.mouse.js");
-			require("lib/jq_includes/jquery.ui.button.js");
-			require("lib/jq_includes/jquery.ui.draggable.js");
-			require("lib/jq_includes/jquery.ui.position.js");
-			require("lib/jq_includes/jquery.ui.resizable.js");
-			require("lib/jq_includes/jquery.ui.dialog.js");
-			require("lib/jq_includes/jquery.effects.core.js");*/
+		
 		//reset image path
 		back_img = im+"background-img.png";
 		scroll_img = im+"scroll2.png";
@@ -223,16 +194,12 @@
 
 		$("#sym_triplist").hide();
 
-		//ChangeToUsedIcon($('#ub_trip_history'),false);
+		ChangeToUsedIcon($('#ub_trip_history'),false);
 
-		ChangeToUsedIcon($('#ub_home'));
+		//ChangeToUsedIcon($('#ub_home'));
 		$('#body').css("background-image", url+back_img+")");
 		$('#Stage').css("background-image", url+scroll_img+")");
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
-
-		if(!g_isForMobile){
-			$('#images_scroll').css("background-image", url+images_scroll_img+")");
-		}
 
 		$('#langOption').change(function() 
 		{
@@ -324,8 +291,6 @@
 		sid = $.cookie("sid");
 		$('#sym_login').show();
 		if(sid!=null){
-			//usrname = $.cookie("usrname");
-			//$("#sym_logintext").text("Welcome! "+usrname);
 			$("#sym_loginarea").hide();
 			$(".class_login_bt").hide();
 			$(".class_logout_bt").show();
@@ -338,13 +303,15 @@
 		}
 		if(g_isForMobile==false)
 		{
+			if(g_enableDebugMode==true)
+			{
+				alert("show");
+			}
 			$('#sym_video').show();
 		}
 	}
 	function show_edit_div(){
 		$('#sym_editpage').show();
-		//$('img[class*=class_left_bt]').hide();
-		//showGMap();
 	}
 
 	function showGMap(){
@@ -377,22 +344,23 @@
 			return window.location ="http://www.facebook.com/antrip.plash";
 		}
 
-		$("body").css("cursor","default");
-		$("#img_seq_trip").css("cursor","pointer");
-		
-		if(g_isForMobile==false){
-			changeCursorToDefaultMode();
-		}
-
 		sid = $.cookie("sid");
-		if(object.attr('name')==$("#ub_about").attr('name') && g_mode!="about"){
+		if(g_enableDebugMode==true)
+		{
+			alert(sid);
+		}
+		if(object.attr('name')==$("#ub_about").attr('name')){
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
 			$('#about_page').show();
 			g_mode = "about";
 		}
-		else if( g_enablewithoutLogin==false && g_mode!= "login" &&((sid==null) || (object.attr('name')==$("#ub_home").attr('name')))){
+		else if( g_enablewithoutLogin==false &&((sid==null) || (object.attr('name')==$("#ub_home").attr('name')))){
+			if(g_enableDebugMode==true)
+			{	
+				alert("start");
+			}
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
@@ -402,12 +370,16 @@
 			}
 			g_mode = "login";
 		}
-		else if((object.attr('name')==$("#ub_trip_history").attr('name')) && g_mode!="triplist"){
+		else if((object.attr('name')==$("#ub_trip_history").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
 			g_page=1;
 			ShowTripList(g_page);
+			if(g_enableDebugMode==true)
+			{
+				alert("ShowTripList");
+			}
 			$("#sym_triplist").show();
 			$("#sym_editpage").hide();
 			$('.class_prepage_bt').show();
@@ -418,7 +390,7 @@
 			}
 			g_mode ="triplist";
 		}
-		else if((object.attr('name')==$("#ub_trip_management").attr('name'))&&g_mode !="tripedit"){
+		else if((object.attr('name')==$("#ub_trip_management").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
@@ -435,7 +407,7 @@
 			}
 			g_mode ="tripedit";
 		}
-		else if((object.attr('name')==$("#ub_friend").attr('name'))&&g_mode !="friendlist"){
+		else if((object.attr('name')==$("#ub_friend").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
@@ -448,10 +420,8 @@
 	}
 
 	function ChangeToUsedIcon(object, msg){
-		//if(object.attr('src')!='images/'+object.attr('name')+'_r.png'){
 			sid = $.cookie("sid");
 			if( g_enablewithoutLogin==true || sid!=null || object.attr('name')==$("#ub_home").attr('name')){
-				//alert("change");
 				TopBtChangeToDefaultImg(object.attr('name'));
 				MM_swapImage(object.attr('name'),'',im+object.attr('name')+'_r.png',1);
 			}
@@ -463,7 +433,6 @@
 				MM_swapImage($('#ub_home').attr('name'),'',im+$('#ub_home').attr('name')+'_r.png',1);
 			}
 			OnlyShowADiv(object);
-		//}
 	}
 
 	function scaleAnimation(object, scale){
@@ -627,6 +596,10 @@
 	}
 
 	function Logout(){
+		if(g_enableDebugMode==true)
+		{
+			alert("Logout");
+		}
 		if($.cookie("facebookid")){
 			FB.logout(function(response) {
 				$.cookie("facebookid", null);
@@ -664,7 +637,7 @@
 				if(result.tripInfoList.length==0){
 					var str_noTrip = "You have no Trip!";
 					alert(str_noTrip);
-					var appendcontent="<div style='margin:auto;width:100%;text-align:center;display:table-cell;vertical-align:middle;'>"+str_noTrip+"</div>";
+					var appendcontent="<div align=center style='margin:auto;width:100%;height:100%;text-align:center;display:table-cell;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
@@ -777,7 +750,7 @@
 				if(result.friend_list.length==0){
 					var str_noFriend = "You have no friend!";
 					alert(str_noFriend);
-					var appendcontent="<div style='margin:auto;width:100%;text-align:center;display:table-cell;vertical-align:middle;'>"+str_noFriend+"</div>";
+					var appendcontent="<div align=center style='margin:auto;width:100%;height:100%;text-align:center;display:table-cell;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
 					$("#friend_list").append(appendcontent);
 				}
 				$.each(result.friend_list, function(i,data){
