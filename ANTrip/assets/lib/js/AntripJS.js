@@ -598,8 +598,8 @@
 				$.cookie("sid", result.sid);
 				$.cookie("usrname", username);
 				ChangeToUsedIcon($("#ub_trip_history"));
-				if(window.android){
-					window.android.saveSid(result.sid);
+				if(window.antrip){
+					window.antrip.saveSid(result.sid);
 				}
 			} else { 
 				alert("Login Fail");
@@ -621,8 +621,8 @@
 		$.cookie("sid", null);
 		$.cookie("trip_id", null);
 		ChangeToUsedIcon($("#ub_home"));
-		if(window.android){
-			window.android.logout();
+		if(window.antrip){
+			window.antrip.logout();
 		}
 	}
 	
@@ -631,8 +631,8 @@
 		//$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
 		var div_data = [];
 		var sid = $.cookie("sid");
-		if(window.android){
-			result = window.android.getTripList();
+		if(window.antrip){
+			result = window.antrip.getTripList();
 		/*}
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
 			data:{userid: sid},
