@@ -293,7 +293,9 @@
 		if(sid!=null){
 			$("#sym_loginarea").hide();
 			$(".class_login_bt").hide();
-			$(".class_logout_bt").show();
+			$(".class_logout_bt").hide();
+			alert("Logout!");
+			Logout();
 		}
 		else{
 			//$("#sym_logintext").text("Welcome to Antrip! Please login...");
@@ -648,7 +650,7 @@
 				if(result.tripInfoList.length==0){
 					var str_noTrip = "You have no Trip!";
 					alert(str_noTrip);
-					var appendcontent="<div align=center style='margin:auto;width:100%;height:100%;text-align:center;display:table-cell;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
+					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
@@ -761,14 +763,17 @@
 				if(result.friend_list.length==0){
 					var str_noFriend = "You have no friend!";
 					alert(str_noFriend);
-					var appendcontent="<div style='margin:auto;width:100%;height:100%;text-align:center;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
+					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
 					$("#friend_list").append(appendcontent);
 				}
-				$.each(result.friend_list, function(i,data){
-					div_data[i] ="<button class='class_friend_bt' style='background:rgba(255,255,255,0) url("+im+"friend_bk.png) 100% 100% no-repeat;'><li><a href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a></li></button>";
-				});
-				$("#friend_list").append(div_data.join('')).listview('refresh');
-				$("button","#friend_list" ).button();
+				else
+				{
+					$.each(result.friend_list, function(i,data){
+						div_data[i] ="<button class='class_friend_bt' style='background:rgba(255,255,255,0) url("+im+"friend_bk.png) 100% 100% no-repeat;'><li><a href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a></li></button>";
+					});
+					$("#friend_list").append(div_data.join('')).listview('refresh');
+					$("button","#friend_list" ).button();
+				}
 				//$.mobile.hidePageLoadingMsg();
 			}
 		});
@@ -810,8 +815,8 @@
 								} else {
 									self.addMarker({ 
 										'position': latlng, 
-										'bounds': true,
-										'icon': im+"placemarker.png"
+										'bounds': true
+										//'icon': im+"placemarker.png"
 									}).click(function(){
 										self.openInfoWindow({'content': marker.timestamp}, this);
 									});
@@ -825,7 +830,7 @@
 								'strokeWeight': 4, 
 								'path': g_tripPointArray
 							});
-							var clusterStyles = [
+							/*var clusterStyles = [
 							  {
 								opt_textColor: 'black',
 								url: im+"placemarker1.png",
@@ -845,7 +850,7 @@
 								width: 63
 							  }
 							];
-							self.set('MarkerClusterer', new MarkerClusterer(map, self.get('markers'), {styles: clusterStyles}));
+							self.set('MarkerClusterer', new MarkerClusterer(map, self.get('markers'), {styles: clusterStyles}));*/
 							$('#map_canvas').gmap('refresh');
 						}});
 					});				
