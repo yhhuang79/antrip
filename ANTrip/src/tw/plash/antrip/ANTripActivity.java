@@ -91,17 +91,15 @@ public class ANTripActivity extends Activity {
 		// need a function to store check-in values
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
-		public String getTripList(){
+		public String getLocalTripList(){
 			JSONObject result = null;
 			Toast.makeText(mContext, "start gettriplist", Toast.LENGTH_SHORT).show();
-			result = new GetTripList(mContext).execute();
+			result = new GetLocalTripList(mContext).execute();
 			Toast.makeText(mContext, "done gettriplist", Toast.LENGTH_SHORT).show();
-			if(result != null){
-				Log.e("gettriplist", result.toString());
-				return result.toString();
-			} else{
-				return null;
-			}
+			
+			Log.e("gettriplist", result.toString());
+			//result is never null, can return safely
+			return result.toString();
 		}
 		
 		
