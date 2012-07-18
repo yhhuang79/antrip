@@ -201,12 +201,14 @@
 		$('#Stage').css("background-image", url+scroll_img+")");
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
-		$('#langOption').change(function() 
+		/*$('#langOption').change(function() 
 		{
 		   g_lang=$(this).attr('value');
 		   setLanguage();
-		});
+		});*/
 		initNoteDialog();
+
+		initEmotionMap();
 		
 		//alert($('#sym_topbtnGroup').css("background-image"));
 		//$("body").queryLoader2();
@@ -341,9 +343,33 @@
 		});
 	}
 
+	function changeIconToBackBtn(){
+		$("#Symbol_ub_home").hide();
+		$("#Symbol_trip_history").hide();
+		$("#Symbol_ub_trip_m").hide();
+		$("#Symbol_friend").hide();
+		$("#Symbol_download").show();
+	}
+
 	function OnlyShowADiv(object){
 		if(object.attr('name')==$("#ub_download").attr('name')){
-			return window.location ="http://www.facebook.com/antrip.plash";
+			$('div[class*=class_fun_div]').each(function() {
+				$(this).hide();
+			});
+			$("#sym_triplist").show();
+			$("#sym_editpage").hide();
+			if(g_isForMobile==true){
+				$('#markplacewindow').hide();
+				$("#end_Text").hide();
+			}
+			$("#Symbol_ub_home").show();
+			$("#Symbol_trip_history").show();
+			$("#Symbol_ub_trip_m").show();
+			$("#Symbol_friend").show();
+			$("#Symbol_download").hide();
+
+			TopBtChangeToDefaultImg($("#ub_trip_history").attr('name'));
+			MM_swapImage($("#ub_trip_history").attr('name'),'',im+$("#ub_trip_history").attr('name')+'_r.png',1);
 		}
 
 		sid = $.cookie("sid");
@@ -400,10 +426,10 @@
 			if(g_isForMobile==true){
 				ShowRecorderMap();
 			}
-			else if($.getUrlVar('trip_id')==null){
+			/*else if($.getUrlVar('trip_id')==null){
 				sid = $.cookie("sid");
 				GetTripMapfromURL(sid, g_tripnum);
-			}
+			}*/
 			if(g_isForMobile==true){
 				$("#end_Text").hide();
 			}
@@ -517,7 +543,7 @@
 	function TopBtChangeToDefaultImg(object){
 		$('img[class*=class_top_bt]').each(function() {
 			if(object!=$(this).attr('name')){
-				if(g_isForMobile==true&&($(this).attr('name')=="ub_download"||$(this).attr('name')=="ub_about"))
+				if(g_isForMobile==true&&($(this).attr('name')=="ub_about"))
 				{
 					;
 				}
@@ -632,12 +658,22 @@
 		var div_data = [];
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			result = window.antrip.getTripList();
-		/*}
+			var localresult = window.antrip.getLocalTripList();
+
+			if(localresult.tripInfoList.length==0)
+			{
+				;
+			}
+			else
+			{
+				;
+			}
+		}
+		//}
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
 			data:{userid: sid},
 			type: 'GET', dataType: 'jsonp', cache: false,
-			success:function(result){*/
+			success:function(result){
 				var index=1;
 				$("div[id*=products]").html("");
 				$("div[id*=tripsum]").html("");
@@ -661,10 +697,10 @@
 						var appendcontent;
 						if(data.upload==true)
 						{
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
 						}
 						else{
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
 						}
 
 						if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
@@ -679,7 +715,8 @@
 				//alert($("button[class*=tripItem]"));
 				//$("button","div[id*=products]" ).draggable({ revert: true });
 			}
-	//	});*/
+		
+		});
 	}
 
 	function prepageAction(){

@@ -112,91 +112,93 @@
 		}
 	}
 
-	require("lib/jq_includes/jquery.imagemapster.js");
-	var image = $('#emotion-c');
-	//var excitedTooltip = 'Excited!';
-    var Tooltip = {
-		bored: 'Bored',
-		sad: 'Sad',
-		sleepy: 'Sleepy',
-		peaceful: 'Peaceful',
-		relaxed: 'Relaxed',
-		pleased: 'Pleased',
-		happy: 'Happy',
-		excited: 'Excited',
-		angry: 'Angry',
-		nervous: 'Nervous',
-		calm: "Calm"
-    };
-	image.mapster(
-	{
-		fillOpacity: 0.4,
-		fillColor: "d42e16",
-		strokeColor: "4fb6d1",
-		strokeOpacity: 0.8,
-		strokeWidth: 4,
-		stroke: true,
-		isSelectable: true,
-		singleSelect: true,
-		mapKey: 'name',
-		listKey: 'name',
-		onClick: function (e) {
-			//var newToolTip = defaultDipTooltip;
-			$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;'>"+Tooltip[e.key]+"</img>");
-			$('#markplacewindow :input').removeAttr('disabled');
-			$('#emotion_compass').hide();
-		},
-		showToolTip: true,
-		toolTipClose: ["tooltip-click", "area-click"],
-		areas: [
-			{
-				key: "bored",
-				toolTip:Tooltip["bored"],
-				//fillColor: "ffffff"
+	function initEmotionMap(){
+		require("lib/jq_includes/jquery.imagemapster.js");
+		var image = $('#emotion-c');
+		//var excitedTooltip = 'Excited!';
+		var Tooltip = {
+			bored: 'Bored',
+			sad: 'Sad',
+			sleepy: 'Sleepy',
+			peaceful: 'Peaceful',
+			relaxed: 'Relaxed',
+			pleased: 'Pleased',
+			happy: 'Happy',
+			excited: 'Excited',
+			angry: 'Angry',
+			nervous: 'Nervous',
+			calm: "Calm"
+		};
+		image.mapster(
+		{
+			fillOpacity: 0.4,
+			fillColor: "d42e16",
+			strokeColor: "4fb6d1",
+			strokeOpacity: 0.8,
+			strokeWidth: 4,
+			stroke: true,
+			isSelectable: true,
+			singleSelect: true,
+			mapKey: 'name',
+			listKey: 'name',
+			onClick: function (e) {
+				//var newToolTip = defaultDipTooltip;
+				$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;'>"+Tooltip[e.key]+"</img>");
+				$('#markplacewindow :input').removeAttr('disabled');
+				$('#emotion_compass').hide();
 			},
-			{
-				key: "sad",
-				toolTip: Tooltip["sad"],
-				//fillColor: "000000"
-			},
-			{
-				key: "sleepy",
-				toolTip:Tooltip["sleepy"],
-			},
-			{
-				key: "peaceful",
-				toolTip:Tooltip["peaceful"],
-			},
-			{
-				key: "relaxed",
-				toolTip:Tooltip["relaxed"],
-			},
-			{
-				key: "pleased",
-				toolTip:Tooltip["pleased"],
-			},
-			{
-				key: "happy",
-				toolTip:Tooltip["happy"],
-			},
-			{
-			   key: "excited",
-			   toolTip: Tooltip["excited"],
-			},
-			{
-				key: "angry",
-				toolTip:Tooltip["angry"],
-			},
-			{
-				key: "nervous",
-				toolTip: Tooltip["nervous"],
-				//fillColor: "000000"
-			},
-			{
-			   key: "calm",
-			   toolTip:Tooltip["calm"],
-			   strokeColor: "FFFFFF"
-			}
-			]
-	});
+			showToolTip: true,
+			toolTipClose: ["tooltip-click", "area-click"],
+			areas: [
+				{
+					key: "bored",
+					toolTip:Tooltip["bored"],
+					//fillColor: "ffffff"
+				},
+				{
+					key: "sad",
+					toolTip: Tooltip["sad"],
+					//fillColor: "000000"
+				},
+				{
+					key: "sleepy",
+					toolTip:Tooltip["sleepy"],
+				},
+				{
+					key: "peaceful",
+					toolTip:Tooltip["peaceful"],
+				},
+				{
+					key: "relaxed",
+					toolTip:Tooltip["relaxed"],
+				},
+				{
+					key: "pleased",
+					toolTip:Tooltip["pleased"],
+				},
+				{
+					key: "happy",
+					toolTip:Tooltip["happy"],
+				},
+				{
+				   key: "excited",
+				   toolTip: Tooltip["excited"],
+				},
+				{
+					key: "angry",
+					toolTip:Tooltip["angry"],
+				},
+				{
+					key: "nervous",
+					toolTip: Tooltip["nervous"],
+					//fillColor: "000000"
+				},
+				{
+				   key: "calm",
+				   toolTip:Tooltip["calm"],
+				   strokeColor: "FFFFFF"
+				}
+				]
+		});
+	}
 //-->
