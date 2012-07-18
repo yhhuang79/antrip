@@ -449,6 +449,7 @@
 
 	function ChangeToUsedIcon(object, msg){
 			sid = $.cookie("sid");
+			//alert(sid);
 			if(g_enableDebugMode==true)
 			{	
 				alert(object.attr('src'));
@@ -657,20 +658,11 @@
 		//$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
 		var div_data = [];
 		var sid = $.cookie("sid");
+		var localresult;
 		if(window.antrip){
-			var localresult = window.antrip.getLocalTripList();
-
-			if(localresult.tripInfoList.length==0)
-			{
-				;
-			}
-			else
-			{
-				;
-			}
+			localresult = window.antrip.getLocalTripList();
 		}
-		//}
-		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
+			$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
 			data:{userid: sid},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
@@ -683,40 +675,52 @@
 				g_tripnum = result.tripInfoList[0].trip_id;
 				g_triplength = result.tripInfoList.length;
 				$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
-				if(result.tripInfoList.length==0){
+				if(result.tripInfoList.length==0 && localresult.tripInfoList.length==0){
 					var str_noTrip = "You have no Trip!";
 					alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
+					if(window.antrip && localresult.tripInfoList.length!=0)
+					{
+						$.each(localresult.tripInfoList, function(i,data){
+							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
+							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
+							var appendcontent;
+				
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
+							
+							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
+								$("div[id=products]").eq(0).append(appendcontent);
+							}
+
+							index++;
+						});
+					}
+
 					$.each(result.tripInfoList, function(i,data){
 						
 						var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 						var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 						var appendcontent;
-						if(data.upload==true)
-						{
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
-						}
-						else{
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
-						}
+
+						appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}GetTripMapfromURL("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>Start: " + data.trip_st + "</p><p>End: " + data.trip_et  + "</p><p>Length: " + data.trip_length  + " M</p></a></div></div></div></button>";
 
 						if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 							$("div[id=products]").eq(0).append(appendcontent);
 						}
 						// this is for trip list of popup dialog.
-						$("div[id=products_in_dialog]").append(appendcontent);
+						//$("div[id=products_in_dialog]").append(appendcontent);
 						index++;
 					});
+
 					$("button","div[id*=products]" ).button();
 				}
 				//alert($("button[class*=tripItem]"));
 				//$("button","div[id*=products]" ).draggable({ revert: true });
 			}
-		
-		});
+			});
 	}
 
 	function prepageAction(){
