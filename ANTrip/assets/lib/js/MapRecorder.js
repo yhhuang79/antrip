@@ -165,7 +165,7 @@
 	}
 
 	function initEmotionMap(){
-		require("lib/jq_includes/jquery.imagemapster.js");
+		//require("lib/jq_includes/jquery.imagemapster.js");
 		var image = $('#emotion-c');
 		//var excitedTooltip = 'Excited!';
 		var Tooltip = {
