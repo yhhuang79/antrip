@@ -42,23 +42,8 @@ public class ANTripActivity extends Activity {
 				return true;
 			}
 		});
-//		mWebView.addJavascriptInterface(new JSInterface(), "aa");
 		mWebView.addJavascriptInterface(new jsinter(), "antrip");
 		mWebView.loadUrl("file:///android_asset/index.html");
-		
-		/* mWebView.setWebViewClient(new WebViewClient(){
-			boolean firstload = true;
-            @Override
-            public void onPageFinished(WebView view, String url) {
-            	if(firstload){
-	            	if(url.contains("#map") || url.contains("#friendlist") || url.contains("#triplist")){
-	            		mWebView.reload();
-	            		firstload = false;
-	            	}
-            	}
-                super.onPageFinished(view, url);
-           }  
-		}); */
 		
 		
 	}
@@ -92,14 +77,17 @@ public class ANTripActivity extends Activity {
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
 		public String getLocalTripList(){
+			Toast.makeText(mContext, "getLocalTripList", Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
-			Toast.makeText(mContext, "start gettriplist", Toast.LENGTH_SHORT).show();
-			result = new GetLocalTripList(mContext).execute();
-			Toast.makeText(mContext, "done gettriplist", Toast.LENGTH_SHORT).show();
 			
-			Log.e("gettriplist", result.toString());
-			//result is never null, can return safely
-			return result.toString();
+			result = new GetLocalTripList(mContext).execute();
+			
+			//null means no local trip history, don't return null, return -1 instead
+			if(result != null){
+				return result.toString();
+			} else{
+				return "-1";
+			}
 		}
 		
 		
@@ -107,7 +95,33 @@ public class ANTripActivity extends Activity {
 			startActivityForResult((new Intent(mContext, test21.class).putExtra("requestCode", 1)), 1);
 		}
 		
+		/**
+		 * start recording, and return the newly generated random tripid
+		 * @return
+		 */
+		public int startRecording(){
+			
+			return -1;
+		}
 		
+		/**
+		 * 
+		 */
+		public void stopRecording(){
+			
+		}
+		
+		
+		
+		/*
+		 * 1: home screen
+		 * 2: trip list screen
+		 * 3: recorder screen
+		 * 4: friend list screen
+		 */
+		public void setMode(int mode){
+			
+		}
 	}
 	
 	@Override

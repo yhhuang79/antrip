@@ -1,5 +1,7 @@
 package tw.plash.antrip;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
@@ -10,7 +12,7 @@ public class GetLocalTripList {
 
 	private Context mContext;
 	private JSONObject result;
-
+	
 	public GetLocalTripList(Context c) {
 		mContext = c;
 		result = new JSONObject();
@@ -21,10 +23,12 @@ public class GetLocalTripList {
 		String uid = pref.getString("sid", null);
 		if (uid != null) {
 			
-			return result;
+			//query all trip infos with the input uid
+			
+//			return result;
+			return null;
 		} else {
-			//don't return null, handle the error in Java not in JavaScript
-			return new JSONObject();
+			return null;
 		}
 	}
 }
