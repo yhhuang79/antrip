@@ -658,10 +658,10 @@
 			if(result.sid != "0"){ 
 				$.cookie("sid", result.sid);
 				$.cookie("usrname", username);
-				ChangeToUsedIcon($("#ub_trip_history"));
 				if(window.antrip){
 					window.antrip.saveSid(result.sid);
 				}
+				ChangeToUsedIcon($("#ub_trip_history"));
 			} else { 
 				alert("Login Fail");
 			}
@@ -681,10 +681,10 @@
 		}
 		$.cookie("sid", null);
 		$.cookie("trip_id", null);
-		ChangeToUsedIcon($("#ub_home"));
 		if(window.antrip){
 			window.antrip.logout();
 		}
+		ChangeToUsedIcon($("#ub_home"));
 	}
 	
 	// trip list
