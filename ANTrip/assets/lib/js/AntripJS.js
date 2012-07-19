@@ -710,16 +710,16 @@
 				if(page==null){
 					page=1;
 				}
-				g_tripnum = result.tripInfoList[0].trip_id;
-				g_triplength = result.tripInfoList.length;
-				$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
-				if(result.tripInfoList.length==0 && (localresult==-1 || localresult.tripInfoList.length==0) ){
+				if((result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList.length==0) ){
 					var str_noTrip = "You have no Trip!";
 					alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
+					g_tripnum = result.tripInfoList[0].trip_id;
+					g_triplength = result.tripInfoList.length;
+					$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
 					if(window.antrip && localresult!=-1 &&localresult.tripInfoList.length!=0)
 					{
 						$.each(localresult.tripInfoList, function(i,data){
@@ -837,7 +837,10 @@
 
 	// friend list 
 	function showfriendList(){
-		//var sid = $.cookie("sid");
+		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
 		$("#friend_list").html("");
 		var div_data = [];
 		//$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
@@ -851,8 +854,7 @@
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
 					$("#friend_list").append(appendcontent);
 				}
-				else
-				{
+				else{
 					$.each(result.friend_list, function(i,data){
 						div_data[i] ="<button class='class_friend_bt' style='background:rgba(255,255,255,0) url("+im+"friend_bk.png) 100% 100% no-repeat;'><li><a href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a></li></button>";
 					});
