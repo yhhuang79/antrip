@@ -149,7 +149,7 @@
 			});
 
 			google.maps.event.addListener(marker, 'click', function() {
-				var CheckInInfo = "<p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p>";
+				var CheckInInfo ="<p><img src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p>";
 				var infowindow = new google.maps.InfoWindow({content: CheckInInfo});
 				infowindow.open(self,marker);
 				//self.openInfoWindow({'content': CheckInInfo}, this);

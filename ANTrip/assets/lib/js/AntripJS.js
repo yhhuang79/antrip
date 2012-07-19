@@ -210,7 +210,7 @@
 
 		initEmotionMap();
 
-		//$("#websites2").msDropDown({mainCSS:'dd2'});
+		//$("#sel_topbtnGroup").msDropDown({mainCSS:'dd2'});
 		
 		//alert($('#sym_topbtnGroup').css("background-image"));
 		//$("body").queryLoader2();
