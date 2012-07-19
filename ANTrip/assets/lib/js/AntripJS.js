@@ -292,7 +292,10 @@
 
 	//**<-- Top buttons scale animation -->**
 	function show_login_div(){
-		sid = $.cookie("sid");
+		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
 		$('#sym_login').show();
 		if(sid!=null){
 			$("#sym_loginarea").hide();
@@ -374,7 +377,10 @@
 			MM_swapImage($("#ub_trip_history").attr('name'),'',im+$("#ub_trip_history").attr('name')+'_r.png',1);
 		}
 
-		sid = $.cookie("sid");
+		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
 		if(g_enableDebugMode==true)
 		{
 			alert(sid);
@@ -470,7 +476,10 @@
 	}
 
 	function ChangeToUsedIcon(object, msg){
-			sid = $.cookie("sid");
+			var sid = $.cookie("sid");
+			if(window.antrip){
+				sid = window.antrip.getSid();
+			}
 			//alert(sid);
 			if(g_enableDebugMode==true)
 			{	
@@ -627,6 +636,9 @@
 		});
 
 		sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
 		if(sid==null){
 			$('.class_logout_bt').hide();
 		}
@@ -680,6 +692,10 @@
 		//$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
 		var div_data = [];
 		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
+
 		var localresult;
 		if(window.antrip){
 			localresult = window.antrip.getLocalTripList();
@@ -767,6 +783,9 @@
 
 	function preTripAction(){
 		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
 		if(g_trip>1){
 			g_trip--;
 			GetTripMapfromURL(sid, g_trip);
@@ -778,6 +797,9 @@
 
 	function nextTripAction(){
 		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getSid();
+		}
 		if(g_trip<g_tripnum){
 			g_trip++;
 			GetTripMapfromURL(sid, g_trip);
