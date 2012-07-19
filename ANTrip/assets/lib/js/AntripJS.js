@@ -209,6 +209,8 @@
 		initNoteDialog();
 
 		initEmotionMap();
+
+		//$("#websites2").msDropDown({mainCSS:'dd2'});
 		
 		//alert($('#sym_topbtnGroup').css("background-image"));
 		//$("body").queryLoader2();
@@ -397,6 +399,10 @@
 				$("#end_Text").show();
 			}
 			g_mode = "login";
+
+			if(window.antrip){
+				window.antrip.setMode(1);
+			}
 		}
 		else if((object.attr('name')==$("#ub_trip_history").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
@@ -417,6 +423,9 @@
 				$("#end_Text").hide();
 			}
 			g_mode ="triplist";
+			if(window.antrip){
+				window.antrip.setMode(2);
+			}
 		}
 		else if((object.attr('name')==$("#ub_trip_management").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
@@ -434,6 +443,9 @@
 				$("#end_Text").hide();
 			}
 			g_mode ="tripedit";
+			if(window.antrip){
+				window.antrip.setMode(3);
+			}
 		}
 		else if((object.attr('name')==$("#ub_friend").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
@@ -444,6 +456,16 @@
 				$("#end_Text").hide();
 			}
 			g_mode ="friendlist";
+			if(window.antrip){
+				window.antrip.setMode(4);
+			}
+		}
+	}
+
+	function showPicture(path){
+		if(path!=-1)
+		{
+			$("#takepicture").attr("src", "file://"+path);
 		}
 	}
 
@@ -675,14 +697,14 @@
 				g_tripnum = result.tripInfoList[0].trip_id;
 				g_triplength = result.tripInfoList.length;
 				$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
-				if(result.tripInfoList.length==0 && localresult.tripInfoList.length==0){
+				if(result.tripInfoList.length==0 && (localresult==-1 || localresult.tripInfoList.length==0) ){
 					var str_noTrip = "You have no Trip!";
 					alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
-					if(window.antrip && localresult.tripInfoList.length!=0)
+					if(window.antrip && localresult!=-1 &&localresult.tripInfoList.length!=0)
 					{
 						$.each(localresult.tripInfoList, function(i,data){
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
