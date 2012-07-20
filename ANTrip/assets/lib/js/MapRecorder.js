@@ -2,16 +2,46 @@
 	var tripRecorder;
 	var g_current_latitude;
 	var g_current_longitude;
-	var g_emotion_html;
+	var g_emotion_html=null;
 
 	function getLocation(){
-		if (navigator.geolocation){
+		/*if (navigator.geolocation){
 			navigator.geolocation.getCurrentPosition(uploadPosition);
 		} else {
 			alert("Geolocation is not supported by this browser.");
-		}
+		}*/
 	}
-	function uploadPosition(position){
+	function setLocation(position){
+		var self = $('#map_canvas').gmap('get','map');
+		var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+		g_tripPointArray.push(latlng);
+
+		var marker = new google.maps.Marker({
+			'position': latlng, 
+			'bounds': true		
+		});
+
+		google.maps.event.addListener(marker, 'click', function() {
+			var CheckInInfo =position.coords.latitude+", "+position.coords.longitude;
+			var infowindow = new google.maps.InfoWindow({content: CheckInInfo});
+			infowindow.open(self,marker);
+		});
+		marker.setMap(self);
+		if(g_cuttedPath!=null)
+		{
+			g_cuttedPath.setMap(null);
+		}
+		g_cutPath = new google.maps.Polyline({
+			'strokeColor': "#FF0000", 
+			'strokeOpacity': 0.8, 
+			'strokeWeight': 4, 
+			'path': g_tripPointArray
+		});
+		g_cutPath.setMap(self);
+
+		$('#map_canvas').gmap('refresh');
+	}
+	/*function uploadPosition(position){
 		Date.prototype.Timestamp = function() {
 			var yyyy = this.getFullYear().toString();
 			var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
@@ -32,13 +62,18 @@
 			success:function(result){
 			}
 		});
-	}
+	}*/
+
+
 	function startRecordTrip(){
 		var isRecording = $.cookie("isRecording");
 		//$('#RecordButton').attr('data-theme','b').removeClass('ui-btn-up-e').removeClass('ui-btn-hover-e').addClass('ui-btn-up-b').trigger('create');
 		if(isRecording == null){
 			$.cookie("isRecording", "true");
 			var sid = $.cookie("sid"); 
+			g_tripPointArray = [];
+			$('#map_canvas').gmap('clear', 'Polyline');
+			$('#map_canvas').gmap('refresh');
 			/*$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetNewTripId.php',
 				data:{userid: sid},							 
 				type: 'GET', dataType: 'jsonp', cache: false,
@@ -46,35 +81,35 @@
 					if(window.antrip){
 						var newTripId = window.antrip.startRecording();
 						$.cookie("trip_id",newTripId);
-						tripRecorder = setInterval(function(){getLocation()},5000);
-						$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
-						$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
-						$('#b_add_note').find('.tip').html("Now Recording...");
-						alert("Start Recording Trip");
-						clockwiseInterval($('#b_add_note').find('.class_left_bt'));
+						//tripRecorder = setInterval(function(){getLocation()},5000);
 					}
 					else{
 						alert("ANTrip APP Exception!");
 					}
+					$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
+					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
+					$('#b_add_note').find('.tip').html("Now Recording...");
+					alert("Start Recording Trip");
+					clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 			//	}
 			//});
 
 		} else {
 				if(window.antrip){
 					window.antrip.stopRecording();
-					$.cookie("isRecording", null);
-					g_tripPointArray = [];
-					$('#map_canvas_2').gmap('clear', 'Polyline');
-					$('#map_canvas_2').gmap('refresh');
-					clearInterval(tripRecorder);
-					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
-					$('#b_add_note').find('.tip').html("start recording");
-					alert("Stop Recording Trip");
-					window.clearInterval(g_clockintval);
 				}
 				else{
 					alert("ANTrip APP Exception!");
 				}
+				$.cookie("isRecording", null);
+				//g_tripPointArray = [];
+				//$('#map_canvas').gmap('clear', 'Polyline');
+				//$('#map_canvas').gmap('refresh');
+				//clearInterval(tripRecorder);
+				$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
+				$('#b_add_note').find('.tip').html("start recording");
+				alert("Stop Recording Trip");
+				window.clearInterval(g_clockintval);
 		}
 	}
 
@@ -83,7 +118,9 @@
 		$('#sym_edit_bt_list').show();
 		$('#markplacewindow :input').removeAttr('disabled');
 		$('#emotion_compass').hide();
-		$('#map_canvas').gmap('destroy');
+		if($.cookie("isRecording") == null){
+			$('#map_canvas').gmap('destroy');
+		}
 		$('#map_canvas').gmap({'center': g_startLatLng, 'zoom': g_zoom, 'callback': function(map) {
 				var self = this;
 				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
@@ -111,7 +148,7 @@
 					}
 				});
 		}});
-		$('#map_canvas_1').gmap('refresh');
+		//$('#map_canvas').gmap('refresh');
 	}
 
 	function openMarkplaceWindow(){
@@ -132,6 +169,11 @@
 	function CheckIn(){
 		//$('#map_canvas').gmap('destroy');
 	//	$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
+		if( $("#takepicture").attr("src")=="" && g_emotion_html==null && $("#placemarktext").val() ==""){
+			alert("please input something!");
+			return;
+		}
+
 			var self = $('#map_canvas').gmap('get','map');
 			//g_tripPointArray = new Array(0);
 			//g_tripMarkerArray = new Array(0);
@@ -149,7 +191,7 @@
 			});
 
 			google.maps.event.addListener(marker, 'click', function() {
-				var CheckInInfo ="<p><img src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p>";
+				var CheckInInfo ="<p><img src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
 				var infowindow = new google.maps.InfoWindow({content: CheckInInfo});
 				infowindow.open(self,marker);
 				//self.openInfoWindow({'content': CheckInInfo}, this);
