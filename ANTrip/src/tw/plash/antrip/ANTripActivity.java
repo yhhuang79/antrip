@@ -3,13 +3,18 @@ package tw.plash.antrip;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
+import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -31,21 +36,51 @@ public class ANTripActivity extends Activity {
 		mContext = this;
 		
 		mWebView = (WebView) findViewById(R.id.webview);
+		//
+		Log.e("cookie = ", CookieManager.getInstance().acceptCookie()?"good":"no good");
 		WebSettings mWebSettings = mWebView.getSettings();
+		//javascript must be enabled, of course
 		mWebSettings.setJavaScriptEnabled(true);
 //		mWebSettings.setDomStorageEnabled(true);
-		mWebView.setWebViewClient(new WebViewClient());
+		
+		mWebView.setWebViewClient(new WebViewClient()/*{
+			@Override
+			public boolean shouldOverrideUrlLoading(WebView view, String url) {
+				return false;
+			}
+		}*/);
 		mWebView.setWebChromeClient(new WebChromeClient(){
+			/**
+			 * intercept and replace JavaScript alert dialog with native android for better visual experiance...
+			 */
+			@Override
+			public boolean onJsAlert(WebView view, String url, String message,
+					final JsResult result) {
+					new AlertDialog.Builder(mContext)
+						.setMessage(message)
+						.setNeutralButton("clicky", new OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								//inform javascript the alert dialog is dismissed
+								result.confirm();
+							}
+						})
+						.show();
+				return true;
+			}
+			/**
+			 * display any message javascript console might have, for debuging purpose
+			 */
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-				Log.e("consolemsg", consoleMessage.message() + ", " + consoleMessage.lineNumber() + ", " + consoleMessage.sourceId());
+				Log.e("consolemsg", consoleMessage.message() + " @line: " + consoleMessage.lineNumber() + " from: " + consoleMessage.sourceId());
 				return true;
 			}
 		});
+		//name the javascript interface "antrip"
 		mWebView.addJavascriptInterface(new jsinter(), "antrip");
+		//now after all the settings, load the html file
 		mWebView.loadUrl("file:///android_asset/index.html");
-		
-		
 	}
 	
 	public interface JavaScriptCallback{}
@@ -58,7 +93,7 @@ public class ANTripActivity extends Activity {
 		public void logout(){
 			//remove sid and stop stuffs
 			Log.e("logged", "out");
-//			PreferenceManager
+			PreferenceManager.getDefaultSharedPreferences(mContext).edit().remove("sid").commit();
 		}
 		
 		public String getSid(){
