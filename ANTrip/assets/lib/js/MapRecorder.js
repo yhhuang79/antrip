@@ -3,6 +3,7 @@
 	var g_current_latitude;
 	var g_current_longitude;
 	var g_emotion_html=null;
+	var g_tripPointArray = new Array(0);
 
 	function getLocation(){
 		/*if (navigator.geolocation){
@@ -86,6 +87,7 @@
 					else{
 						alert("ANTrip APP Exception!");
 					}
+					$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
 					$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
 					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
 					$('#b_add_note').find('.tip').html("Now Recording...");
@@ -106,6 +108,7 @@
 				//$('#map_canvas').gmap('clear', 'Polyline');
 				//$('#map_canvas').gmap('refresh');
 				//clearInterval(tripRecorder);
+				$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
 				$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
 				$('#b_add_note').find('.tip').html("start recording");
 				alert("Stop Recording Trip");
@@ -120,11 +123,11 @@
 		$('#emotion_compass').hide();
 		if($.cookie("isRecording") == null){
 			$('#map_canvas').gmap('destroy');
+			g_tripPointArray = new Array(0);
 		}
 		$('#map_canvas').gmap({'center': g_startLatLng, 'zoom': g_zoom, 'callback': function(map) {
 				var self = this;
 				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
-				g_tripPointArray = new Array(0);
 				self.watchPosition(function(position, status) {
 					if ( status === 'OK' ) {
 						g_current_latitude = position.coords.latitude;
@@ -152,6 +155,9 @@
 	}
 
 	function openMarkplaceWindow(){
+		if($('#b_seq_trip').find('.class_left_bt').attr("src")==im+"MarkPlace_b.png"){
+			return;
+		}
 		if( $('#markplacewindow').is(":visible") ) {
 			$('#edit_display_area :input').removeAttr('disabled');
 			$('#sym_topbtnGroup :input').removeAttr('disabled');
