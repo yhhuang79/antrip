@@ -67,10 +67,11 @@
 
 
 	function startRecordTrip(){
-		var isRecording = $.cookie("isRecording");
+		var isRecording = window.localStorage["isRecording"];
+		//alert(isRecording);
 		//$('#RecordButton').attr('data-theme','b').removeClass('ui-btn-up-e').removeClass('ui-btn-hover-e').addClass('ui-btn-up-b').trigger('create');
 		if(isRecording == null){
-			$.cookie("isRecording", "true");
+			window.localStorage["isRecording"] = true;
 			var sid = $.cookie("sid"); 
 			g_tripPointArray = [];
 			$('#map_canvas').gmap('clear', 'Polyline');
@@ -103,7 +104,10 @@
 				else{
 					alert("ANTrip APP Exception!");
 				}
-				$.cookie("isRecording", null);
+				//$.cookie("isRecording", null);
+				//window.localStorage["isRecording"] = null;
+				window.localStorage.removeItem("isRecording");
+				//alert(window.localStorage["isRecording"]);
 				//g_tripPointArray = [];
 				//$('#map_canvas').gmap('clear', 'Polyline');
 				//$('#map_canvas').gmap('refresh');
@@ -124,17 +128,21 @@
 
 	function ShowRecorderMap(){
 		$('#map_canvas').css('margin-top','-690px');
-		var isRecording = $.cookie("isRecording");
+		var isRecording = window.localStorage["isRecording"];
 		if(isRecording == null){
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
 		}
 		else{
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
+			$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
+			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
+			$('#b_add_note').find('.tip').html("Now Recording...");
+			clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		}
 		$('#sym_edit_bt_list').show();
 		$('#markplacewindow :input').removeAttr('disabled');
 		$('#emotion_compass').hide();
-		if($.cookie("isRecording") == null){
+		if(isRecording == null){
 			$('#map_canvas').gmap('destroy');
 			g_tripPointArray = new Array(0);
 		}
@@ -146,7 +154,7 @@
 						g_current_latitude = position.coords.latitude;
 						g_current_longitude = position.coords.longitude;
 						var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-						if($.cookie("isRecording") != null){
+						if(isRecording != null){
 							g_tripPointArray.push(latlng);
 							self.addShape('Polyline',{
 								'strokeColor': "#FF0000", 
