@@ -116,8 +116,21 @@
 		}
 	}
 
+	function SetText(text){
+		if(window.antrip){
+			window.antrip.setText(text);
+		}
+	}
+
 	function ShowRecorderMap(){
 		$('#map_canvas').css('margin-top','-690px');
+		var isRecording = $.cookie("isRecording");
+		if(isRecording == null){
+			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
+		}
+		else{
+			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
+		}
 		$('#sym_edit_bt_list').show();
 		$('#markplacewindow :input').removeAttr('disabled');
 		$('#emotion_compass').hide();
@@ -165,10 +178,23 @@
 			$('#markplacewindow').hide();
 			$('#emotion_compass').hide();
 		}else{
-			$('#edit_display_area :input').attr('disabled', true);
-			$('#sym_topbtnGroup :input').attr('disabled', true);
+			$('#edit_display_area').attr('disabled', true);
+			$('#sym_topbtnGroup').attr('disabled', true);
+
+			//document.getElementById("edit_display_area").disabled = true;
+			//document.getElementById("img_seq_trip").disabled = true;
 			$('#markplacewindow').show();
 			$('#emotion_compass').hide();
+			if(window.antrip){
+				window.antrip.startCheckin();
+			}
+		}
+	}
+
+	function showPicture(path){
+		if(path!=-1)
+		{
+			$("#takepicture").attr("src", "file://"+path);
 		}
 	}
 
@@ -209,6 +235,10 @@
 	//	}});
 		$('#map_canvas').gmap('refresh');
 
+		if(window.antrip){
+			window.antrip.endCheckin();
+		}
+
 		openMarkplaceWindow();
 	}
 
@@ -247,6 +277,9 @@
 				$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;'>"+Tooltip[e.key]+"</img>");
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
+				if(window.antrip){
+					window.antrip.endCheckin(id[e.key]);
+				}
 			},
 			showToolTip: true,
 			toolTipClose: ["tooltip-click", "area-click"],
@@ -254,50 +287,61 @@
 				{
 					key: "bored",
 					toolTip:Tooltip["bored"],
+						id: 1,
 					//fillColor: "ffffff"
 				},
 				{
 					key: "sad",
 					toolTip: Tooltip["sad"],
+						id: 2,
 					//fillColor: "000000"
 				},
 				{
 					key: "sleepy",
 					toolTip:Tooltip["sleepy"],
+						id: 3,
 				},
 				{
 					key: "peaceful",
 					toolTip:Tooltip["peaceful"],
+						id: 4,
 				},
 				{
 					key: "relaxed",
 					toolTip:Tooltip["relaxed"],
+						id: 5,
 				},
 				{
 					key: "pleased",
 					toolTip:Tooltip["pleased"],
+						id: 6,
 				},
 				{
 					key: "happy",
 					toolTip:Tooltip["happy"],
+						id: 7,
 				},
 				{
 				   key: "excited",
 				   toolTip: Tooltip["excited"],
+					   id: 8,
 				},
 				{
 					key: "angry",
 					toolTip:Tooltip["angry"],
+						id: 9,
 				},
 				{
 					key: "nervous",
 					toolTip: Tooltip["nervous"],
+						id: 10,
 					//fillColor: "000000"
 				},
 				{
 				   key: "calm",
 				   toolTip:Tooltip["calm"],
-				   strokeColor: "FFFFFF"
+				   strokeColor: "FFFFFF",
+				   id: 11,
 				}
 				]
 		});

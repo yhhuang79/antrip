@@ -264,7 +264,12 @@
 		display:none;
 	}
 
-	.class_login_bt, .class_logout_bt, .class_takemarker_bt{
+	.class_login_bt, .class_logout_bt{
+		width:40%;
+	}
+
+	.class_takemarker_bt{
+		float:left;
 		width:40%;
 	}
 

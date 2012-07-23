@@ -468,13 +468,6 @@
 		}
 	}
 
-	function showPicture(path){
-		if(path!=-1)
-		{
-			$("#takepicture").attr("src", "file://"+path);
-		}
-	}
-
 	function ChangeToUsedIcon(object, msg){
 			var sid = $.cookie("sid");
 			if(window.antrip){
