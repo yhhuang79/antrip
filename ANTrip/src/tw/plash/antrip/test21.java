@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup.LayoutParams;
@@ -88,6 +89,7 @@ public class test21 extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		requestCode = getIntent().getExtras().getInt("requestCode");
+		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		
 		mContext = this;
 

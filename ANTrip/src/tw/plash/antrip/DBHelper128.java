@@ -198,6 +198,26 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public long insert(Location location, String userid, Long tripid, CandidateCheckinObject cco) {
+		if (db.isOpen()) {
+			ContentValues cv = new ContentValues();
+			locationStringConverter l2s = new locationStringConverter(location);
+			cv.put("latitude", l2s.getLatitude());
+			cv.put("longitude", l2s.getLongitude());
+			cv.put("time", l2s.getTime());
+			cv.put("altitude", l2s.getAltitude());
+			cv.put("speed", l2s.getSpeed());
+			cv.put("bearing", l2s.getBearing());
+			cv.put("accuracy", l2s.getAccuracy());
+			cv.put("userID", userid);
+			cv.put("tripID", String.valueOf(tripid));
+			//cco fields
+			return db.insert(TRIP_POINT_TABLE, null, cv);
+		} else {
+			return -2;
+		}
+	}
+	
 	synchronized public long createNewTripInfo(Long tripid, String userid){
 		if(db.isOpen()){
 			ContentValues cv = new ContentValues();

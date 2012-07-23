@@ -1,5 +1,7 @@
 package tw.plash.antrip;
 
+import java.io.File;
+
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -9,8 +11,11 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
@@ -25,6 +30,13 @@ public class ANTripActivity extends Activity {
 	private Context mContext;
 	private WebView mWebView;
 	
+	private Integer previousMode;
+	
+	private CandidateCheckinObject cco;
+	
+	private Uri imageUri;
+	private final int REQUEST_CODE_TAKE_PICTURE = 100;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -36,7 +48,9 @@ public class ANTripActivity extends Activity {
 		mContext = this;
 		
 		mWebView = (WebView) findViewById(R.id.webview);
-		//
+		
+		previousMode = null;
+		
 		Log.e("cookie = ", CookieManager.getInstance().acceptCookie()?"good":"no good");
 		WebSettings mWebSettings = mWebView.getSettings();
 		//javascript must be enabled, of course
@@ -57,6 +71,7 @@ public class ANTripActivity extends Activity {
 			public boolean onJsAlert(WebView view, String url, String message,
 					final JsResult result) {
 					new AlertDialog.Builder(mContext)
+						.setCancelable(false)
 						.setMessage(message)
 						.setNeutralButton("clicky", new OnClickListener() {
 							@Override
@@ -86,6 +101,10 @@ public class ANTripActivity extends Activity {
 	public interface JavaScriptCallback{}
 	
 	private class jsinter implements JavaScriptCallback{
+		
+		private final String imagepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+		
+		
 		public void hello(String sid){
 			Toast.makeText(mContext, "hola~ " + sid, Toast.LENGTH_LONG).show();
 		}
@@ -126,9 +145,7 @@ public class ANTripActivity extends Activity {
 		}
 		
 		
-		public void startCamera(){
-			startActivityForResult((new Intent(mContext, test21.class).putExtra("requestCode", 1)), 1);
-		}
+		
 		
 		/**
 		 * start recording, and return the newly generated random tripid
@@ -146,8 +163,6 @@ public class ANTripActivity extends Activity {
 			
 		}
 		
-		
-		
 		/*
 		 * 1: home screen
 		 * 2: trip list screen
@@ -156,6 +171,68 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setMode(int mode){
 			
+		}
+		
+		/**
+		 * **check-in method family**
+		 * call Android build-in camera class to take the picture, and modify the EXIF header afterwards 
+		 */
+		public void startCamera(){
+			//file name for pictures
+			String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
+			//complete file path for picture
+			imageUri = Uri.fromFile(new File(imagepath, imagename));
+Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
+			//intent to launch Android camera app to take pictures
+			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+			//input the desired filepath + filename
+			intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+			//launch the intent with code
+			startActivityForResult(intent, REQUEST_CODE_TAKE_PICTURE);
+			
+			// should add extra functions to camera, e.g. filters, special effects, stickers, etc.
+//			startActivityForResult((new Intent(mContext, test21.class).putExtra("requestCode", 1)), 1);
+		}
+		/**
+		 * **check-in method family**
+		 * save the emotion id to candidate check-in object
+		 */
+		public void setEmotion(int id){
+			if(cco!=null){
+				cco.setEmotionID(id);
+			}
+		}
+		/**
+		 * **check-in method family**
+		 * save the inputted text to candidate check-in object
+		 */
+		public void setText(String text){
+			if(cco != null){
+				cco.setCheckinText(text);
+			}
+		}
+		/**
+		 * **check-in method family**
+		 * create a new candidate check-in object
+		 * also request a coordinate from location service
+		 */
+		public void startCheckin(){
+			cco = new CandidateCheckinObject();
+		}
+		/**
+		 * **check-in method family**
+		 * confirmed check-in action, pass the candidate check-in object to location service to be saved
+		 */
+		public void endCheckin(){
+			//send cco to service via startService call with action and extras
+			
+		}
+		/**
+		 * **check-in method family**
+		 * check-in action is canceled, drop the candidate check-in object
+		 */
+		public void cancelCheckin(){
+			cco = null;
 		}
 	}
 	
@@ -179,21 +256,29 @@ public class ANTripActivity extends Activity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		switch(resultCode){
-		case 1:
-			String imageLocation = data.getExtras().getString("photoLocation");
-			Log.e("on act result", "at " + imageLocation);
-			String imageURL = "javascript:showPicture('" + imageLocation + "')";
-			mWebView.loadUrl(imageURL);
-			//mWebView.loadUrl("http://plash2.iis.sinica.edu.tw/antrip/index.html#map&ui-state=dialog");
-			break;
-		default:
-			String noImageURL = "javascript:showPicture(-1)";
-			mWebView.loadUrl(noImageURL);
-			break;
+		if(requestCode == REQUEST_CODE_TAKE_PICTURE){
+			switch(resultCode){
+			case RESULT_OK:
+				//need to grab the generated filename plus filepath and return it to html for display purpose
+				String imageURL = "javascript:showPicture('" + imageUri.getPath() + "')";
+				mWebView.loadUrl(imageURL);
+Log.e("onActivityResult", "imageURL= " + imageURL);
+				if(cco!=null){
+					cco.setPicturePath(imageUri.getPath());
+				}
+				break;
+			case RESULT_CANCELED:
+				//decides to not take a picture after all
+//				break;
+			case RESULT_FIRST_USER:
+				//not sure when will this method be called
+//				break;
+			default:
+				//handle all exceptions
+				String noImageURL = "javascript:showPicture(-1)";
+				mWebView.loadUrl(noImageURL);
+				break;
+			}
 		}
-		Log.e("on act result", "done");
 	}
-	
-	
 }
