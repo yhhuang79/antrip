@@ -650,8 +650,9 @@
 		success:function(result){
 			if(result.sid != "0"){ 
 				$.cookie("sid", result.sid);
-				$.cookie("usrname", username);
+			//	$.cookie("usrname", username);
 				if(window.antrip){
+					window.antrip.setCookie("usrname", username);
 					window.antrip.saveSid(result.sid);
 				}
 				ChangeToUsedIcon($("#ub_trip_history"));
@@ -667,14 +668,22 @@
 		{
 			alert("Logout");
 		}
-		if($.cookie("facebookid")){
+		var facebookid = $.cookie("facebookid");
+		if(window.antrip){
+			facebookid = window.antrip.getCookie("facebookid");
+		}
+		if(facebookid){
 			FB.logout(function(response) {
-				$.cookie("facebookid", null);
+				//$.cookie("facebookid", null);
+				if(window.antrip){
+					isRecording = window.antrip.removeCookie("facebookid");
+				}
 			}); 
 		}
 		$.cookie("sid", null);
-		$.cookie("trip_id", null);
+		//$.cookie("trip_id", null);
 		if(window.antrip){
+			window.antrip.removeCookie("trip_id");
 			window.antrip.logout();
 		}
 		ChangeToUsedIcon($("#ub_home"));
@@ -882,6 +891,8 @@
 								var lng = marker.lng.valueOf() / 1000000;
 								var latlng = new google.maps.LatLng(lat, lng);
 								g_tripPointArray.push(latlng);
+								throw(latlng);
+								//alert(latlng);
 								if (typeof marker.CheckIn != 'undefined'){
 									var placemarker = self.addMarker({ 
 										'position': latlng, 

@@ -67,12 +67,20 @@
 
 
 	function startRecordTrip(){
-		var isRecording = window.localStorage["isRecording"];
+		var isRecording = null;
+		if(window.antrip){
+			isRecording = window.antrip.getCookie("isRecording");
+		}
 		//alert(isRecording);
 		//$('#RecordButton').attr('data-theme','b').removeClass('ui-btn-up-e').removeClass('ui-btn-hover-e').addClass('ui-btn-up-b').trigger('create');
 		if(isRecording == null){
-			window.localStorage["isRecording"] = true;
-			var sid = $.cookie("sid"); 
+			//window.localStorage["isRecording"] = true;
+			var sid = null;
+			if(window.antrip){
+				isRecording = window.antrip.setCookie("isRecording", "true");
+				sid = window.antrip.getCookie("sid");
+			}
+			//var sid = $.cookie("sid"); 
 			g_tripPointArray = [];
 			$('#map_canvas').gmap('clear', 'Polyline');
 			$('#map_canvas').gmap('refresh');
@@ -82,7 +90,8 @@
 				success:function(result){*/
 					if(window.antrip){
 						var newTripId = window.antrip.startRecording();
-						$.cookie("trip_id",newTripId);
+						//$.cookie("trip_id",newTripId);
+						window.antrip.setCookie("trip_id", newTripId);
 						//tripRecorder = setInterval(function(){getLocation()},5000);
 					}
 					else{
@@ -106,7 +115,10 @@
 				}
 				//$.cookie("isRecording", null);
 				//window.localStorage["isRecording"] = null;
-				window.localStorage.removeItem("isRecording");
+				//window.localStorage.removeItem("isRecording");
+				if(window.antrip){
+					isRecording = window.antrip.removeCookie("isRecording");
+				}
 				//alert(window.localStorage["isRecording"]);
 				//g_tripPointArray = [];
 				//$('#map_canvas').gmap('clear', 'Polyline');
@@ -128,7 +140,11 @@
 
 	function ShowRecorderMap(){
 		$('#map_canvas').css('margin-top','-690px');
-		var isRecording = window.localStorage["isRecording"];
+		var isRecording = null;
+		if(window.antrip){
+			isRecording = window.antrip.getCookie("isRecording");
+		}
+		//var isRecording = window.localStorage["isRecording"];
 		if(isRecording == null){
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
 		}
