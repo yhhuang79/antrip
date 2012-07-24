@@ -230,7 +230,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 */
 		public void endCheckin(){
 			//send cco to service via startService call with action and extras
-			
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_SAVE_CCO").putExtra("cco", cco));
 		}
 		/**
 		 * **check-in method family**
@@ -245,8 +245,8 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 * @param key
 		 * @param value
 		 */
-		public void setCookie(String key, Object value){
-			pref.edit().putString(key, (String) value).commit();
+		public void setCookie(String key, String value){
+			pref.edit().putString(key, value).commit();
 			Log.e("setCookie", "key= " + key + ", value= " + value);
 		}
 		
@@ -256,7 +256,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 * @return the value paired with the key, or null if key does not exist
 		 */
 		public String getCookie(String key){
-			Log.e("getCookie", "key= " + key);
+			Log.e("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
 			return pref.getString(key, null);
 		}
 		
@@ -266,6 +266,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 */
 		public void removeCookie(String key){
 			pref.edit().remove(key).commit();
+			Log.e("removeCookie", "key= " + key);
 		}
 	}
 	
