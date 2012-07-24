@@ -294,7 +294,7 @@
 	function show_login_div(){
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");
 		}
 		$('#sym_login').show();
 		if(sid!=null){
@@ -379,7 +379,7 @@
 
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");
 		}
 		if(g_enableDebugMode==true)
 		{
@@ -471,7 +471,7 @@
 	function ChangeToUsedIcon(object, msg){
 			var sid = $.cookie("sid");
 			if(window.antrip){
-				sid = window.antrip.getSid();
+				sid = window.antrip.getCookie("sid");
 			}
 			//alert(sid);
 			if(g_enableDebugMode==true)
@@ -630,7 +630,7 @@
 
 		sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");;
 		}
 		if(sid==null){
 			$('.class_logout_bt').hide();
@@ -653,7 +653,7 @@
 			//	$.cookie("usrname", username);
 				if(window.antrip){
 					window.antrip.setCookie("usrname", username);
-					window.antrip.saveSid(result.sid);
+					window.antrip.setCookie("sid", result.sid);
 				}
 				ChangeToUsedIcon($("#ub_trip_history"));
 			} else { 
@@ -684,6 +684,7 @@
 		//$.cookie("trip_id", null);
 		if(window.antrip){
 			window.antrip.removeCookie("trip_id");
+			window.antrip.removeCookie("sid");
 			window.antrip.logout();
 		}
 		ChangeToUsedIcon($("#ub_home"));
@@ -695,7 +696,7 @@
 		var div_data = [];
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");
 		}
 
 		var localresult;
@@ -786,7 +787,7 @@
 	function preTripAction(){
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");
 		}
 		if(g_trip>1){
 			g_trip--;
@@ -800,7 +801,7 @@
 	function nextTripAction(){
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");
 		}
 		if(g_trip<g_tripnum){
 			g_trip++;
@@ -841,7 +842,7 @@
 	function showfriendList(){
 		var sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getSid();
+			sid = window.antrip.getCookie("sid");
 		}
 		$("#friend_list").html("");
 		var div_data = [];
@@ -878,20 +879,21 @@
 					g_tripPointArray = new Array(0);
 					g_tripMarkerArray = new Array(0);
 					g_trip = trip_id;
-					var url = "http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripDataComponent.php?userid="+userid+"&trip_id="+trip_id+"&field_mask=110010000000000";
+	//				var url = "http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripDataComponent.php?userid="+userid+"&trip_id="+trip_id+"&field_mask=110010000000000";
 					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);				
-					$.getJSON(url, function(data) { 
+//					$.getJSON(url, function(data) { 
 
 						$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetCheckInData.php',
 						data:{userid: sid, trip_id: trip_id},
 						type: 'GET', dataType: 'jsonp', cache: false,
 						success:function(result){
-							$.each(data.tripDataList, function(i, marker) {
+							//alert(result);
+							$.each(result.CheckInDataList, function(i, marker) {
 								var lat = marker.lat.valueOf() / 1000000;
 								var lng = marker.lng.valueOf() / 1000000;
 								var latlng = new google.maps.LatLng(lat, lng);
 								g_tripPointArray.push(latlng);
-								throw(latlng);
+								//throw(latlng);
 								//alert(latlng);
 								if (typeof marker.CheckIn != 'undefined'){
 									var placemarker = self.addMarker({ 
@@ -944,7 +946,7 @@
 							self.set('MarkerClusterer', new MarkerClusterer(map, self.get('markers'), {styles: clusterStyles}));*/
 							$('#map_canvas').gmap('refresh');
 						}});
-					});				
+				//	});				
 				}});
 
 				//$("#sym_triplist_in_open_dialog").dialog("close");

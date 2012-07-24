@@ -139,6 +139,7 @@
 	}
 
 	function ShowRecorderMap(){
+	//	alert("ShowRecorderMap");
 		$('#map_canvas').css('margin-top','-690px');
 		var isRecording = null;
 		if(window.antrip){
