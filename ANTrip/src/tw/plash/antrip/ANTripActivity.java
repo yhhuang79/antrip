@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
@@ -19,6 +20,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
+import android.webkit.CookieSyncManager;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -37,6 +39,8 @@ public class ANTripActivity extends Activity {
 	private Uri imageUri;
 	private final int REQUEST_CODE_TAKE_PICTURE = 100;
 	
+	private SharedPreferences pref;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -51,7 +55,8 @@ public class ANTripActivity extends Activity {
 		
 		previousMode = null;
 		
-		Log.e("cookie = ", CookieManager.getInstance().acceptCookie()?"good":"no good");
+		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+		
 		WebSettings mWebSettings = mWebView.getSettings();
 		//javascript must be enabled, of course
 		mWebSettings.setJavaScriptEnabled(true);
@@ -112,16 +117,16 @@ public class ANTripActivity extends Activity {
 		public void logout(){
 			//remove sid and stop stuffs
 			Log.e("logged", "out");
-			PreferenceManager.getDefaultSharedPreferences(mContext).edit().remove("sid").commit();
+			pref.edit().remove("sid").commit();
 		}
 		
 		public String getSid(){
-			return PreferenceManager.getDefaultSharedPreferences(mContext).getString("sid", null);
+			return pref.getString("sid", null);
 		}
 		
 		//save userid from a successful login responce message
 		public void saveSid(String sid){
-			PreferenceManager.getDefaultSharedPreferences(mContext).edit().putString("sid", sid).commit();
+			pref.edit().putString("sid", sid).commit();
 			Log.e("saveSid", "= " + sid);
 		}
 		
@@ -234,6 +239,19 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		public void cancelCheckin(){
 			cco = null;
 		}
+		
+		/**
+		 * to replace cookie in html
+		 */
+		public void setCookie(String key, Object value){
+			pref.edit().putString(key, (String) value).commit();
+			Log.e("setCookie", "key= " + key + ", value= " + value);
+		}
+		
+		public String getCookie(String key){
+			Log.e("getCookie", "key= " + key);
+			return pref.getString(key, null);
+		}
 	}
 	
 	@Override
@@ -241,17 +259,13 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		super.onResume();
 		// need to notify location service to send location update
 		
-		
-		
 	}
 	
 	@Override
 	protected void onPause() {
+		super.onPause();
 		// need to notify location service not to send location update
 		
-		
-		
-		super.onPause();
 	}
 	
 	@Override
