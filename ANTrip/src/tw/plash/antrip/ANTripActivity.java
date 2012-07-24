@@ -241,16 +241,31 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		}
 		
 		/**
-		 * to replace cookie in html
+		 * Replace cookie function in html, save the key-value pair to android preference
+		 * @param key
+		 * @param value
 		 */
 		public void setCookie(String key, Object value){
 			pref.edit().putString(key, (String) value).commit();
 			Log.e("setCookie", "key= " + key + ", value= " + value);
 		}
 		
+		/**
+		 * 
+		 * @param key
+		 * @return the value paired with the key, or null if key does not exist
+		 */
 		public String getCookie(String key){
 			Log.e("getCookie", "key= " + key);
 			return pref.getString(key, null);
+		}
+		
+		/**
+		 * remove the key entry from preference
+		 * @param key
+		 */
+		public void removeCookie(String key){
+			pref.edit().remove(key).commit();
 		}
 	}
 	
