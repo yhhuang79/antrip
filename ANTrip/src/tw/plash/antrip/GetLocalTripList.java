@@ -12,6 +12,7 @@ public class GetLocalTripList {
 
 	private Context mContext;
 	private JSONObject result;
+	private DBHelper128 dh;
 	
 	public GetLocalTripList(Context c) {
 		mContext = c;

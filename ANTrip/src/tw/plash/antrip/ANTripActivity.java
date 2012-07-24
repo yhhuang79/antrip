@@ -19,8 +19,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
-import android.webkit.CookieManager;
-import android.webkit.CookieSyncManager;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -107,8 +105,8 @@ public class ANTripActivity extends Activity {
 	
 	private class jsinter implements JavaScriptCallback{
 		
-		private final String imagepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-		
+//		private final String imagepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+		private final String imagepath = getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
 		
 		public void hello(String sid){
 			Toast.makeText(mContext, "hola~ " + sid, Toast.LENGTH_LONG).show();
@@ -130,10 +128,6 @@ public class ANTripActivity extends Activity {
 			Log.e("saveSid", "= " + sid);
 		}
 		
-		// need a function to provide trip list(both local the server side)
-		
-		// need a function to store check-in values
-		
 		// need a function to provide detailed trip data(reviewing historic trip)
 		public String getLocalTripList(){
 			Toast.makeText(mContext, "getLocalTripList", Toast.LENGTH_SHORT).show();
@@ -149,23 +143,21 @@ public class ANTripActivity extends Activity {
 			}
 		}
 		
-		
-		
-		
 		/**
 		 * start recording, and return the newly generated random tripid
 		 * @return
 		 */
-		public int startRecording(){
-			
-			return -1;
+		public Long startRecording(){
+			Long tid = System.nanoTime();
+//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid));
+			return tid;
 		}
 		
 		/**
 		 * 
 		 */
 		public void stopRecording(){
-			
+//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING"));
 		}
 		
 		/*
@@ -175,7 +167,21 @@ public class ANTripActivity extends Activity {
 		 * 4: friend list screen
 		 */
 		public void setMode(int mode){
-			
+			switch(mode){
+			case 3:
+				//start location service
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
+				break;
+			case 1:
+			case 2:
+			case 4:
+			default:
+				//stop location service
+				if(pref.getString("isRecording", null) == null){
+					stopService(new Intent(mContext, LocationService.class));
+				}
+				break;
+			}
 		}
 		
 		/**
@@ -223,6 +229,9 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 */
 		public void startCheckin(){
 			cco = new CandidateCheckinObject();
+			//request a check-in location from service
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
+			
 		}
 		/**
 		 * **check-in method family**
@@ -238,6 +247,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 */
 		public void cancelCheckin(){
 			cco = null;
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_CANCEL_CHECKIN"));
 		}
 		
 		/**
@@ -246,8 +256,8 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 * @param value
 		 */
 		public void setCookie(String key, String value){
-			pref.edit().putString(key, value).commit();
-			Log.e("setCookie", "key= " + key + ", value= " + value);
+			pref.edit().putString(key, String.valueOf(value)).commit();
+			Log.e("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 		}
 		
 		/**

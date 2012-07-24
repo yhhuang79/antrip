@@ -20,25 +20,32 @@ import com.skyhookwireless.wps.WPSReturnCode;
 import com.skyhookwireless.wps.XPS;
 
 public class LocationService extends Service {
-
+	/**
+	 * check-in related stuff
+	 */
+	private boolean checkinCallbackCanCallAgain;
+	private Location checkinLocationBuffer = null;
+	private CandidateCheckinObject cco;
+	/**
+	 * recording related
+	 */
+	private boolean isRecording;
+	private Location recorderLocationBuffer = null;
+	private Location nullLocation;
+	private DBHelper128 dh;
+	private Timer mTimer;
+	/**
+	 * generic
+	 */
+	
 	private XPS _xps;
 	private WPSAuthentication auth;
-
-	private boolean isRecording;
-
-	private Location recorderLocationBuffer = null;
-	private Location checkinLocationBuffer = null;
-	private Location nullLocation;
-
 	private SharedPreferences pref;
-
-	private DBHelper128 dh;
-
-	private Timer mTimer;
-
 	private Integer period;
 	private Integer oldPeriod;
-
+	/**
+	 * possible error situations
+	 */
 	private String error_no_uid = "NO UID IN PREFERENCE, ABORT RECORDING";
 	private String error_no_action = "NO ACTION SPECIFIED, TERMINATE SERVICE";
 	private String error_unknown_action = "UNKNOWN ACTION GIVEN, TERMINATE SERVICE";
@@ -48,7 +55,8 @@ public class LocationService extends Service {
 		super.onCreate();
 
 		isRecording = false;
-
+		checkinCallbackCanCallAgain = true;
+		
 		_xps = new XPS(this);
 		auth = new WPSAuthentication("plash", "iis.sinica.edu.tw");
 
@@ -66,7 +74,6 @@ public class LocationService extends Service {
 		// period will have value after this line
 		oldPeriod = period;
 		period = Integer.valueOf(pref.getString("timeInterval", "30"));
-
 		Log.e("locationService128", "period= " + period);
 
 		String action = intent.getAction();
@@ -77,7 +84,7 @@ public class LocationService extends Service {
 			// if equal, that means two consecutive call to startService without
 			// interval change
 			if (period != oldPeriod) {
-				_xps.getXPSLocation(auth, period, XPS.EXACT_ACCURACY, _callback);
+				_xps.getXPSLocation(auth, period, XPS.EXACT_ACCURACY, recorderCallback);
 				// if recording, update the timer
 				if (isRecording) {
 					stopTimer();
@@ -87,8 +94,9 @@ public class LocationService extends Service {
 		} else if (action.equals("ACTION_START_RECORDING")) {
 			// start saving location updates into DB
 			// create a unique key as local trip id
-			Long tid = System.nanoTime();
-			pref.edit().putLong("tid", tid).commit();
+			Long tid = intent.getExtras().getLong("tid");
+			//the insert action is already done by html using setcookie
+//			pref.edit().putLong("tid", tid).commit();
 			// save the unique key to preference so mapview can access it
 			
 			// start a runnable in handler to fetch location every interval and
@@ -105,11 +113,25 @@ public class LocationService extends Service {
 			// kill the runnable that's been saving location to DB
 			stopTimer();
 			// remove all the related preference entries
-			pref.edit().remove("tid").commit();
-		} else if (action.equals("ACTION_GET_ONE_LOCATION")) {
-			// for picture geotagging
+			pref.edit().remove("trip_id").commit();
+			
+		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
+			// request one location for picture geotagging
+			if(checkinCallbackCanCallAgain){
+				_xps.getLocation(auth, null, checkinCallback);
+				checkinCallbackCanCallAgain = false;
+			} else{
+				//try again later
+			}
+			
 		} else if (action.equals("ACTION_SAVE_CCO")) {
 			// save check-in data to DB
+			cco = (CandidateCheckinObject) intent.getExtras().getSerializable("cco");
+			
+		} else if (action.equals("ACTION_CANCEL_CHECKIN")){
+			// clear temp check-in location object
+			checkinLocationBuffer = null;
+			cco = null;
 		} else {
 			// unknown ACTION given, stop service
 			errorStopService(error_unknown_action);
@@ -143,9 +165,9 @@ public class LocationService extends Service {
 					// save to DB
 					if (recorderLocationBuffer == null) {
 						// don't want to input null stuff into database
-						recorderLocationBuffer = nullLocation;
+						recorderLocationBuffer = getCurrentNullLocation();
 					}
-					dh.insert(recorderLocationBuffer, userid, pref.getLong("tid", -1));
+					dh.insert(recorderLocationBuffer, userid, Long.valueOf(pref.getString("trip_id", "-1")));
 				}
 			}, 0, period);
 		} else {
@@ -159,7 +181,7 @@ public class LocationService extends Service {
 	 * @param tid
 	 */
 	void setTimer(Long tid) {
-		final String userid = pref.getString("uid", "");
+		final String userid = pref.getString("sid", null);
 		if (userid != null) {
 			mTimer = new Timer();
 			dh = new DBHelper128(getApplicationContext());
@@ -170,9 +192,14 @@ public class LocationService extends Service {
 					// save to DB
 					if (recorderLocationBuffer == null) {
 						// don't want to input null stuff into database
-						recorderLocationBuffer = nullLocation;
+						recorderLocationBuffer = getCurrentNullLocation();
 					}
-					dh.insert(recorderLocationBuffer, userid, pref.getLong("tid", -1));
+					dh.insert(recorderLocationBuffer, userid, Long.valueOf(pref.getString("trip_id", "-1")));
+					
+					/**
+					 * if activity if running in foreground
+					 * broadcast location from recorderLocationBuffer
+					 */
 				}
 			}, 0, period);
 		} else {
@@ -191,7 +218,7 @@ public class LocationService extends Service {
 
 		_xps.abort();
 
-		pref.edit().remove("tid").commit();
+		pref.edit().remove("trip_id").commit();
 
 		stopTimer();
 
@@ -203,30 +230,58 @@ public class LocationService extends Service {
 		return null;
 	}
 
-	// *** For Skyhook callback
-	/**
-	 * A single callback class that will be used to handle all notifications
-	 * sent by WPS to our app.
-	 */
-	public class MyLocationCallback implements WPSPeriodicLocationCallback,
-			WPSLocationCallback {
+	
+	private Location getCurrentNullLocation(){
+		nullLocation.setTime(System.currentTimeMillis());
+		return nullLocation;
+	}
+	
+	public class CheckinLocationCallback implements WPSLocationCallback{
+		
+		@Override
+		public void done() {
+			checkinCallbackCanCallAgain = true;
+		}
+
+		@Override
+		public WPSContinuation handleError(WPSReturnCode arg0) {
+			checkinLocationBuffer = getCurrentNullLocation();
+			Log.d("location service", "error code = " + arg0.toString());
+			return WPSContinuation.WPS_CONTINUE;
+		}
+
+		/**
+		 * This will be the location callback for check in points. Recorder will
+		 * be default at a lower frequency, so a check-in point might not be
+		 * able to tie with a nearby point, thus check-in points need to request
+		 * their own location
+		 */
+		@Override
+		public void handleWPSLocation(WPSLocation arg0) {
+			checkinLocationBuffer = WPS2Location(arg0);
+			Log.d("location service","check-in location= " + checkinLocationBuffer.toString());
+		}
+		
+	}
+	
+	public class RecorderLocationCallback implements WPSPeriodicLocationCallback{
 
 		public void done() {
-			// tell the UI thread to re-enable the buttons
+			
 		}
 
 		public WPSContinuation handleError(WPSReturnCode error) {
 			if (isRecording) {
 				// save to location buffer when recording
-				recorderLocationBuffer = nullLocation;
+				//set the time so we can better analysis the situation
+				recorderLocationBuffer = getCurrentNullLocation();
 			} else {
 				// broadcast when not recording
 				// actually no need to broadcast error when not recording
 			}
 
-			Log.d("Yu-Hsiang: Skyhook GPSLocation@LocationService = ",
-					"error code = " + error.toString());
-			return null;
+			Log.d("location service", "error code = " + error.toString());
+			return WPSContinuation.WPS_CONTINUE;
 		}
 
 		public WPSContinuation handleWPSPeriodicLocation(WPSLocation wpslocation) {
@@ -238,39 +293,28 @@ public class LocationService extends Service {
 			} else {
 				// Broadcasts when not recording
 				Intent intent = new Intent();
-				// intent.setAction(PLASHConst.LOCATIONSERVICE_UPDATE);
+				intent.setAction("ACTION_LOCATION_SERVICE_UPDATE");
 				intent.putExtra("location", location);
 				sendBroadcast(intent);
 			}
 
-			Log.d("Yu-Hsiang: Skyhook periodic location@LocationService = ",
-					location.toString());
+			Log.d("location service","periodic location= " + location.toString());
 			return null;
-		}
-
-		/**
-		 * This will be the location callback for check in points. Recorder will
-		 * be default at a lower frequency, so a check-in point might not be
-		 * able to tie with a nearby point, thus check-in points need to request
-		 * their own location
-		 */
-		@Override
-		public void handleWPSLocation(WPSLocation arg0) {
-			
-		}
-
-		private Location WPS2Location(WPSLocation l) {
-			Location location = new Location("skyhook");
-			location.setLatitude(l.getLatitude());
-			location.setLongitude(l.getLongitude());
-			location.setTime(l.getTime());
-			location.setAltitude(l.getAltitude());
-			location.setSpeed((float) l.getSpeed());
-			location.setBearing((float) l.getBearing());
-			location.setAccuracy((float) l.getHPE());
-			return location;
 		}
 	}
 
-	private final MyLocationCallback _callback = new MyLocationCallback();
+	private final RecorderLocationCallback recorderCallback = new RecorderLocationCallback();
+	private final CheckinLocationCallback checkinCallback = new CheckinLocationCallback();
+	
+	private Location WPS2Location(WPSLocation l) {
+		Location location = new Location("skyhook");
+		location.setLatitude(l.getLatitude());
+		location.setLongitude(l.getLongitude());
+		location.setTime(l.getTime());
+		location.setAltitude(l.getAltitude());
+		location.setSpeed((float) l.getSpeed());
+		location.setBearing((float) l.getBearing());
+		location.setAccuracy((float) l.getHPE());
+		return location;
+	}
 }
