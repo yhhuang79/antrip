@@ -56,6 +56,13 @@
 
 	var g_enableDebugMode = false;
 	var g_enablewithoutLogin=false;
+	//Except following languages, others are English.
+	//CHINA
+	//CHINESE
+	//PRC
+	//SIMPLIFIED_CHINESE
+	//TAIWAN
+	//TRADITIONAL_CHINESE
 	var g_lang="English";
 	var g_ready=false;
 	var g_str_numberoftrip = "the number of trips:";
@@ -158,6 +165,11 @@
 
 	}
 	function PreloadandSet(){
+		if(window.antrip)
+		{
+			g_lang = window.antrip.getLocale();
+		}
+
 		g_isForMobile=true;
 		
 		//reset image path

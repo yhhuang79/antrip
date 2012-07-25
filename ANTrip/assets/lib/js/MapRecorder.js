@@ -5,14 +5,14 @@
 	var g_emotion_html=null;
 	var g_tripPointArray = new Array(0);
 
-	function getLocation(){
+	/*function getLocation(){
 		/*if (navigator.geolocation){
 			navigator.geolocation.getCurrentPosition(uploadPosition);
 		} else {
 			alert("Geolocation is not supported by this browser.");
 		}*/
-	}
-	function setLocation(position){
+	//}
+	/*function setLocation(position){
 		var self = $('#map_canvas').gmap('get','map');
 		var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
 		g_tripPointArray.push(latlng);
@@ -41,7 +41,7 @@
 		g_cutPath.setMap(self);
 
 		$('#map_canvas').gmap('refresh');
-	}
+	}*/
 	/*function uploadPosition(position){
 		Date.prototype.Timestamp = function() {
 			var yyyy = this.getFullYear().toString();
@@ -144,8 +144,8 @@
 				var self = this;
 				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 
-				g_current_latitude = position.coords.latitude;
-				g_current_longitude = position.coords.longitude;
+				g_current_latitude = latitude;
+				g_current_longitude =longitude;
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 				if(isRecording != null){
 					g_tripPointArray.push(latlng);
