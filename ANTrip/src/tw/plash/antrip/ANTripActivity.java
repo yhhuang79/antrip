@@ -1,6 +1,7 @@
 package tw.plash.antrip;
 
 import java.io.File;
+import java.util.Locale;
 import java.util.PriorityQueue;
 
 import org.json.JSONException;
@@ -131,26 +132,13 @@ public class ANTripActivity extends Activity {
 	private class jsinter implements JavaScriptCallback{
 		
 //		private final String imagepath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-		private final String imagepath = getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-		
-		public void hello(String sid){
-			Toast.makeText(mContext, "hola~ " + sid, Toast.LENGTH_LONG).show();
-		}
+		//TODO:
+		// cannot assume getExtFilesDir will always return the path, might be null, need to check before proceeding
+		private final String imagepath = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
 		
 		public void logout(){
 			//remove sid and stop stuffs
 			Log.e("logged", "out");
-			pref.edit().remove("sid").commit();
-		}
-		
-		public String getSid(){
-			return pref.getString("sid", null);
-		}
-		
-		//save userid from a successful login responce message
-		public void saveSid(String sid){
-			pref.edit().putString("sid", sid).commit();
-			Log.e("saveSid", "= " + sid);
 		}
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
@@ -174,7 +162,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public Long startRecording(){
 			Long tid = System.nanoTime();
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid));
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid));
 			return tid;
 		}
 		
@@ -182,7 +170,7 @@ public class ANTripActivity extends Activity {
 		 * 
 		 */
 		public void stopRecording(){
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING"));
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING"));
 		}
 		
 		/*
@@ -203,7 +191,9 @@ public class ANTripActivity extends Activity {
 			case 4:
 			default:
 				//stop location service if not recording
-				if(pref.getString("isRecording", null) != "true"){
+				String isrec = pref.getString("isRecording", null);
+				Log.e("setMode", "isrec= " + isrec);
+				if(isrec == null || !isrec.equals("true")){
 					stopService(new Intent(mContext, LocationService.class));
 				}
 				break;
@@ -278,8 +268,6 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 			startService(new Intent(mContext, LocationService.class).setAction("ACTION_CANCEL_CHECKIN"));
 		}
 		
-		
-		
 		/**
 		 * Replace cookie function in html, save the key-value pair to android preference
 		 * @param key
@@ -307,6 +295,10 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		public void removeCookie(String key){
 			pref.edit().remove(key).commit();
 			Log.e("removeCookie", "key= " + key);
+		}
+		
+		public String getLocale(){
+			return Locale.getDefault().getDisplayLanguage();
 		}
 	}
 	
