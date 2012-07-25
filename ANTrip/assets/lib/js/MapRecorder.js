@@ -139,7 +139,30 @@
 	}
 
 	function setPosition(latitude, longitude){
+		$('#map_canvas').css('margin-top','-690px');
+		$('#map_canvas').gmap({'center': g_startLatLng, 'zoom': g_zoom, 'callback': function(map) {
+				var self = this;
+				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 
+				g_current_latitude = position.coords.latitude;
+				g_current_longitude = position.coords.longitude;
+				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+				if(isRecording != null){
+					g_tripPointArray.push(latlng);
+					self.addShape('Polyline',{
+						'strokeColor': "#FF0000", 
+						'strokeOpacity': 0.8, 
+						'strokeWeight': 2, 
+						'path': g_tripPointArray
+					});
+				}
+				if ( !self.get('markers').client ) {
+					self.addMarker({ 'id': 'client', 'position': latlng, 'bounds': true });
+				} else {
+					self.get('markers').client.setPosition(latlng);
+					map.panTo(latlng);
+				}
+		}});
 	}
 
 	function ShowRecorderMap(){
