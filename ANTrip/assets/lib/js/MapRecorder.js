@@ -91,7 +91,7 @@
 					if(window.antrip){
 						var newTripId = window.antrip.startRecording();
 						//$.cookie("trip_id",newTripId);
-						window.antrip.setCookie("trip_id", newTripId);
+						window.antrip.setCookie("trip_id", newTripId.toString());
 						//tripRecorder = setInterval(function(){getLocation()},5000);
 					}
 					else{
@@ -101,7 +101,7 @@
 					$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
 					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
 					$('#b_add_note').find('.tip').html("Now Recording...");
-					alert("Start Recording Trip");
+					//alert("Start Recording Trip");
 					clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 			//	}
 			//});
@@ -127,7 +127,7 @@
 				$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
 				$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
 				$('#b_add_note').find('.tip').html("start recording");
-				alert("Stop Recording Trip");
+				//alert("Stop Recording Trip");
 				window.clearInterval(g_clockintval);
 		}
 	}
@@ -136,6 +136,10 @@
 		if(window.antrip){
 			window.antrip.setText(text);
 		}
+	}
+
+	function setPosition(latitude, longitude){
+
 	}
 
 	function ShowRecorderMap(){

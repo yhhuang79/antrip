@@ -210,6 +210,8 @@
 
 		initEmotionMap();
 
+		// a workaround for a flaw in the demo system (http://dev.jqueryui.com/ticket/4375), ignore!
+	//	$( "#dialog:ui-dialog" ).dialog( "destroy" );
 		//$("#sel_topbtnGroup").msDropDown({mainCSS:'dd2'});
 		
 		//alert($('#sym_topbtnGroup').css("background-image"));
@@ -486,8 +488,36 @@
 			}
 			
 			if( g_enablewithoutLogin==true || sid!=null || object.attr('name')==$("#ub_home").attr('name')){
-				TopBtChangeToDefaultImg(object.attr('name'));
-				MM_swapImage(object.attr('name'),'',im+object.attr('name')+'_r.png',1);
+				var isRecording = null;
+				if(window.antrip){
+					isRecording = window.antrip.getCookie("isRecording");
+				}
+				if(isRecording != null && sid!=null && object.attr('name')==$("#ub_home").attr('name')){
+					$("#dialog-confirm").dialog({
+						resizable: false,
+						height:200,
+						modal: true,
+						buttons: {
+							"Yes": function() {
+								$( this ).dialog( "close" );
+								startRecordTrip();
+								TopBtChangeToDefaultImg(object.attr('name'));
+								MM_swapImage(object.attr('name'),'',im+object.attr('name')+'_r.png',1);
+								OnlyShowADiv(object);
+								return;
+							},
+							"No": function() {
+								$( this ).dialog( "close" );
+								return;
+							}
+						}
+					});
+				}
+				else{
+					TopBtChangeToDefaultImg(object.attr('name'));
+					MM_swapImage(object.attr('name'),'',im+object.attr('name')+'_r.png',1);
+					OnlyShowADiv(object);
+				}
 			}
 			else if(sid==null){
 				if(msg==null&&(object.attr('name')!=$("#ub_download").attr('name'))&&(object.attr('name')!=$("#ub_about").attr('name'))){
@@ -495,8 +525,8 @@
 				}
 				TopBtChangeToDefaultImg($("#ub_home").attr('name'));
 				MM_swapImage($('#ub_home').attr('name'),'',im+$('#ub_home').attr('name')+'_r.png',1);
+				OnlyShowADiv(object);
 			}
-			OnlyShowADiv(object);
 	}
 
 	function scaleAnimation(object, scale){
@@ -652,8 +682,8 @@
 				$.cookie("sid", result.sid);
 			//	$.cookie("usrname", username);
 				if(window.antrip){
-					window.antrip.setCookie("usrname", username);
-					window.antrip.setCookie("sid", result.sid);
+					window.antrip.setCookie("usrname", username.toString());
+					window.antrip.setCookie("sid", result.sid.toString());
 				}
 				ChangeToUsedIcon($("#ub_trip_history"));
 			} else { 
