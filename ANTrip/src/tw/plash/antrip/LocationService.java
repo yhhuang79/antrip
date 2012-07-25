@@ -84,6 +84,7 @@ public class LocationService extends Service {
 			// if equal, that means two consecutive call to startService without
 			// interval change
 			if (period != oldPeriod) {
+				Log.e("getXPSLocation", "period= " + period);
 				_xps.getXPSLocation(auth, period, XPS.EXACT_ACCURACY, recorderCallback);
 				// if recording, update the timer
 				if (isRecording) {
@@ -236,6 +237,9 @@ public class LocationService extends Service {
 		return nullLocation;
 	}
 	
+	private final RecorderLocationCallback recorderCallback = new RecorderLocationCallback();
+	private final CheckinLocationCallback checkinCallback = new CheckinLocationCallback();
+	
 	public class CheckinLocationCallback implements WPSLocationCallback{
 		
 		@Override
@@ -303,8 +307,7 @@ public class LocationService extends Service {
 		}
 	}
 
-	private final RecorderLocationCallback recorderCallback = new RecorderLocationCallback();
-	private final CheckinLocationCallback checkinCallback = new CheckinLocationCallback();
+	
 	
 	private Location WPS2Location(WPSLocation l) {
 		Location location = new Location("skyhook");

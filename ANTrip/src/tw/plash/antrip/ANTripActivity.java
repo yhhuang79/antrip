@@ -1,20 +1,25 @@
 package tw.plash.antrip;
 
 import java.io.File;
+import java.util.PriorityQueue;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -39,6 +44,21 @@ public class ANTripActivity extends Activity {
 	
 	private SharedPreferences pref;
 	
+	private PriorityQueue<String> urlQueue;
+	private Handler mHandler;
+	private boolean canPostAgain;
+	
+	private BroadcastReceiver br = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Location loc = (Location) intent.getExtras().getParcelable("location");
+			String singleLocationUpdateURL = "javascript:setPosition('" + loc.getLatitude() + "', '" + loc.getLatitude() + "')";;
+			//push this location update to html
+//			mWebView.loadUrl(singleLocationUpdateURL);
+			queuedLoadURL(singleLocationUpdateURL);
+		}
+	};
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -52,6 +72,10 @@ public class ANTripActivity extends Activity {
 		mWebView = (WebView) findViewById(R.id.webview);
 		
 		previousMode = null;
+		
+		urlQueue = new PriorityQueue<String>();
+		mHandler = new Handler();
+		canPostAgain = true;
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		
@@ -98,7 +122,8 @@ public class ANTripActivity extends Activity {
 		//name the javascript interface "antrip"
 		mWebView.addJavascriptInterface(new jsinter(), "antrip");
 		//now after all the settings, load the html file
-		mWebView.loadUrl("file:///android_asset/index.html");
+//		mWebView.loadUrl("file:///android_asset/index.html");
+		queuedLoadURL("file:///android_asset/index.html");
 	}
 	
 	public interface JavaScriptCallback{}
@@ -167,6 +192,7 @@ public class ANTripActivity extends Activity {
 		 * 4: friend list screen
 		 */
 		public void setMode(int mode){
+			Log.e("setMode", "mode= " + mode);
 			switch(mode){
 			case 3:
 				//start location service
@@ -176,12 +202,14 @@ public class ANTripActivity extends Activity {
 			case 2:
 			case 4:
 			default:
-				//stop location service
-				if(pref.getString("isRecording", null) == null){
+				//stop location service if not recording
+				if(pref.getString("isRecording", null) != "true"){
 					stopService(new Intent(mContext, LocationService.class));
 				}
 				break;
 			}
+			// not sure if I need to know what the previous mode was, save it anyway
+			previousMode = mode;
 		}
 		
 		/**
@@ -250,6 +278,8 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 			startService(new Intent(mContext, LocationService.class).setAction("ACTION_CANCEL_CHECKIN"));
 		}
 		
+		
+		
 		/**
 		 * Replace cookie function in html, save the key-value pair to android preference
 		 * @param key
@@ -280,6 +310,36 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		}
 	}
 	
+	/**
+	 * to prevent frequent calls to the mWebView.loadURL() method, all calls are queued and executed every 400ms
+	 * @param url
+	 */
+	private void queuedLoadURL(String url){
+		urlQueue.offer(url);
+		//if already running, don't post again
+		if(canPostAgain){
+			mHandler.post(new Runnable() {
+				@Override
+				public void run() {
+					//now we're running, don't accept any more post calls
+					canPostAgain = false;
+					//get a url from queue
+					String url = urlQueue.poll();
+					Log.d("queuedLoadURL", "url= " + url);
+					mWebView.loadUrl(url);
+					//check if the queue is empty or not
+					if(urlQueue.peek() != null){
+						//queue not empty, post self with delay
+						mHandler.postDelayed(this, 400);
+					} else{
+						//queue empty, now accepting post calls
+						canPostAgain = true;
+					}
+				}
+			});
+		}
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -301,7 +361,8 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 			case RESULT_OK:
 				//need to grab the generated filename plus filepath and return it to html for display purpose
 				String imageURL = "javascript:showPicture('" + imageUri.getPath() + "')";
-				mWebView.loadUrl(imageURL);
+//				mWebView.loadUrl(imageURL);
+				queuedLoadURL(imageURL);
 Log.e("onActivityResult", "imageURL= " + imageURL);
 				if(cco!=null){
 					cco.setPicturePath(imageUri.getPath());
@@ -316,7 +377,8 @@ Log.e("onActivityResult", "imageURL= " + imageURL);
 			default:
 				//handle all exceptions
 				String noImageURL = "javascript:showPicture(-1)";
-				mWebView.loadUrl(noImageURL);
+//				mWebView.loadUrl(noImageURL);
+				queuedLoadURL(noImageURL);
 				break;
 			}
 		}
