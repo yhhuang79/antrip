@@ -64,71 +64,53 @@
 			}
 		});
 	}*/
-
+	function changeIconToRecoding(){
+			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
+			$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
+			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
+			$('#b_add_note').find('.tip').html("Now Recording...");
+	}
 
 	function startRecordTrip(){
 		var isRecording = null;
 		if(window.antrip){
 			isRecording = window.antrip.getCookie("isRecording");
 		}
-		//alert(isRecording);
-		//$('#RecordButton').attr('data-theme','b').removeClass('ui-btn-up-e').removeClass('ui-btn-hover-e').addClass('ui-btn-up-b').trigger('create');
 		if(isRecording == null){
-			//window.localStorage["isRecording"] = true;
 			var sid = null;
 			if(window.antrip){
 				isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
 			}
-			//var sid = $.cookie("sid"); 
 			g_tripPointArray = [];
 			$('#map_canvas').gmap('clear', 'Polyline');
 			$('#map_canvas').gmap('refresh');
-			/*$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetNewTripId.php',
-				data:{userid: sid},							 
-				type: 'GET', dataType: 'jsonp', cache: false,
-				success:function(result){*/
-					if(window.antrip){
-						var newTripId = window.antrip.startRecording();
-						//$.cookie("trip_id",newTripId);
-						window.antrip.setCookie("trip_id", newTripId.toString());
-						//tripRecorder = setInterval(function(){getLocation()},5000);
-					}
-					else{
-						alert("ANTrip APP Exception!");
-					}
-					$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
-					$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
-					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
-					$('#b_add_note').find('.tip').html("Now Recording...");
-					//alert("Start Recording Trip");
-					clockwiseInterval($('#b_add_note').find('.class_left_bt'));
-			//	}
-			//});
 
+			if(window.antrip){
+				var newTripId = window.antrip.startRecording();
+				window.antrip.setCookie("trip_id", newTripId.toString());
+			}
+			else{
+				alert("ANTrip APP Exception!");
+			}
+			changeIconToRecoding();
+			scaleInterval($('#b_add_note'));
+			//clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		} else {
-				if(window.antrip){
-					window.antrip.stopRecording();
-				}
-				else{
-					alert("ANTrip APP Exception!");
-				}
-				//$.cookie("isRecording", null);
-				//window.localStorage["isRecording"] = null;
-				//window.localStorage.removeItem("isRecording");
-				if(window.antrip){
-					isRecording = window.antrip.removeCookie("isRecording");
-				}
-				//alert(window.localStorage["isRecording"]);
-				//g_tripPointArray = [];
-				//$('#map_canvas').gmap('clear', 'Polyline');
-				//$('#map_canvas').gmap('refresh');
-				//clearInterval(tripRecorder);
-				$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
-				$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
-				$('#b_add_note').find('.tip').html("start recording");
-				//alert("Stop Recording Trip");
-				window.clearInterval(g_clockintval);
+			if(window.antrip){
+				window.antrip.stopRecording();
+			}
+			else{
+				alert("ANTrip APP Exception!");
+			}
+			if(window.antrip){
+				isRecording = window.antrip.removeCookie("isRecording");
+			}
+			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
+			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
+			$('#b_add_note').find('.tip').html("start recording");
+			scaleRestore($('#b_add_note'));
+			//window.clearInterval(g_clockintval);
 		}
 	}
 
@@ -166,7 +148,6 @@
 	}
 
 	function ShowRecorderMap(){
-	//	alert("ShowRecorderMap");
 		$('#map_canvas').css('margin-top','-690px');
 		var isRecording = null;
 		if(window.antrip){
@@ -177,11 +158,8 @@
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
 		}
 		else{
-			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
-			$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
-			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
-			$('#b_add_note').find('.tip').html("Now Recording...");
-			clockwiseInterval($('#b_add_note').find('.class_left_bt'));
+			changeIconToRecoding();
+			//clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		}
 		$('#sym_edit_bt_list').show();
 		$('#markplacewindow :input').removeAttr('disabled');
@@ -225,40 +203,30 @@
 	}
 
 	function CheckIn(){
-		//$('#map_canvas').gmap('destroy');
-	//	$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
 		if( $("#takepicture").attr("src")=="" && g_emotion_html==null && $("#placemarktext").val() ==""){
 			alert("please input something!");
 			return;
 		}
 
-			var self = $('#map_canvas').gmap('get','map');
-			//g_tripPointArray = new Array(0);
-			//g_tripMarkerArray = new Array(0);
-			//alert("start!");
-			var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-			g_tripPointArray.push(latlng);
+		var self = $('#map_canvas').gmap('get','map');
+		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+		g_tripPointArray.push(latlng);
 
-			//alert(g_current_latitude);
-			//alert(g_current_longitude);
-			var marker = new google.maps.Marker({
-				'position': latlng, 
-				'bounds': true,
-				'icon': im+"placemarker.png",
-				
-			});
+		var marker = new google.maps.Marker({
+			'position': latlng, 
+			'bounds': true,
+			'icon': im+"placemarker.png",
+			
+		});
 
-			google.maps.event.addListener(marker, 'click', function() {
-				var CheckInInfo ="<p><img src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
-				var infowindow = new google.maps.InfoWindow({content: CheckInInfo});
-				infowindow.open(self,marker);
-				//self.openInfoWindow({'content': CheckInInfo}, this);
-			});
-			marker.setMap(self);
-			//alert(g_emotion_html);
-			//alert($("#placemarktext").val());
-			//g_tripMarkerArray.push(marker);
-	//	}});
+		google.maps.event.addListener(marker, 'click', function() {
+			var CheckInInfo ="<p><img src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
+			var infowindow = new google.maps.InfoWindow({content: CheckInInfo});
+			infowindow.open(self,marker);
+			//self.openInfoWindow({'content': CheckInInfo}, this);
+		});
+		marker.setMap(self);
+
 		$('#map_canvas').gmap('refresh');
 
 		if(window.antrip){

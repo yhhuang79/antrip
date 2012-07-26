@@ -110,7 +110,7 @@
 					<span class="tip" id="open_trip_tip"></span>
 				</div>
 				<div id="b_seq_trip" class="class_left_bt">	
-					<img src="" id="img_seq_trip" name="img_seq_trip" class="class_left_bt" onClick="if(g_isForMobile==false){changeCursorToCut($(this));}else{openMarkplaceWindow();}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>				
+					<img src="" id="img_seq_trip" name="img_seq_trip" class="class_left_bt" onClick="if(g_isForMobile==false){changeCursorToCut($(this));}else{openMarkplaceWindow();}" onMouseOver="if($(this).attr('src')!=im+'MarkPlace_b.png'){rotateInterval($(this));}" onMouseOut="if($(this).attr('src')!=im+'MarkPlace_b.png'){stopRotateInterval($(this));}"></img>				
 					<span class="tip" id="seg_trip_tip"></span>
 				</div>
 				<div id="b_add_note" class="class_left_bt">	
