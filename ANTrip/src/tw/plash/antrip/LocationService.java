@@ -1,7 +1,11 @@
 package tw.plash.antrip;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.json.JSONObject;
 
 import android.app.Service;
 import android.content.Intent;
@@ -168,7 +172,7 @@ public class LocationService extends Service {
 	 * valid user id
 	 */
 	void setTimer() {
-		final String userid = pref.getString("uid", "");
+		final String userid = pref.getString("uid", null);
 		if (userid != null) {
 			mTimer = new Timer();
 			dh = new DBHelper128(getApplicationContext());
@@ -199,7 +203,7 @@ public class LocationService extends Service {
 		if (userid != null) {
 			mTimer = new Timer();
 			dh = new DBHelper128(getApplicationContext());
-			dh.createNewTripInfo(tid, userid);
+			dh.createNewTripInfo(userid, tid, new Timestamp(new Date().getTime()).toString());
 			mTimer.scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {

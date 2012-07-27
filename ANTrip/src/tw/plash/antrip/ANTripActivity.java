@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Locale;
 import java.util.PriorityQueue;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -30,7 +29,6 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 public class ANTripActivity extends Activity {
 	private Context mContext;
@@ -143,7 +141,7 @@ public class ANTripActivity extends Activity {
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
 		public String getLocalTripList(){
-			Toast.makeText(mContext, "getLocalTripList", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(mContext, "getLocalTripList", Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
 			
 			result = new GetLocalTripList(mContext).execute();
@@ -299,6 +297,22 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		
 		public String getLocale(){
 			return Locale.getDefault().getDisplayLanguage();
+		}
+		
+		public JSONObject getTripStats(){
+			return null;
+		}
+		
+		public void setTripName(String name){
+			//save trip name to DB
+			
+		}
+		
+		public void uploadTrip(String tripid){
+			startService(new Intent(mContext, UploadService.class)
+			.setAction("ACTION_UPLOAD_TRIP")
+			.putExtra("tripid", tripid)
+			.putExtra("userid", pref.getString("sid", null)));
 		}
 	}
 	
