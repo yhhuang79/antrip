@@ -129,9 +129,9 @@
 		  <div id="markplacewindow" class="class_mark_place class_fun_div">
 			<div class="content-primary" id="markplace_fn_content">	
 				<ul data-role="listview" id="markplace_fn_list">
-					<button style="width:480px;border:0" id="sym_takepicture" onClick="if(window.antrip){window.antrip.startCamera();}"><div style="width:480px;height:101px;background:url('images/s/takepicture.png') no-repeat "><img id='takepicture' src="" style="width:420px;height:95px;"></img></div></button>
+					<button style="width:480px;border:0" id="sym_takepicture" onClick="if(window.antrip){window.antrip.startCamera();}"><div id="takepicture_id" style="width:480px;height:101px;"><img id='takepicture' src="" style="width:420px;height:95px;"></img></div></button>
 					<button style="width:480px;border:0" onClick="$('#markplacewindow :input').attr('disabled', true);$('#emotion_compass').show();" id="sym_selectemotion">
-					<div id="emotion-sel" style="width:480px;height:101px;background:url('images/s/selectemotion.png') no-repeat "></div>
+					<div id="emotion-sel" style="width:480px;height:101px;"></div>
 					</button>
 					<button style="width:480px;border:0" id="sym_textarea"><div style="width:480px;height:200px;resize:none;background:url('images/s/typenotearea.png') no-repeat "><textarea id='placemarktext' style='width:90%;height:90%;' onChange="SetText(this.value);"></textarea></div></button>
 					<div style="width:400px;padding-left:80px;">
@@ -142,7 +142,7 @@
 			</div>
 		  </div>
 		 <div id="emotion_compass">
-			<img id="emotion-c" src="images/s/emotion-compass.png" class="class_mark_place"  usemap="#emotion-c" onMouseOver="" onMouseOut=""></img>
+			<img id="emotion-c" src="" class="class_mark_place"  usemap="#emotion-c" onMouseOver="" onMouseOut=""></img>
 			<map id="emotion-c_map" name="emotion-c">
 			<area shape="circle" name="bored" coords="144,245,24" href="#" />
 			<area shape="circle" name="sad" coords="176,296,23" href="#" />

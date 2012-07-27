@@ -14,5 +14,8 @@
 	$('#b_add_note').find('.tip').html(g_str_startrecording);
 	$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
+	$('#takepicture_id').css("background", url+takepic_img+") no-repeat");
+	$('#emotion-sel').css("background", url+selemotion_img+") no-repeat");
+	$('#emotion-c').attr("src", emocompass_img);
 	initEmotionMap();
 //-->

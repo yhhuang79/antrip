@@ -690,7 +690,7 @@
 		}
 		if(facebookid){
 			FB.logout(function(response) {
-				//$.cookie("facebookid", null);
+				$.cookie("facebookid", null);
 				if(window.antrip){
 					isRecording = window.antrip.removeCookie("facebookid");
 				}
@@ -741,7 +741,8 @@
 							success:function(result){
 								if(result.sid != "0"){ 
 									$.cookie("sid", result.sid);
-									$.mobile.changePage("#mainpage");
+									//$.mobile.changePage("#mainpage");
+									ChangeToUsedIcon($('#ub_trip_history'));
 								} else { 
 									$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookRegister.php',
 										data:{username: username, email: email, facebookid: facebookid},							 
@@ -751,7 +752,8 @@
 												var body = 'Reading Connect JS documentation';
 												FB.api('/me/feed', 'post', {body: body, link: 'http://antrip.plash.tw', message: 'ANTrip ¶³¤ô³~»x ¦n¦nª±!!!', picture: 'http://plash2.iis.sinica.edu.tw/antrip_icon.jpg'}, function(response) {});
 												$.cookie("sid", result.sid);
-												$.mobile.changePage("#mainpage");
+												//$.mobile.changePage("#mainpage");
+												ChangeToUsedIcon($('#ub_trip_history'));
 											}
 										}
 									});
@@ -772,7 +774,7 @@
 			sid = window.antrip.getCookie("sid");
 		}
 
-		var localresult;
+		var localresult=-1;
 		if(window.antrip){
 			localresult = window.antrip.getLocalTripList();
 		}
@@ -787,8 +789,8 @@
 				if(page==null){
 					page=1;
 				}
-				if((result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList.length==0) ){
-					var str_noTrip = "You have no Trip!";
+				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null|| localresult.tripInfoList.length==0) ){
+					var str_noTrip = g_str_notrip;
 					alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
