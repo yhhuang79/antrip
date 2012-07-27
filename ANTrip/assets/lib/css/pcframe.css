@@ -332,6 +332,10 @@
 		width:40%;
 	}
 
+	.class_fblogin_bt{
+		width:60%;
+	}
+
 	.class_prepage_bt, .class_nextpage_bt, .class_pretrip_bt, .class_nextrip_bt{
 		float:left;
 		width:20%;
@@ -389,5 +393,12 @@
 		padding-bottom:0px;
 		color:#fff;
 		display:block;
+	}
+
+	.ui-icon-facebook {
+		background-image: url+im+"facebook.png)";
+		background-repeat: no-repeat;
+		background-position: 0 50%;
+		background-size: 18px 18px;
 	}
 	

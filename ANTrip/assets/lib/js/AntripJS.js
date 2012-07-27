@@ -306,6 +306,7 @@
 		if(sid!=null){
 			$("#sym_loginarea").hide();
 			$(".class_login_bt").hide();
+			$(".class_fblogin_bt").hide();
 			$(".class_logout_bt").hide();
 			alert(g_str_logout);
 			Logout();
@@ -313,6 +314,7 @@
 		else{
 			$('#sym_loginarea').show();
 			$('.class_login_bt').show();
+			$(".class_fblogin_bt").show();
 			$('.class_logout_bt').hide();
 		}
 		$("#end_Text").show();
@@ -703,6 +705,63 @@
 		}
 		ChangeToUsedIcon($("#ub_home"));
 	}
+	window.fbAsyncInit = function() {
+		FB.init({
+		  appId      : '314048998686760', // App ID
+		  status     : true, // check login status
+		  cookie     : true, // enable cookies to allow the server to access the session
+		  xfbml      : true  // parse XFBML
+		});
+
+		// Additional initialization code here
+	};
+	  // Load the SDK Asynchronously
+	  (function(d){
+		 var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+		 if (d.getElementById(id)) {return;}
+		 js = d.createElement('script'); js.id = id; js.async = true;
+		 js.src = "//connect.facebook.net/en_US/all.js";
+		 ref.parentNode.insertBefore(js, ref);
+	   }(document));
+	   
+	   function LoginFacebook(){
+			FB.login(function(response) {
+				if (response.authResponse) {
+					FB.api('/me', function(response) {
+						var username = response.username.toString();
+						var email = response.email.toString();
+						var facebookid = response.id.toString();
+						$.cookie("facebookid", facebookid);
+						if(window.antrip){
+							window.antrip.setCookie("facebookid", facebookid);
+						}
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookLogin.php',
+							data:{email: email, facebookid: facebookid},							 
+							type: 'GET', dataType: 'jsonp', cache: false,
+							success:function(result){
+								if(result.sid != "0"){ 
+									$.cookie("sid", result.sid);
+									$.mobile.changePage("#mainpage");
+								} else { 
+									$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookRegister.php',
+										data:{username: username, email: email, facebookid: facebookid},							 
+										type: 'GET', dataType: 'json', cache: false,
+										success:function(result){
+											if(result.sid != "0"){ 
+												var body = 'Reading Connect JS documentation';
+												FB.api('/me/feed', 'post', {body: body, link: 'http://antrip.plash.tw', message: 'ANTrip ¶³¤ô³~»x ¦n¦nª±!!!', picture: 'http://plash2.iis.sinica.edu.tw/antrip_icon.jpg'}, function(response) {});
+												$.cookie("sid", result.sid);
+												$.mobile.changePage("#mainpage");
+											}
+										}
+									});
+								}
+							}
+						});
+					});
+				}
+			},{scope: 'email, publish_stream'});
+	   }
 	
 	// trip list
 	function ShowTripList(page){

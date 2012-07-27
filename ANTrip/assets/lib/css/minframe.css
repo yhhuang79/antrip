@@ -268,6 +268,10 @@
 		width:40%;
 	}
 
+	.class_fblogin_bt{
+		width:60%;
+	}
+
 	.class_takemarker_bt{
 		float:left;
 		width:40%;
@@ -331,4 +335,11 @@
 		padding-bottom:0px;
 		color:#fff;
 		display:none;
+	}
+
+	.ui-icon-facebook {
+		background-image: url+im+"facebook.png)";
+		background-repeat: no-repeat;
+		background-position: 0 50%;
+		background-size: 18px 18px;
 	}
