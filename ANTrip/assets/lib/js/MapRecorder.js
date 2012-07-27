@@ -204,7 +204,7 @@
 
 	function CheckIn(){
 		if( $("#takepicture").attr("src")=="" && g_emotion_html==null && $("#placemarktext").val() ==""){
-			alert("please input something!");
+			alert(g_str_inputsomething);
 			return;
 		}
 
@@ -241,17 +241,17 @@
 		var image = $('#emotion-c');
 		//var excitedTooltip = 'Excited!';
 		var Tooltip = {
-			bored: 'Bored',
-			sad: 'Sad',
-			sleepy: 'Sleepy',
-			peaceful: 'Peaceful',
-			relaxed: 'Relaxed',
-			pleased: 'Pleased',
-			happy: 'Happy',
-			excited: 'Excited',
-			angry: 'Angry',
-			nervous: 'Nervous',
-			calm: "Calm"
+			bored: g_str_bored,
+			sad: g_str_sad,
+			sleepy: g_str_sleepy,
+			peaceful: g_str_peaceful,
+			relaxed: g_str_relaxed,
+			pleased: g_str_pleased,
+			happy: g_str_happy,
+			excited: g_str_excited,
+			angry: g_str_angry,
+			nervous: g_str_nervous,
+			calm: g_str_calm
 		};
 		image.mapster(
 		{
@@ -268,7 +268,7 @@
 			onClick: function (e) {
 				//var newToolTip = defaultDipTooltip;
 				g_emotion_html = "<img width='72px' src='"+im+e.key+".png'>"+Tooltip[e.key]+"</img>";
-				$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;'>"+Tooltip[e.key]+"</img>");
+				$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;font-size:24px;'><font size=10 color='#e9e5da'><b>"+Tooltip[e.key]+"</b></font></img>");
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
 				if(window.antrip){

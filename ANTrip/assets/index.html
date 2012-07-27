@@ -16,9 +16,9 @@
 	<script type="text/javascript" src="lib/jq_includes/jquery.ui.draggable.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.ui.position.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.ui.dialog.js"></script>
-
 	<script type="text/JavaScript" src="lib/jq_includes/jquery-ui-1.8.21.custom.min.js"></script>
 	
+	<!--for google map javascript file-->
 	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.js"></script>
 	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.extensions.js"></script>
 	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.overlays.js"></script>
@@ -27,9 +27,13 @@
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery.mobile-1.1.0.min.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui-1.8.21.custom.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/minframe.css" />
+
+	<!--set bookmark logo picture-->
 	<link rel="shortcut icon" href="images/favicon.ico" />
 	<link rel="Bookmark" href="images/favicon.ico" type="image/x-icon" />
-	
+
+	<!--load javascript file created by antrip-->
+	<script type="text/javascript" src="lib/js/GetTripFromID.js"></script>
 	<script type="text/javascript" src="lib/js/AntripJS.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.cookie.js"></script>
 	<script type="text/javascript" src="lib/js/markerclusterer.js"></script>
@@ -46,12 +50,6 @@
 				<div id="banner_logo">	
 					<img src="" id="img_banner_logo" onMouseOver="scaleAnimation($(this),1.05)" onMouseOut="scaleRestore($(this))"></img>				</div>
 				   <div id="div_langOption"><span id="span_langtitle"></span><select id="langOption"></select></div>
-<!--				<select name="sel_topbtnGroup" data-theme="e" data-inline="true" data-native-menu="false" id="sel_topbtnGroup" style="width:72px;height:204px;" onchange="ChangeToUsedIcon($('#sel_topbtnGroup.value'))">
-				  <option name="ub_home" value="ub_home" selected="selected" title="images/s/ub_home.png"></option>
-				  <option  name="ub_trip_history" value="ub_trip_history" title="images/s/ub_trip_history.png"></option>
-				  <option name="ub_trip_management" value="ub_trip_management" title="images/s/ub_trip_management.png"></option>
-				  <option name="ub_friend" value="ub_friend" title="images/s/ub_friend.png"></option>
-				</select>-->
 				<div id="Symbol_ub_home" class="class_top_bt" >	
 					<img src="" class="class_top_bt" name="ub_home" id="ub_home" onClick="ChangeToUsedIcon($(this))" ></img>				
 				</div>
@@ -79,8 +77,8 @@
 		<div id="sym_loginarea">
 			<div data-role='fieldcontain'><fieldset data-role='controlgroup'><label for='textinput1'></label><input id='username' placeholder='ID' value='' type='text' /></fieldset></div><div data-role='fieldcontain'><fieldset data-role='controlgroup'><label for='textinput2'></label><input id='password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
 		</div>
-		<div class="class_login_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#login' class="login_bt_link">Login</a></div>
-		<div class="class_logout_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#logout' class="logout_bt_link">Logout</a></div>
+		<div class="class_login_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#login' class="login_bt_link"></a></div>
+		<div class="class_logout_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#logout' class="logout_bt_link"></a></div>
 	  </div>
 	  <!-- Symbol_trip_history - trip list start -->
       <div id="sym_triplist" class="class_fun_div">
@@ -127,29 +125,7 @@
 			 <div id="map_canvas">
 		
 			 </div>
-			 <div id="calculate_area" class="class_paper">
-				<img id="img_calculate_area" src=""></img>			
-			</div>
 		 </div>
-		 <div id="images_scroll" class="class_scroll">
-			 <a id="scroll_to_left" class="class_float_div" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-			 <div id="view_scroll">
-			 <div id="images_scroll_content">
-			<div id="images_scroll_content_1" class="class_float_div"></div>
-			<div id="images_scroll_content_2" class="class_float_div"></div>
-			<div id="images_scroll_content_3" class="class_float_div"></div>
-			<div id="images_scroll_content_4" class="class_float_div"></div>
-			<div id="images_scroll_content_5" class="class_float_div"></div>
-			<div id="images_scroll_content_6" class="class_float_div"></div>
-			<div id="images_scroll_content_7" class="class_float_div"></div>
-			</div>
-			</div>
-			<a id="scroll_to_right" class="class_float_div" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-		 </div>
-		 <div id="images_ants" class="class_ants">
-			<img id="img_ant" src="" onMouseOver="rotateInterval($(this),2);" onMouseOut="stopRotateInterval($(this));"></img>		 
-		 </div>
-
 		  <div id="markplacewindow" class="class_mark_place class_fun_div">
 			<div class="content-primary" id="markplace_fn_content">	
 				<ul data-role="listview" id="markplace_fn_list">
@@ -159,8 +135,8 @@
 					</button>
 					<button style="width:480px;border:0" id="sym_textarea"><div style="width:480px;height:200px;resize:none;background:url('images/s/typenotearea.png') no-repeat "><textarea id='placemarktext' style='width:90%;height:90%;' onChange="SetText(this.value);"></textarea></div></button>
 					<div style="width:400px;padding-left:80px;">
-					<div class="class_takemarker_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#takemarker' class="takemarker_bt_link" onClick="CheckIn();">check in</a></div>
-					<div class="class_takemarker_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#takemarker' class="takemarker_bt_link" onClick="openMarkplaceWindow();">cancel</a></div>
+					<div class="class_takemarker_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#takemarker' class="takemarker_bt_link" id="takemarker_checkin" onClick="CheckIn();"></a></div>
+					<div class="class_takemarker_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#takemarker' class="takemarker_bt_link" id="takemarker_cancel"  onClick="openMarkplaceWindow();"></a></div>
 					</div>
 				</ul>
 			</div>
@@ -203,6 +179,7 @@
 		<p></p><p align="left"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Recording now, stop and logout?</p>
 	</div>
 </body>
+<!--load javascript file that should be loaded in the end of html-->
 <script type="text/javascript" src="lib/jq_includes/jquery.imagemapster.js"></script>	
 <script type="text/javascript" src="lib/js/MapRecorder.js"></script>	
 <script type="text/javascript" src="lib/js/AntripJS.min.js"></script>
