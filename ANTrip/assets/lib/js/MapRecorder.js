@@ -96,7 +96,6 @@
 			}
 			changeIconToRecoding();
 		} else {
-			$.cookie("isRecording", null);
 			var tripname="";
 			$("#dialog-tripname").dialog('open');
 		}
@@ -113,6 +112,7 @@
 			modal: true,
 			buttons: {
 				"OK": function() {
+					$.cookie("isRecording", null);
 					if(window.antrip){
 						window.antrip.stopRecording(tripname);
 						isRecording = window.antrip.removeCookie("isRecording");
@@ -124,8 +124,15 @@
 					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
 					$('#b_add_note').find('.tip').html(g_str_startrecording);
 					scaleRestore($('#b_add_note'));
+					if(g_logoutbyIcon == true){
+						logoutbyIcon();
+					}
 					$( this ).dialog( "close" );
 				}
+			},
+			close: function() {
+				//alert('close');
+				$('#dialog').dialog('close');
 			}
 		});
 	}
@@ -141,11 +148,13 @@
 		g_current_latitude = latitude;
 		g_current_longitude =longitude;
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+		g_tripPointArray_2.push(latlng);
+		$('#map_canvas_2').gmap('destory');
 		$('#map_canvas_2').gmap({'center': latlng, 'zoom': g_zoom, 'callback': function(map) {
 				var self = this;
 				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 			//	if(isRecording != null){
-					g_tripPointArray_2.push(latlng);
+					//g_tripPointArray_2.push(latlng);
 					self.addShape('Polyline',{
 						'strokeColor': "#FF0000", 
 						'strokeOpacity': 0.8, 
@@ -161,6 +170,7 @@
 					map.panTo(latlng);
 				}
 		}});
+		$('#map_canvas_2').gmap('refresh');
 	}
 
 	function ShowRecorderMap(){

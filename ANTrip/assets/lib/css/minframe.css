@@ -234,7 +234,8 @@
 		width:100%;
 	}
 	.product {
-		padding:13px 0;
+		padding-top:10px;
+		padding-right:20px;
 		/*! background-color:#fff;
 		border:2px solid #555;
 		-webkit-border-radius: 3px;
@@ -243,12 +244,12 @@
 	}
 	.listview_image {
 		width:98px;
-		margin-top:10px;
-		margin-left:10px;
+		margin-top:5px;
+		margin-left:12px;
 	}
 	.listview_description {
 		text-align:right;
-		width:340px;
+		width:310px;
 	}
 	.grid .product {
 		padding:0px;

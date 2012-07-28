@@ -456,6 +456,8 @@
 		}
 	}
 
+	var g_logoutbyIcon = false;
+
 	function ChangeToUsedIcon(object, msg){
 			var sid = $.cookie("sid");
 			if(window.antrip){
@@ -475,6 +477,7 @@
 			
 			if( g_enablewithoutLogin==true || sid!=null || object.attr('name')==$("#ub_home").attr('name')){
 				var isRecording = null;
+				isRecording = $.cookie("isRecording");
 				if(window.antrip){
 					isRecording = window.antrip.getCookie("isRecording");
 				}
@@ -490,9 +493,7 @@
 							"Yes": function() {
 								$( this ).dialog( "close" );
 								startRecordTrip();
-								TopBtChangeToDefaultImg(object.attr('name'));
-								MM_swapImage(object.attr('name'),'',im+object.attr('name')+'_r.png',1);
-								OnlyShowADiv(object);
+								g_logoutbyIcon = true;
 								return;
 							},
 							"No": function() {
@@ -516,6 +517,14 @@
 				MM_swapImage($('#ub_home').attr('name'),'',im+$('#ub_home').attr('name')+'_r.png',1);
 				OnlyShowADiv(object);
 			}
+	}
+
+	function logoutbyIcon(){
+		TopBtChangeToDefaultImg($("#ub_home").attr('name'));
+		MM_swapImage($("#ub_home").attr('name'),'',im+$("#ub_home").attr('name')+'_r.png',1);
+		OnlyShowADiv($("#ub_home"));
+
+		g_logoutbyIcon = false;
 	}
 
 	function scaleAnimation(object, scale){

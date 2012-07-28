@@ -14,6 +14,10 @@
 	$('#b_add_note').find('.tip').html(g_str_startrecording);
 	$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
+	$('#logoutwhenrecord').html(g_str_logoutwhenrecord);
+	$('#typetripname').html(g_str_typetripname);
+	$('#tripinput1').html(g_str_tripname);
+
 	$('#takepicture_id').css("background", url+takepic_img+") no-repeat");
 	$('#emotion-sel').css("background", url+selemotion_img+") no-repeat");
 	$('#emotion-c').attr("src", emocompass_img);
