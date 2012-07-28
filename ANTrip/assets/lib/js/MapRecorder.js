@@ -187,12 +187,12 @@
 		//var isRecording = window.localStorage["isRecording"];
 		if(isRecording == null){
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
-			g_tripPointArray_2 = new Array(0);
-			g_tripMarkerArray_2 = new Array(0);
-			$('#map_canvas_2').gmap('destroy');
+		//	g_tripPointArray_2 = new Array(0);
+		//	g_tripMarkerArray_2 = new Array(0);
+		//	$('#map_canvas_2').gmap('destroy');
 			//alert("destory");
 			//var self = $('#map_canvas_2').gmap('get','map');
-			$('#map_canvas_2').gmap('watchPosition', function (position, status) {
+	/*		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
 				if ( status == 'OK' ) {
 					//alert(position.coords.latitude);
 					g_current_latitude = position.coords.latitude;
@@ -200,8 +200,8 @@
 					var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 					g_tripPointArray_2.push(latlng);
 					setPosition(g_current_latitude, g_current_longitude);
-				}
-			});
+				}*/
+		//	});
 		}
 		else{
 			changeIconToRecoding();
