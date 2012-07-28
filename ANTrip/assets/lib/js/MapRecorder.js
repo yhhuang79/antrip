@@ -165,6 +165,11 @@
 			height:260,
 			width: 400,
 			modal: true,
+			open: function (event, ui) {
+					$("button").css({
+						color: "#000000",
+					});
+				},
 			buttons: {
 				"OK": function() {
 					$.cookie("isRecording", null);

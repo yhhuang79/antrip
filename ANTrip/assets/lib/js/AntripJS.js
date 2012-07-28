@@ -495,6 +495,11 @@
 						draggable: false,
 						height:200,
 						modal: true,
+						open: function (event, ui) {
+								$("button").css({
+									color: "#000000",
+								});
+							},
 						buttons: {
 							"Yes": function() {
 								$( this ).dialog( "close" );
@@ -955,7 +960,7 @@
 				}
 				else{
 					$.each(result.friend_list, function(i,data){
-						div_data[i] ="<button class='class_friend_bt' style='background:rgba(255,255,255,0) url("+im+"friend_bk.png) 100% 100% no-repeat;'><li><a href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a></li></button>";
+						div_data[i] ="<button class='class_friend_bt' style='background:rgba(255,255,255,0) url("+im+"friend_bk.png) 100% 100% no-repeat;'><li><a href='#'><img src='" + data.image + "'/><h3 style='color:#000000;'>" + data.name  + "</h3><p></p></a></li></button>";
 					});
 					$("#friend_list").append(div_data.join('')).listview('refresh');
 					$("button","#friend_list" ).button();
@@ -963,7 +968,6 @@
 				//$.mobile.hidePageLoadingMsg();
 			}
 		});
-
 		$("#sym_friends").show();
 	}
 
