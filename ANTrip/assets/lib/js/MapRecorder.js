@@ -96,7 +96,7 @@
 			}
 			changeIconToRecoding();
 		} else {
-			var tripname="";
+			//var tripname="";
 			$("#dialog-tripname").dialog('open');
 		}
 	}
@@ -114,7 +114,7 @@
 				"OK": function() {
 					$.cookie("isRecording", null);
 					if(window.antrip){
-						window.antrip.stopRecording(tripname);
+						window.antrip.stopRecording($('#trip_name').val());
 						isRecording = window.antrip.removeCookie("isRecording");
 					}
 					else{
@@ -149,9 +149,11 @@
 		g_current_longitude =longitude;
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 		g_tripPointArray_2.push(latlng);
+		alert("set Position to point array:"+g_current_latitude+","+g_current_longitude);
 		$('#map_canvas_2').gmap('destory');
 		$('#map_canvas_2').gmap({'center': latlng, 'zoom': g_zoom, 'callback': function(map) {
 				var self = this;
+				alert("set Position to point array"+latitude+","+longitude);
 				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 			//	if(isRecording != null){
 					//g_tripPointArray_2.push(latlng);
@@ -163,7 +165,7 @@
 					});
 			//	}
 				if ( !self.get('markers').client ) {
-					//alert("addMarker2");
+					alert("addMarker");
 					self.addMarker({ 'id': 'client', 'position': latlng, 'bounds': true });
 				} else {
 					self.get('markers').client.setPosition(latlng);
