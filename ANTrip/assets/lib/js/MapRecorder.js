@@ -192,10 +192,9 @@
 				var checkinmarker =  new google.maps.Marker({ 
 					'position': latlng, 
 					'bounds': true,
-					'icon': "images/placemarker.png",
+					'icon': im+"placemarker.png",
 					map: self
 				});
-					g_emotion_html = "<img width='72px' src='"+im+e.key+".png'>"+Tooltip[e.key]+"</img>";
 				var infowindow = new google.maps.InfoWindow(
 				{ 
 					//'content': "<p><img src='"+im+e.key+".png' /></p><p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>"
