@@ -173,6 +173,7 @@
 				$("button").css({
 					color: "#000000",
 				});
+				$(".ui-dialog-titlebar-close").hide();
 			},
 			buttons: {
 				"OK": function() {
