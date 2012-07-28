@@ -737,7 +737,7 @@
 						var facebookid = response.id.toString();
 						$.cookie("facebookid", facebookid);
 						if(window.antrip){
-							window.antrip.setCookie("facebookid", facebookid);
+							window.antrip.setCookie("facebookid", facebookid.toString());
 						}
 						$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookLogin.php',
 							data:{email: email, facebookid: facebookid},							 
@@ -745,7 +745,9 @@
 							success:function(result){
 								if(result.sid != "0"){ 
 									$.cookie("sid", result.sid);
-									//$.mobile.changePage("#mainpage");
+									if(window.antrip){
+										window.antrip.setCookie("sid", result.sid.toString());
+									}
 									ChangeToUsedIcon($('#ub_trip_history'));
 								} else { 
 									$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookRegister.php',
@@ -756,7 +758,9 @@
 												var body = 'Reading Connect JS documentation';
 												FB.api('/me/feed', 'post', {body: body, link: 'http://antrip.plash.tw', message: 'ANTrip ¶³¤ô³~»x ¦n¦nª±!!!', picture: 'http://plash2.iis.sinica.edu.tw/antrip_icon.jpg'}, function(response) {});
 												$.cookie("sid", result.sid);
-												//$.mobile.changePage("#mainpage");
+												if(window.antrip){
+													window.antrip.setCookie("sid", result.sid.toString());
+												}
 												ChangeToUsedIcon($('#ub_trip_history'));
 											}
 										}
