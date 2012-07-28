@@ -296,7 +296,16 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		}
 		
 		public String getLocale(){
-			return Locale.getDefault().getDisplayLanguage();
+//			Log.e("locale/getDisplayLanguage", Locale.getDefault().getDisplayLanguage());
+//			Log.e("locale/getCountry", Locale.getDefault().getCountry());
+//			Log.e("locale/getDisplayCountry", Locale.getDefault().getDisplayCountry());
+//			Log.e("locale/getDisplayName", Locale.getDefault().getDisplayName());
+//			Log.e("locale/getDisplayVariant", Locale.getDefault().getDisplayVariant());
+//			Log.e("locale/getISO3Country", Locale.getDefault().getISO3Country());
+//			Log.e("locale/getISO3Language", Locale.getDefault().getISO3Language());
+//			Log.e("locale/getLanguage", Locale.getDefault().getLanguage());
+//			Log.e("locale/getVariant", Locale.getDefault().getVariant());
+			return Locale.getDefault().getLanguage();
 		}
 		
 		public JSONObject getTripStats(){
