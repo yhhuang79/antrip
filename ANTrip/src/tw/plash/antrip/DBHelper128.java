@@ -329,6 +329,10 @@ public class DBHelper128 {
 					
 					
 					
+					
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
 					return result;
 				} else{
 					if(!mCursor.isClosed()){
@@ -428,7 +432,9 @@ public class DBHelper128 {
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					CachedPoints cp = new CachedPoints(mCursor.getDouble(mCursor.getColumnIndex("latitude")), mCursor.getDouble(mCursor.getColumnIndex("longitude")));
-					mCursor.close();
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
 					return cp;
 				} else{
 					if(!mCursor.isClosed()){
@@ -469,7 +475,80 @@ public class DBHelper128 {
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
 					return tmp;
+				} else{
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
+			return null;
+		}
+	}
+	
+	/**
+	 * get a complete trip data wrapped in CheckInDataList styled JSONObject format
+	 * @param userid
+	 * @param tripid
+	 * @return CheckInDataList styled trip data JSONObject
+	 */
+	synchronized public JSONObject getOneTripData(String userid, String tripid){
+		if(db.isOpen()){
+			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null, null, "id ASC");
+			if(mCursor != null){
+				if(!mCursor.moveToFirst()){
+					JSONObject result = new JSONObject();
+					try {
+						result.put("userid", userid);
+						result.put("trip_id", tripid);
+						JSONArray cidl = new JSONArray();
+						do{
+							JSONObject tmp = new JSONObject();
+							//TODO need to ask yu-hsiang about the definition of our DB schema
+							tmp.put("lat", mCursor.getDouble(mCursor.getColumnIndex("latitude")));
+							tmp.put("lng", mCursor.getDouble(mCursor.getColumnIndex("longitude")));
+							tmp.put("timestamp", mCursor.getString(mCursor.getColumnIndex("timestamp")));
+							tmp.put("alt", mCursor.getString(mCursor.getColumnIndex("altitude")));
+							tmp.put("spd", mCursor.getString(mCursor.getColumnIndex("speed")));
+							tmp.put("bear", mCursor.getString(mCursor.getColumnIndex("bearing")));
+							tmp.put("accu", mCursor.getString(mCursor.getColumnIndex("accuracy")));
+							//empty jsonobject to put in check-in info
+							JSONObject checkin = new JSONObject();
+							if(mCursor.getString(mCursor.getColumnIndex("picture")) != null){
+								//picture exists! put it in
+								checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")));
+							} else if(mCursor.getString(mCursor.getColumnIndex("emotion")) != null){
+								//emotion exists! put it in
+								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndex("emotion")));
+							} else if(mCursor.getString(mCursor.getColumnIndex("note")) != null){
+								//message exists! put it in
+								checkin.put("message", mCursor.getString(mCursor.getColumnIndex("note")));
+							} else{
+								//no check-in info exists, set jsonobject to null
+								checkin = null;
+							}
+							if(checkin != null){
+								//only put in the check-in objecty if it is not null
+								tmp.put("CheckIn", checkin);
+							}
+							cidl.put(tmp);
+						} while(mCursor.moveToNext());
+						result.put("CheckInDataList", cidl);
+					} catch (JSONException e) {
+						e.printStackTrace();
+						result = null;
+					}
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return result;
 				} else{
 					if(!mCursor.isClosed()){
 						mCursor.close();
@@ -556,6 +635,7 @@ public class DBHelper128 {
 							list.put(tmp);
 						}while(mCursor.moveToNext());
 						//jsonarray all filled, put into result object
+						//TODO not finished yet...
 						result.put("", list);
 					} catch (JSONException e) {
 						e.printStackTrace();
@@ -563,6 +643,9 @@ public class DBHelper128 {
 						return null;
 					}
 					//all is well
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
 					return result;
 				} else{
 					//cursor is empty, close it

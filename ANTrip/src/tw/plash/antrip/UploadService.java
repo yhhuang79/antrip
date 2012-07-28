@@ -3,6 +3,7 @@ package tw.plash.antrip;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLEncoder;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,8 +67,6 @@ public class UploadService extends Service {
 			Log.e("uploadService", "old tripid= " + tid);
 			//give the task a dh to handle its own business with DB
 			new uploadThread().execute(tid, sid);
-		} else if (action.equals("")) {
-
 		} else {
 			stopSelf();
 		}
@@ -81,7 +80,9 @@ public class UploadService extends Service {
 	}
 
 	private class uploadThread extends AsyncTask<String, Integer, Void> {
-
+		
+		private boolean[] checkList = {false, false, false, false, false};
+		
 		@Override
 		protected void onPreExecute() {
 			super.onPreExecute();
@@ -106,7 +107,7 @@ public class UploadService extends Service {
 				//first, update trip info and data with the correct tripid
 				String newTripidUrl = "https://plash.iis.sinica.edu.tw:8080/GetNewTripId?userid=" + userid;
 				Log.e("newTripidUrl", newTripidUrl);
-				HttpGet getRequest = new HttpGet(newTripidUrl);
+				HttpGet getRequest = new HttpGet(URLEncoder.encode(newTripidUrl, "UTF-8"));
 				HttpResponse response = httpsClient.execute(getRequest);
 				Integer statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -125,6 +126,9 @@ public class UploadService extends Service {
 					//connection failed, abort
 					return null;
 				}
+				checkList[0] = true;
+				//XXX get new trip id done
+				
 				//to be reused later
 				getRequest = null;
 				response = null;
@@ -135,7 +139,7 @@ public class UploadService extends Service {
 				CachedPoints first = dh.getOnePoint(userid, newTripid, true);
 				String reGeoFirst = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + first.latitude + "," + first.longitude + "&sensor=true";
 				Log.e("reGeoFirst", reGeoFirst);
-				getRequest = new HttpGet(reGeoFirst);
+				getRequest = new HttpGet(URLEncoder.encode(reGeoFirst, "UTF-8"));
 				response = httpClient.execute(getRequest);
 				statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -160,6 +164,9 @@ public class UploadService extends Service {
 					dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
 					return null;
 				}
+				checkList[1] = true;
+				//XXX reverse-geocoding of starting address done
+				
 				//to be reused later
 				getRequest = null;
 				response = null;
@@ -167,7 +174,7 @@ public class UploadService extends Service {
 				CachedPoints last = dh.getOnePoint(userid, newTripid, false);
 				String reGeoLast = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + last.latitude + "," + last.longitude + "&sensor=true";
 				Log.e("reGeoLast", reGeoLast);
-				getRequest = new HttpGet(reGeoFirst);
+				getRequest = new HttpGet(URLEncoder.encode(reGeoLast, "UTF-8"));
 				response = httpClient.execute(getRequest);
 				statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -192,6 +199,9 @@ public class UploadService extends Service {
 					dh.insertEndaddr(userid, newTripid, "", "", "", "", "Address not available");
 					return null;
 				}
+				checkList[2] = true;
+				//XXX reverse-geocoding of ending address done
+				
 				//to be reused later
 				getRequest = null;
 				response = null;
@@ -214,7 +224,7 @@ public class UploadService extends Service {
 				+ "&et_addr_prt3=" + tripinfo.getString("et_addr_prt3")
 				+ "&et_addr_prt4=" + tripinfo.getString("et_addr_prt4")
 				+ "&et_addr_prt5=" + tripinfo.getString("et_addr_prt5");
-				getRequest = new HttpGet(inputtripinfo);
+				getRequest = new HttpGet(URLEncoder.encode(inputtripinfo, "UTF-8"));
 				response = httpsClient.execute(getRequest);
 				statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -222,6 +232,9 @@ public class UploadService extends Service {
 				} else{
 					return null;
 				}
+				checkList[3] = true;
+				//XXX input trip info done
+				
 				//release this
 				httpsClient = null;
 				//to be reused later
@@ -235,12 +248,10 @@ public class UploadService extends Service {
 				// the method to be used, with url
 				HttpPost postRequest = new HttpPost(uploadUrl);
 				//GET DATA FROM DB
-				
-				
-				
+				JSONObject data = dh.getOneTripData(userid, newTripid);
 				// pair our data with corresponding name
 				List<NameValuePair> param = new ArrayList<NameValuePair>();
-				param.add(new BasicNameValuePair("trip", "data"));
+				param.add(new BasicNameValuePair("trip", data.toString()));
 				// encode our data with UTF8
 				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(param,
 						HTTP.UTF_8);
@@ -264,6 +275,9 @@ public class UploadService extends Service {
 					// connection error
 					Log.e("connection error", "status code= " + statusCode);
 				}
+				checkList[4] = true;
+				//XXX input trip data done
+				
 				// close the connection
 				httpClient.getConnectionManager().shutdown();
 			} catch (IOException e) {
@@ -277,7 +291,9 @@ public class UploadService extends Service {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
-
+			for(boolean item : checkList){
+				Log.e("checkList", item?"good":"no good");
+			}
 		}
 	}
 

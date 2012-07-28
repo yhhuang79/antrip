@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.IntentFilter;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -51,9 +52,8 @@ public class ANTripActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Location loc = (Location) intent.getExtras().getParcelable("location");
-			String singleLocationUpdateURL = "javascript:setPosition('" + loc.getLatitude() + "', '" + loc.getLatitude() + "')";;
+			String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + "," + loc.getLongitude() + ")";;
 			//push this location update to html
-//			mWebView.loadUrl(singleLocationUpdateURL);
 			queuedLoadURL(singleLocationUpdateURL);
 		}
 	};
@@ -99,7 +99,7 @@ public class ANTripActivity extends Activity {
 					new AlertDialog.Builder(mContext)
 						.setCancelable(false)
 						.setMessage(message)
-						.setNeutralButton("clicky", new OnClickListener() {
+						.setNeutralButton((Locale.getDefault().getLanguage().equals("zh"))?"¦nªº":"Okay", new OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								//inform javascript the alert dialog is dismissed
@@ -167,8 +167,8 @@ public class ANTripActivity extends Activity {
 		/**
 		 * 
 		 */
-		public void stopRecording(){
-			startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING"));
+		public void stopRecording(String tripname){
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING").putExtra("tripname", tripname));
 		}
 		
 		/*
@@ -308,21 +308,22 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 			return Locale.getDefault().getLanguage();
 		}
 		
-		public JSONObject getTripStats(){
-			return null;
-		}
+//		public JSONObject getTripStats(){
+//			return null;
+//		}
 		
-		public void setTripName(String name){
-			//save trip name to DB
-			
-		}
+//		public void setTripName(String name){
+//			//save trip name to DB
+//			
+//		}
 		
-		public void uploadTrip(String tripid){
-			startService(new Intent(mContext, UploadService.class)
-			.setAction("ACTION_UPLOAD_TRIP")
-			.putExtra("tripid", tripid)
-			.putExtra("userid", pref.getString("sid", null)));
-		}
+		//TODO auto upload, no user interaction involved
+//		public void uploadTrip(String tripid){
+//			startService(new Intent(mContext, UploadService.class)
+//			.setAction("ACTION_UPLOAD_TRIP")
+//			.putExtra("tripid", tripid)
+//			.putExtra("userid", pref.getString("sid", null)));
+//		}
 	}
 	
 	/**
@@ -359,14 +360,15 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 	protected void onResume() {
 		super.onResume();
 		// need to notify location service to send location update
-		
+		IntentFilter filter = new IntentFilter("ACTION_LOCATION_SERVICE_UPDATE");
+		registerReceiver(br, filter);
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
 		// need to notify location service not to send location update
-		
+		unregisterReceiver(br);
 	}
 	
 	@Override
