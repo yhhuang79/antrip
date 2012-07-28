@@ -267,6 +267,7 @@
 		}
 		else{
 			changeIconToRecoding();
+			setPosition(g_current_latitude, g_current_longitude);
 			//clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		}
 		$('#sym_edit_bt_list').show();
@@ -315,10 +316,10 @@
 			return;
 		}
 		
-		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
+	/*	$('#map_canvas_2').gmap('watchPosition', function (position, status) {
 			if ( status == 'OK' ) {
 				g_current_latitude = position.coords.latitude;
-				g_current_longitude = position.coords.longitude;
+				g_current_longitude = position.coords.longitude;*/
 
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 				g_tripPointArray_2.push(latlng);
@@ -338,8 +339,8 @@
 					//self.openInfoWindow({'content': CheckInInfo}, this);
 				});
 				marker.setMap(self);
-			}
-		});
+		//	}
+	//	});
 
 		$('#map_canvas_2').gmap('refresh');
 
