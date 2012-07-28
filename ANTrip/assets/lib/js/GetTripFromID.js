@@ -1,8 +1,9 @@
 	var g_tripPointArray = null;
 	var g_tripMarkerArray = null;
 	function GetTripPointfromID(userid, trip_id){
-
 		$('#map_canvas').gmap('destroy');
+		//$('#map_canvas').gmap('clear', 'markers');
+		//$('#map_canvas').gmap('clear', 'Polyline');
 		$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
 			var self = this;
 			g_tripPointArray = new Array(0);

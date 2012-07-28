@@ -5,6 +5,20 @@
 	var g_emotion_html=null;
 	var g_tripPointArray_2 = new Array(0);
 	var g_tripMarkerArray_2 = new Array(0);
+
+	var emotionMapping = {	
+		1: "excited",
+		2: "happy",
+		3: "pleased",
+		4: "relaxed",
+		5: "peaceful",
+		6: "sleepy",
+		7: "sad",
+		8: "bored",
+		9: "nervous",
+		10: "angry",
+		11: "calm"
+	};
 	/*function getLocation(){
 		/*if (navigator.geolocation){
 			navigator.geolocation.getCurrentPosition(uploadPosition);
@@ -143,33 +157,83 @@
 		}
 	}
 
+	function syncPosition(result){
+		$('#map_canvas').gmap('clear', 'markers');
+		$('#map_canvas').gmap('clear', 'Polyline');
+		g_tripPointArray_2 = new Array(0);
+		g_tripMarkerArray_2 = new Array(0);
+		addPosition(result);
+	}
+
+	function addPosition(result){
+		var Tooltip = {	
+			excited: g_str_excited,
+			happy: g_str_happy,
+			pleased: g_str_pleased,
+			relaxed: g_str_relaxed,
+			peaceful: g_str_peaceful,
+			sleepy: g_str_sleepy,
+			sad: g_str_sad,
+			bored: g_str_bored,
+			nervous: g_str_nervous,
+			angry: g_str_angry,
+			calm: g_str_calm
+		};
+
+		var self =  $('#map_canvas_2').gmap('get','map');
+		$.each(result.CheckInDataList, function(i, point) {
+			g_current_latitude = point.lat.valueOf() / 1000000;
+			g_current_longitude = point.lng.valueOf() / 1000000;
+			var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+			self.setCenter(latlng);
+			self.setZoom(g_zoom);
+			g_tripPointArray.push(latlng);
+			if (typeof point.CheckIn != 'undefined'){
+				var checkinmarker =  new google.maps.Marker({ 
+					'position': latlng, 
+					'bounds': true,
+					'icon': "images/placemarker.png",
+					map: self
+				});
+					g_emotion_html = "<img width='72px' src='"+im+e.key+".png'>"+Tooltip[e.key]+"</img>";
+				var infowindow = new google.maps.InfoWindow(
+				{ 
+					//'content': "<p><img src='"+im+e.key+".png' /></p><p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>"
+					'content': "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>"
+					
+				});
+				google.maps.event.addListener(checkinmarker, 'click', function() {
+					infowindow.open(map,checkinmarker);
+				});		
+			
+				g_tripMarkerArray.push(placemarker);
+			} else {
+				var marker =  new google.maps.Marker({ 
+					'position': latlng, 
+					'bounds': true
+				});
+				var infowindow = new google.maps.InfoWindow(
+				{ 
+					'content': marker.timestamp
+				});
+				google.maps.event.addListener(marker, 'click', function() {
+					infowindow.open(map,marker);
+				});
+			}
+		});
+
+		$('#map_canvas_2').gmap('refresh');
+	}
+
 	function setPosition(latitude, longitude){
 		//$('#map_canvas').css('margin-top','-690px');
 		g_current_latitude = latitude;
 		g_current_longitude =longitude;
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-		g_tripPointArray_2.push(latlng);
-		//alert("set Position to point array:"+g_current_latitude+","+g_current_longitude);
-		//$('#map_canvas_2').gmap('destory');
 
 		var self =  $('#map_canvas_2').gmap('get','map');
 		self.setCenter(latlng);
 		self.setZoom(g_zoom);
-		//alert("set Position to point array"+latitude+","+longitude);
-
-		var shapePath = new google.maps.Polyline({
-				'strokeColor': "#FF0000", 
-				'strokeOpacity': 0.8, 
-				'strokeWeight': 2, 
-				'path': g_tripPointArray_2
-		});
-		shapePath.setMap(self);
-		 var marker = new google.maps.Marker({
-				'id': 'client',
-				position: latlng,
-				'bounds': true,
-				map: self
-		 });
 
 		$('#map_canvas_2').gmap('refresh');
 	}
@@ -291,19 +355,20 @@
 		//require("lib/jq_includes/jquery.imagemapster.js");
 		var image = $('#emotion-c');
 		//var excitedTooltip = 'Excited!';
-		var Tooltip = {
-			bored: g_str_bored,
-			sad: g_str_sad,
-			sleepy: g_str_sleepy,
-			peaceful: g_str_peaceful,
-			relaxed: g_str_relaxed,
-			pleased: g_str_pleased,
-			happy: g_str_happy,
+		var Tooltip = {	
 			excited: g_str_excited,
-			angry: g_str_angry,
+			happy: g_str_happy,
+			pleased: g_str_pleased,
+			relaxed: g_str_relaxed,
+			peaceful: g_str_peaceful,
+			sleepy: g_str_sleepy,
+			sad: g_str_sad,
+			bored: g_str_bored,
 			nervous: g_str_nervous,
+			angry: g_str_angry,
 			calm: g_str_calm
 		};
+
 		image.mapster(
 		{
 			fillOpacity: 0.4,
