@@ -496,6 +496,10 @@
 						height:200,
 						modal: true,
 						open: function (event, ui) {
+								$('.ui-dialog-buttonpane').css({
+									'background-image':url+im+"typenotearea.png)",
+									'background-position':"center center",
+								});
 								$("button").css({
 									color: "#000000",
 								});

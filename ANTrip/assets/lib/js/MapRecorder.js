@@ -166,10 +166,14 @@
 			width: 400,
 			modal: true,
 			open: function (event, ui) {
-					$("button").css({
-						color: "#000000",
-					});
-				},
+				$('.ui-dialog-buttonpane').css({
+					'background-image':url+im+"typenotearea.png)",
+					'background-position':"center center",
+				});
+				$("button").css({
+					color: "#000000",
+				});
+			},
 			buttons: {
 				"OK": function() {
 					$.cookie("isRecording", null);
