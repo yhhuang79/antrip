@@ -85,11 +85,11 @@
 			$.cookie("isRecording", true);
 			g_tripPointArray_2 = new Array(0);
 			g_tripMarkerArray_2 = new Array(0);
-			$('#map_canvas_2').gmap('destroy');
+			//$('#map_canvas_2').gmap('destroy');
 			if(window.antrip){
 				isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
-				window.antrip.setCookie("trip_id", window.antrip.startRecording());
+				window.antrip.setCookie("trip_id", window.antrip.startRecording().toString());
 			}
 			else{
 				alert("ANTrip APP Exception!");
@@ -149,29 +149,28 @@
 		g_current_longitude =longitude;
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 		g_tripPointArray_2.push(latlng);
-		alert("set Position to point array:"+g_current_latitude+","+g_current_longitude);
-		$('#map_canvas_2').gmap('destory');
-		$('#map_canvas_2').gmap({'center': latlng, 'zoom': g_zoom, 'callback': function(map) {
-				var self = this;
-				alert("set Position to point array"+latitude+","+longitude);
-				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
-			//	if(isRecording != null){
-					//g_tripPointArray_2.push(latlng);
-					self.addShape('Polyline',{
-						'strokeColor': "#FF0000", 
-						'strokeOpacity': 0.8, 
-						'strokeWeight': 2, 
-						'path': g_tripPointArray_2
-					});
-			//	}
-				if ( !self.get('markers').client ) {
-					alert("addMarker");
-					self.addMarker({ 'id': 'client', 'position': latlng, 'bounds': true });
-				} else {
-					self.get('markers').client.setPosition(latlng);
-					map.panTo(latlng);
-				}
-		}});
+		//alert("set Position to point array:"+g_current_latitude+","+g_current_longitude);
+		//$('#map_canvas_2').gmap('destory');
+
+		var self =  $('#map_canvas_2').gmap('get','map');
+		self.setCenter(latlng);
+		self.setZoom(g_zoom);
+		//alert("set Position to point array"+latitude+","+longitude);
+
+		var shapePath = new google.maps.Polyline({
+				'strokeColor': "#FF0000", 
+				'strokeOpacity': 0.8, 
+				'strokeWeight': 2, 
+				'path': g_tripPointArray_2
+		});
+		shapePath.setMap(self);
+		 var marker = new google.maps.Marker({
+				'id': 'client',
+				position: latlng,
+				'bounds': true,
+				map: self
+		 });
+
 		$('#map_canvas_2').gmap('refresh');
 	}
 
@@ -187,12 +186,12 @@
 		//var isRecording = window.localStorage["isRecording"];
 		if(isRecording == null){
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
-		//	g_tripPointArray_2 = new Array(0);
-		//	g_tripMarkerArray_2 = new Array(0);
-		//	$('#map_canvas_2').gmap('destroy');
+			g_tripPointArray_2 = new Array(0);
+			g_tripMarkerArray_2 = new Array(0);
+			//$('#map_canvas_2').gmap('destroy');
 			//alert("destory");
 			//var self = $('#map_canvas_2').gmap('get','map');
-	/*		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
+			$('#map_canvas_2').gmap('watchPosition', function (position, status) {
 				if ( status == 'OK' ) {
 					//alert(position.coords.latitude);
 					g_current_latitude = position.coords.latitude;
@@ -200,8 +199,8 @@
 					var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 					g_tripPointArray_2.push(latlng);
 					setPosition(g_current_latitude, g_current_longitude);
-				}*/
-		//	});
+				}
+			});
 		}
 		else{
 			changeIconToRecoding();
