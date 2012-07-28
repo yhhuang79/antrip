@@ -532,7 +532,7 @@
 	function  scaleInterval(object) {
 		var  param  =   object ;
 		scaleAnimation(param, g_scale);
-		intval=window.setInterval( function () { scaleAnimation(param, g_scale); } ,  1000 )
+		g_intval=window.setInterval( function () { scaleAnimation(param, g_scale); } ,  1000 )
 	}
 
 	function scaleRestore(object){
@@ -540,6 +540,7 @@
 			object.css('-webkit-transition-duration', '1s');
 			object.css('-webkit-transform','scale(1)');
 		}
+		window.clearInterval(g_intval);
 	}
 
 	//**<-- left buttons rotate animation -->**

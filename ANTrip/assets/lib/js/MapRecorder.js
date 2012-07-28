@@ -75,12 +75,14 @@
 
 	function startRecordTrip(){
 		var isRecording = null;
+		isRecording = $.cookie("isRecording");
 		if(window.antrip){
 			isRecording = window.antrip.getCookie("isRecording");
 		}
 		if(isRecording == null){
 			var sid = null;
-			sid = $.cookie("sid"); 
+			sid = $.cookie("sid");
+			$.cookie("isRecording", true);
 			g_tripPointArray_2 = new Array(0);
 			g_tripMarkerArray_2 = new Array(0);
 			$('#map_canvas_2').gmap('destroy');
@@ -96,6 +98,7 @@
 			
 			//clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		} else {
+			$.cookie("isRecording", null);
 			if(window.antrip){
 				window.antrip.stopRecording();
 				isRecording = window.antrip.removeCookie("isRecording");
@@ -107,7 +110,6 @@
 			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
 			$('#b_add_note').find('.tip').html(g_str_startrecording);
 			scaleRestore($('#b_add_note'));
-			//window.clearInterval(g_clockintval);
 		}
 	}
 
@@ -149,6 +151,7 @@
 		$('#map_canvas_2').show();
 		$('#map_canvas_2').css('margin-top','-690px');
 		var isRecording = null;
+		isRecording = $.cookie("isRecording");
 		if(window.antrip){
 			isRecording = window.antrip.getCookie("isRecording");
 		}
