@@ -5,6 +5,9 @@
 	var g_emotion_html=null;
 	var g_tripPointArray_2 = new Array(0);
 	var g_tripMarkerArray_2 = new Array(0);
+	var g_tripMarkerObjArray = new Array(0);
+
+	var g_mapPath = null;
 
 	var emotionMapping = {	
 		1: "excited",
@@ -78,13 +81,52 @@
 			}
 		});
 	}*/
+	var g_intval=null;
 	function changeIconToRecoding(){
+			//g_intval=window.setInterval( function () { addPoint(); } ,  10000 );
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace.png");
 			$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
 			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
 			//alert("Now Recording...");
 			$('#b_add_note').find('.tip').html(g_str_nowrecording);
 			scaleInterval($('#b_add_note'));
+	}
+
+	function addPoint(){
+		alert('addPoint');
+		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
+			if ( status == 'OK' ) {
+					alert('OK');
+					var self = $('#map_canvas_2').gmap('get','map');
+					g_current_latitude = position.coords.latitude;
+					g_current_longitude = position.coords.longitude;
+					var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+					g_tripPointArray_2.push(latlng);
+					var marker =  new google.maps.Marker({ 
+						'position': latlng, 
+						'bounds': true
+					});
+					var infowindow = new google.maps.InfoWindow(
+					{ 
+						'content': marker.timestamp
+					});
+					google.maps.event.addListener(marker, 'click', function() {
+						infowindow.open(self,marker);
+					});
+					marker.setMap(self);
+			}
+			$('#map_canvas_2').gmap('refresh');
+		});
+	}
+
+	function cleanGlobalArray(){
+		for(i=0;i<g_tripMarkerObjArray.length;i++){
+			g_tripMarkerObjArray[i].setMap(null);
+		}
+		g_tripPointArray_2 = new Array(0);
+		g_tripMarkerArray_2 = new Array(0);
+		g_tripMarkerObjArray = new Array(0);
+		g_emotion_html=null;
 	}
 
 	function startRecordTrip(){
@@ -97,9 +139,7 @@
 			var sid = null;
 			sid = $.cookie("sid");
 			$.cookie("isRecording", true);
-			g_tripPointArray_2 = new Array(0);
-			g_tripMarkerArray_2 = new Array(0);
-			//$('#map_canvas_2').gmap('destroy');
+			cleanGlobalArray();
 			if(window.antrip){
 				isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
@@ -117,19 +157,21 @@
 
 	function initTripNameDialog(){
 		$("#dialog-tripname").dialog({
+			//dialogClass: 'antripDialogStyle',
 			autoOpen: false,
 			bgiframe: false,
 			draggable: false,
 			resizable: false,
-			height:200,
+			height:260,
 			width: 400,
 			modal: true,
 			buttons: {
 				"OK": function() {
 					$.cookie("isRecording", null);
 					if(window.antrip){
+						//alert($('#trip_name').val());
 						window.antrip.stopRecording($('#trip_name').val());
-						isRecording = window.antrip.removeCookie("isRecording");
+						window.antrip.removeCookie("isRecording");
 					}
 					else{
 						alert("ANTrip APP Exception!");
@@ -138,6 +180,7 @@
 					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
 					$('#b_add_note').find('.tip').html(g_str_startrecording);
 					scaleRestore($('#b_add_note'));
+					//window.clearInterval(g_intval);
 					if(g_logoutbyIcon == true){
 						logoutbyIcon();
 					}
@@ -158,10 +201,7 @@
 	}
 
 	function syncPosition(result){
-		$('#map_canvas').gmap('clear', 'markers');
-		$('#map_canvas').gmap('clear', 'Polyline');
-		g_tripPointArray_2 = new Array(0);
-		g_tripMarkerArray_2 = new Array(0);
+		cleanGlobalArray();
 		addPosition(result);
 	}
 
@@ -187,7 +227,7 @@
 			var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 			self.setCenter(latlng);
 			self.setZoom(g_zoom);
-			g_tripPointArray.push(latlng);
+			g_tripPointArray_2.push(latlng);
 			if (typeof point.CheckIn != 'undefined'){
 				var checkinmarker =  new google.maps.Marker({ 
 					'position': latlng, 
@@ -202,10 +242,11 @@
 					
 				});
 				google.maps.event.addListener(checkinmarker, 'click', function() {
-					infowindow.open(map,checkinmarker);
+					infowindow.open(self,checkinmarker);
 				});		
-			
-				g_tripMarkerArray.push(placemarker);
+
+				//placemarker.setMap(self);	
+				g_tripMarkerArray_2.push(placemarker);
 			} else {
 				var marker =  new google.maps.Marker({ 
 					'position': latlng, 
@@ -216,16 +257,38 @@
 					'content': marker.timestamp
 				});
 				google.maps.event.addListener(marker, 'click', function() {
-					infowindow.open(map,marker);
+					infowindow.open(self,marker);
 				});
+
+				marker.setMap(self);
 			}
 		});
+		DrawLine();
 
 		$('#map_canvas_2').gmap('refresh');
 	}
 
+	function DrawLine(){
+		var self =  $('#map_canvas_2').gmap('get','map');
+		if(g_mapPath!=null)
+		{
+			g_mapPath.setMap(null);
+			g_mapPath = null;
+		}
+		g_mapPath = new google.maps.Polyline({
+			'strokeColor': "#FF0000", 
+			'strokeOpacity': 0.8, 
+			'strokeWeight': 4, 
+			'path': g_tripPointArray_2
+		});
+		g_mapPath.setMap(self);
+	}
+
 	function setPosition(latitude, longitude){
 		//$('#map_canvas').css('margin-top','-690px');
+		if(latitude==null || longitude==null ){
+			return;
+		}
 		g_current_latitude = latitude;
 		g_current_longitude =longitude;
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
@@ -245,31 +308,33 @@
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){
 			isRecording = window.antrip.getCookie("isRecording");
+			alert(isRecording);
 		}
 		//var isRecording = window.localStorage["isRecording"];
 		if(isRecording == null){
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
-			g_tripPointArray_2 = new Array(0);
-			g_tripMarkerArray_2 = new Array(0);
+			cleanGlobalArray();
 			//$('#map_canvas_2').gmap('destroy');
 			//alert("destory");
-			//var self = $('#map_canvas_2').gmap('get','map');
-			$('#map_canvas_2').gmap('watchPosition', function (position, status) {
-				if ( status == 'OK' ) {
-					//alert(position.coords.latitude);
-					g_current_latitude = position.coords.latitude;
-					g_current_longitude = position.coords.longitude;
-					var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-					g_tripPointArray_2.push(latlng);
-					setPosition(g_current_latitude, g_current_longitude);
-				}
-			});
 		}
 		else{
 			changeIconToRecoding();
-			setPosition(g_current_latitude, g_current_longitude);
+			//setPosition(g_current_latitude, g_current_longitude);
 			//clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		}
+		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
+			//var self =  $('#map_canvas_2').gmap('get','map');
+			if ( status == 'OK' ) {
+				//alert(position.coords.latitude);
+				g_current_latitude = position.coords.latitude;
+				g_current_longitude = position.coords.longitude;
+				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+				g_tripPointArray_2.push(latlng);
+				setPosition(g_current_latitude, g_current_longitude);
+			}
+		});
+		setPosition(g_current_latitude, g_current_longitude);
+
 		$('#sym_edit_bt_list').show();
 		$('#markplacewindow :input').removeAttr('disabled');
 		$('#emotion_compass').hide();
@@ -295,6 +360,7 @@
 			$("#placemarktext").attr("value","");
 			//document.getElementById("edit_display_area").disabled = true;
 			//document.getElementById("img_seq_trip").disabled = true;
+			g_emotion_html=null;
 			$('#markplacewindow').show();
 			$('#emotion_compass').hide();
 			if(window.antrip){
@@ -316,32 +382,44 @@
 			return;
 		}
 		
-	/*	$('#map_canvas_2').gmap('watchPosition', function (position, status) {
-			if ( status == 'OK' ) {
-				g_current_latitude = position.coords.latitude;
-				g_current_longitude = position.coords.longitude;*/
+		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+		g_tripPointArray_2.push(latlng);
+		g_tripMarkerArray_2.push(latlng);
 
-				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-				g_tripPointArray_2.push(latlng);
-				g_tripMarkerArray_2.push(latlng);
+		var marker = new google.maps.Marker({
+			'position': latlng, 
+			'bounds': true,
+			'icon': im+"placemarker.png",
+		});
 
-				var marker = new google.maps.Marker({
-					'position': latlng, 
-					'bounds': true,
-					'icon': im+"placemarker.png",
-				});
+		var self = $('#map_canvas_2').gmap('get','map');
+		var infoWindow = new google.maps.InfoWindow(); 
+		google.maps.event.addListener(marker, 'click', function() {
+			var CheckInInfo;
+			if($("#takepicture").attr("src")==""){
+				CheckInInfo ="<p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
+				if(g_emotion_html==null){
+					CheckInInfo ="<p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
+				}
+			}
+			else{
+				CheckInInfo ="<p><img height='120' src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
+			}
+			infoWindow.setContent(CheckInInfo);
+			if (infoWindow.getMap()==null){
+				infoWindow.open(self,marker);
+			}
+			else{
+				infoWindow.close();
+			}
+			//self.openInfoWindow({'content': CheckInInfo}, this);
+		});
+		marker.setMap(self);
+		setPosition(g_current_latitude, g_current_longitude);
 
-				var self = $('#map_canvas_2').gmap('get','map');
-				google.maps.event.addListener(marker, 'click', function() {
-					var CheckInInfo ="<p><img src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
-					var infowindow = new google.maps.InfoWindow({content: CheckInInfo});
-					infowindow.open(self,marker);
-					//self.openInfoWindow({'content': CheckInInfo}, this);
-				});
-				marker.setMap(self);
-		//	}
-	//	});
+		g_tripMarkerObjArray.push(marker);
 
+		DrawLine();
 		$('#map_canvas_2').gmap('refresh');
 
 		if(window.antrip){

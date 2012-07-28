@@ -218,7 +218,7 @@
 		//initNoteDialog();
 		initTripNameDialog();
 
-		$('#sym_topbtnGroup').show();
+		//$('#sym_topbtnGroup').show();
 	}
 
 	/*function inputNoteDialog(){
@@ -302,12 +302,13 @@
 			sid = window.antrip.getCookie("sid");
 		}
 		$('#sym_login').show();
+		$('#sym_topbtnGroup').hide();
 		if(sid!=null){
 			$("#sym_loginarea").hide();
 			$(".class_login_bt").hide();
 			$(".class_fblogin_bt").hide();
 			$(".class_logout_bt").hide();
-			alert(g_str_logout);
+			//alert(g_str_logout);
 			Logout();
 		}
 		else{
@@ -379,6 +380,7 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$('#sym_topbtnGroup').show();
 			$("#sym_triplist").show();
 			$("#sym_editpage").hide();
 			$('#markplacewindow').hide();
@@ -411,6 +413,7 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$('#sym_topbtnGroup').show();
 			g_page=1;
 			ShowTripList(g_page);
 			if(g_enableDebugMode==true)
@@ -432,6 +435,7 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$('#sym_topbtnGroup').show();
 			show_edit_div();
 			g_mode ="eTripDisplay";
 			if(g_trip==-1)
@@ -447,6 +451,7 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$('#sym_topbtnGroup').show();
 			showfriendList();
 
 			g_mode ="eFriendList";
@@ -487,6 +492,7 @@
 				if(isRecording != null && sid!=null && object.attr('name')==$("#ub_home").attr('name')){
 					$("#dialog-confirm").dialog({
 						resizable: false,
+						draggable: false,
 						height:200,
 						modal: true,
 						buttons: {
@@ -808,7 +814,7 @@
 				}
 				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null|| localresult.tripInfoList.length==0) ){
 					var str_noTrip = g_str_notrip;
-					alert(str_noTrip);
+					//alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
@@ -943,7 +949,7 @@
 			success:function(result){
 				if(result.friend_list.length==0){
 					var str_noFriend = g_str_nofriend;
-					alert(str_noFriend);
+					//alert(str_noFriend);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noFriend+"</b></div>";
 					$("#friend_list").append(appendcontent);
 				}

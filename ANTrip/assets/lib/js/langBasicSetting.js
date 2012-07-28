@@ -21,6 +21,25 @@
 	$('#takepicture_id').css("background", url+takepic_img+") no-repeat");
 	$('#emotion-sel').css("background", url+selemotion_img+") no-repeat");
 	$('#emotion-c').attr("src", emocompass_img);
+
+	var elements = $('#sym_takepicture');
+	elements.each(function() {
+		var element = $(this);
+		element.removeClass('ui-state-default');
+	});
+
+	elements = $('#sym_selectemotion');
+	elements.each(function() {
+		var element = $(this);
+		element.removeClass('ui-state-default');
+	});
+
+	elements = $('#sym_textarea');
+	elements.each(function() {
+		var element = $(this);
+		element.removeClass('ui-state-default');
+	});
+
 	initEmotionMap();
 
 	ChangeToUsedIcon($('#ub_trip_history'),false);
