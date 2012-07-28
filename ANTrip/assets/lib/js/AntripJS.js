@@ -138,7 +138,7 @@
 		//TAIWAN
 		//TRADITIONAL_CHINESE
 		g_lang = g_lang.toUpperCase();
-		if(g_lang=="CHINA" || g_lang=="CHINESE" || g_lang=="PRC" || g_lang=="SIMPLIFIED_CHINESE" || g_lang=="TAIWAN" || g_lang=="TRADITIONAL_CHINESE"){
+		if(g_lang=="ZH" ||g_lang=="CHINA" || g_lang=="CHINESE" || g_lang=="PRC" || g_lang=="SIMPLIFIED_CHINESE" || g_lang=="TAIWAN" || g_lang=="TRADITIONAL_CHINESE"){
 			//require("lib/lang/lang_Chinese.js");
 			loadjscssfile("lib/lang/lang_Chinese.js", "js");
 		//	throw new Error("loaded lang_Chinese.js");
@@ -209,8 +209,6 @@
 		MM_preloadImages(trip_m_img);
 
 		$("#sym_triplist").hide();
-
-		ChangeToUsedIcon($('#ub_trip_history'),false);
 
 		//ChangeToUsedIcon($('#ub_home'));
 		$('#body').css("background-image", url+back_img+")");
@@ -435,7 +433,10 @@
 			});
 			show_edit_div();
 
-			ShowRecorderMap();
+			if(g_trip==-1)
+			{
+				ShowRecorderMap();
+			}
 			$("#end_Text").hide();
 
 			g_mode ="eTripDisplay";
@@ -477,6 +478,9 @@
 				var isRecording = null;
 				if(window.antrip){
 					isRecording = window.antrip.getCookie("isRecording");
+				}
+				if(object.attr('name')==$("#ub_trip_management").attr('name')){
+					g_trip=-1;
 				}
 				if(isRecording != null && sid!=null && object.attr('name')==$("#ub_home").attr('name')){
 					$("#dialog-confirm").dialog({
@@ -944,7 +948,12 @@
 		$("#sym_friends").show();
 	}
 
+	var g_showtripmap = false;
+
 	function ShowTripMapfromID(userid, trip_id){
+		g_showtripmap = true;
+		$('#map_canvas').show();
+		$('#map_canvas_2').hide();
 		GetTripPointfromID(userid, trip_id);
 		g_trip=trip_id;
 	}

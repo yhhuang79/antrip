@@ -1,6 +1,7 @@
 	var g_tripPointArray = null;
 	var g_tripMarkerArray = null;
 	function GetTripPointfromID(userid, trip_id){
+
 		$('#map_canvas').gmap('destroy');
 		$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
 			var self = this;
@@ -11,6 +12,14 @@
 			data:{userid: sid, trip_id: trip_id},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
+				//alert(g_showtripmap);
+				if(g_showtripmap==false){
+					return;
+				}
+				else{
+					g_showtripmap = false;
+				}
+				//alert("addMarker1");
 				$.each(result.CheckInDataList, function(i, point) {
 					var lat = point.lat.valueOf() / 1000000;
 					var lng = point.lng.valueOf() / 1000000;
@@ -45,4 +54,6 @@
 				$('#map_canvas').gmap('refresh');
 			}});				
 		}});
+
+		
 	}

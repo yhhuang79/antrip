@@ -76,7 +76,7 @@
 		width: 400px;
 		font-weight:normal;
 	}
-	#map_canvas{
+	#map_canvas, #map_canvas_2{
 		float:left;
 		position: relative;
 		margin-top:-690px;

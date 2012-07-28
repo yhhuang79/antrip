@@ -18,4 +18,6 @@
 	$('#emotion-sel').css("background", url+selemotion_img+") no-repeat");
 	$('#emotion-c').attr("src", emocompass_img);
 	initEmotionMap();
+
+	ChangeToUsedIcon($('#ub_trip_history'),false);
 //-->
