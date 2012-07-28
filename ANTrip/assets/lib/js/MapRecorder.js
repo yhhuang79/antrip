@@ -95,22 +95,39 @@
 				alert("ANTrip APP Exception!");
 			}
 			changeIconToRecoding();
-			
-			//clockwiseInterval($('#b_add_note').find('.class_left_bt'));
 		} else {
 			$.cookie("isRecording", null);
-			if(window.antrip){
-				window.antrip.stopRecording();
-				isRecording = window.antrip.removeCookie("isRecording");
-			}
-			else{
-				alert("ANTrip APP Exception!");
-			}
-			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
-			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
-			$('#b_add_note').find('.tip').html(g_str_startrecording);
-			scaleRestore($('#b_add_note'));
+			var tripname="";
+			$("#dialog-tripname").dialog('open');
 		}
+	}
+
+	function initTripNameDialog(){
+		$("#dialog-tripname").dialog({
+			autoOpen: false,
+			bgiframe: false,
+			draggable: false,
+			resizable: false,
+			height:200,
+			width: 400,
+			modal: true,
+			buttons: {
+				"OK": function() {
+					if(window.antrip){
+						window.antrip.stopRecording(tripname);
+						isRecording = window.antrip.removeCookie("isRecording");
+					}
+					else{
+						alert("ANTrip APP Exception!");
+					}
+					$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
+					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
+					$('#b_add_note').find('.tip').html(g_str_startrecording);
+					scaleRestore($('#b_add_note'));
+					$( this ).dialog( "close" );
+				}
+			}
+		});
 	}
 
 	function SetText(text){

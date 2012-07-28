@@ -57,7 +57,7 @@
 	var g_enableDebugMode = false;
 	var g_enablewithoutLogin=false;
 	//set default language to Chinese
-	var g_lang="CHINESE";
+	var g_lang="English";
 	var g_ready=false;
 
 	var g_eMode={'eHome':1,'eTripList':2,'eTripDisplay':3,'eFriendList':4};
@@ -216,11 +216,12 @@
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
 		//initNoteDialog();
+		initTripNameDialog();
 
 		$('#sym_topbtnGroup').show();
 	}
 
-	function inputNoteDialog(){
+	/*function inputNoteDialog(){
 		var data="<p class=\"validateTips\">"+g_str_tripnotedes+"</p><textarea id='notetextarea'  class=\"text ui-widget-content ui-corner-all\" style=\"width:350px;height:300px;resize:none;\"></textarea>"; 
 		$('#dialog').html( data );
 		$("#dialog").dialog({
@@ -260,7 +261,7 @@
 					//$("#sym_triplist_in_open_dialog").dialog('close');
 				}
 			});
-	}
+	}*/
 
 	function initNoteDialog(){
 
@@ -432,17 +433,15 @@
 				$(this).hide();
 			});
 			show_edit_div();
-
+			g_mode ="eTripDisplay";
 			if(g_trip==-1)
 			{
 				ShowRecorderMap();
+				if(window.antrip){
+					window.antrip.setMode(g_eMode[g_mode]);
+				}
 			}
 			$("#end_Text").hide();
-
-			g_mode ="eTripDisplay";
-			if(window.antrip){
-				window.antrip.setMode(g_eMode[g_mode]);
-			}
 		}
 		else if((object.attr('name')==$("#ub_friend").attr('name'))){
 			$('div[class*=class_fun_div]').each(function() {
@@ -536,10 +535,10 @@
 	}
 
 	function scaleRestore(object){
-		if(object.attr('src')!='images/'+object.attr('name')+'_r.png'){
+	//	if(object.attr('src')!='images/'+object.attr('name')+'_r.png'){
 			object.css('-webkit-transition-duration', '1s');
 			object.css('-webkit-transform','scale(1)');
-		}
+	//	}
 		window.clearInterval(g_intval);
 	}
 

@@ -7,6 +7,7 @@
 		background-position:left bottom;
 		background-attachment:fixed;
 		width: 100%;
+		font-size:20px;
 	}
 
 	#body.cutMode { 
@@ -224,6 +225,11 @@
 	#products,.product,.wrapper,.listview_image,.listview_description {
 		float:left;
 	}
+
+	.listview_description{
+		margin-right: 0px;
+	}
+
 	#products,.product {
 		width:100%;
 	}
@@ -271,7 +277,7 @@
 
 	.class_fblogin_bt{
 		font-size:24px;
-		width:60%;
+		width:40%;
 	}
 
 	.class_takemarker_bt{
