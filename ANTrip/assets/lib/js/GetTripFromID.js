@@ -1,6 +1,11 @@
 	var g_tripPointArray = null;
 	var g_tripMarkerArray = null;
 	function GetTripPointfromID(userid, trip_id){
+	//	$('#ub_download').css("display","none");
+	//	$('#ub_download').css("z-index", "9999");
+		$("#overlay").css("display","block");
+		$("#overlay").html(g_str_loading);
+	//	$('#ub_download').css("display","block");
 		$('#map_canvas').gmap('destroy');
 		//$('#map_canvas').gmap('clear', 'markers');
 		//$('#map_canvas').gmap('clear', 'Polyline');
@@ -53,7 +58,10 @@
 					'path': g_tripPointArray
 				});
 				$('#map_canvas').gmap('refresh');
-			}});				
+				$("#overlay").css("display","none");
+				$("#overlay").html("");
+			}
+			});				
 		}});
 
 		

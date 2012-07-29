@@ -278,6 +278,7 @@
 
 					marker.setMap(self);
 				}
+//				$("#overlay").css("display","none");
 			}
 		});
 		DrawLine();
@@ -324,6 +325,8 @@
 		});
 
 		g_currentmarker.setMap(self);
+		$("#overlay").css("display","none");
+		$("#overlay").html("");
 		//g_tripMarkerObjArray.push(g_currentmarker);
 
 		$('#map_canvas_2').gmap('refresh');
@@ -333,6 +336,8 @@
 		$('#map_canvas').hide();
 		$('#map_canvas_2').show();
 		$('#map_canvas_2').css('margin-top','-690px');
+		$("#overlay").css("display","block");
+		$("#overlay").html(g_str_loading);
 		var isRecording = null;
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){

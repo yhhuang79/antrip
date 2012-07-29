@@ -219,7 +219,7 @@
 		initTripNameDialog();
 		//initScrollTopBtn();
 
-		var overlay = jQuery('<div id="overlay"> </div>');
+		var overlay = jQuery('<div valign=center id="overlay"></div>');
 		overlay.appendTo(document.body)
 		$("#overlay").css("display","none");
 
@@ -850,6 +850,8 @@
 			localresult = eval("("+window.antrip.getLocalTripList()+")");
 		}
 
+		$("#overlay").css("display","block");
+		$("#overlay").html(g_str_loading);
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
 			data:{userid: sid},
 			type: 'GET', dataType: 'jsonp', cache: false,
@@ -910,6 +912,8 @@
 						$("button","div[id*=products]" ).button();
 					}
 				}
+				$("#overlay").css("display","none");
+				$("#overlay").html("");
 			}
 		});
 	}
@@ -933,6 +937,8 @@
 					//alert(g_startLatLng);
 //					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 					var index=0;
+					$("#overlay").css("display","block");
+					$("#overlay").html(g_str_loading);
 					$.each(localtripdata.CheckInDataList, function(i, point) {
 						//alert(point.lat);
 						if(index>localtripdata.CheckInDataList.length){
@@ -972,6 +978,8 @@
 						}
 						index++;
 					});
+					$("#overlay").css("display","none");
+					$("#overlay").html("");
 				}});
 			}
 		}
@@ -1059,6 +1067,8 @@
 		}
 		$("#friend_list").html("");
 		var div_data = [];
+		$("#overlay").css("display","block");
+		$("#overlay").html(g_str_loading);	
 		//$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetFriendList.php',
 			data:{sid : sid},
@@ -1077,7 +1087,8 @@
 					$("#friend_list").append(div_data.join('')).listview('refresh');
 					$("button","#friend_list" ).button();
 				}
-				//$.mobile.hidePageLoadingMsg();
+				$("#overlay").css("display","none");
+				$("#overlay").html("");
 			}
 		});
 		$("#sym_friends").show();
