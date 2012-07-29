@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Service;
@@ -34,14 +36,18 @@ public class LocationService extends Service {
 	 * recording related
 	 */
 	private boolean isRecording;
+	private boolean startNewTrip = false;
 	private Location recorderLocationBuffer = null;
 	private Location nullLocation;
 	private DBHelper128 dh;
 	private Timer mTimer;
+	private String currentTid = null;
+	private String currentSid = null;
+	private TripStats stats = null;
 	/**
 	 * generic
 	 */
-	
+
 	private XPS _xps;
 	private WPSAuthentication auth;
 	private SharedPreferences pref;
@@ -61,7 +67,11 @@ public class LocationService extends Service {
 
 		isRecording = false;
 		checkinCallbackCanCallAgain = true;
-		
+
+		pref = PreferenceManager
+				.getDefaultSharedPreferences(getApplicationContext());
+		currentSid = pref.getString("sid", "-1");
+
 		_xps = new XPS(getApplicationContext());
 		auth = new WPSAuthentication("plash", "iis.sinica.edu.tw");
 
@@ -74,25 +84,25 @@ public class LocationService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.e("LocationService", "onStartCommand called");
 
-		pref = PreferenceManager
-				.getDefaultSharedPreferences(getApplicationContext());
 		// period will have value after this line
 		oldPeriodSEC = periodSEC;
 		periodSEC = Integer.valueOf(pref.getString("timeInterval", "30"));
 		periodMS = (long) (periodSEC * 1000);
 		Log.e("locationService", "period= " + periodSEC + " seconds");
 		Log.e("locationService", "period= " + periodMS + " milliseconds");
-		
+
 		String action = intent.getAction();
 		if (action == null) {
 			// does not accept startService call without any given ACTION
 			errorStopService(error_no_action);
+
 		} else if (action.equals("ACTION_START_SERVICE")) {
 			// if equal, that means two consecutive call to startService without
 			// interval change
 			if (periodSEC != oldPeriodSEC) {
 				Log.e("getXPSLocation", "period= " + periodSEC);
-				_xps.getXPSLocation(auth, periodSEC, XPS.EXACT_ACCURACY, recorderCallback);
+				_xps.getXPSLocation(auth, periodSEC, XPS.EXACT_ACCURACY,
+						recorderCallback);
 				// if recording, update the timer
 				if (isRecording) {
 					stopTimer();
@@ -102,45 +112,90 @@ public class LocationService extends Service {
 		} else if (action.equals("ACTION_START_RECORDING")) {
 			// start saving location updates into DB
 			// create a unique key as local trip id
-			Long tid = intent.getExtras().getLong("tid");
-			//the insert action is already done by html using setcookie
-//			pref.edit().putLong("tid", tid).commit();
+			currentTid = intent.getExtras().getString("tid");
+			// the insert action is already done by html using setcookie
+			// pref.edit().putLong("tid", tid).commit();
 			// save the unique key to preference so mapview can access it
-			Log.e("LocationService", "start recording, tid= " + tid);
+			Log.e("LocationService", "start recording, tid= " + currentTid);
 			// start a runnable in handler to fetch location every interval and
 			// save it to DB
-			setTimer(tid);
+			startNewTrip = true;
+			stats = new TripStats();
+			setTimer();
 
 			isRecording = true;
 
 		} else if (action.equals("ACTION_STOP_RECORDING")) {
-			
+
 			isRecording = false;
-			
+
 			Log.e("LocationService", "stop recording");
+
+			// finalize trip stats and save to DB
+			String name = intent.getExtras().getString("tripname");
+			Log.e("locationService", "tripname= " + name);
+			dh.insertEndInfo(currentSid, currentTid, name, new Timestamp(
+					new Date().getTime()).toString(), stats.getLength());
 			// stop saving location updates into DB
 			// kill the runnable that's been saving location to DB
 			stopTimer();
+
 			// remove all the related preference entries
+			stats = null;
+			currentTid = null;
 			pref.edit().remove("trip_id").commit();
-			
+
 		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
-			
+
 			Log.e("LocationService", "get check-in location");
 			// request one location for picture geotagging
-			if(checkinCallbackCanCallAgain){
+			if (checkinCallbackCanCallAgain) {
 				_xps.getLocation(auth, null, checkinCallback);
 				checkinCallbackCanCallAgain = false;
-			} else{
-				//try again later
+			} else {
+				// try again later
 			}
-			
+
 		} else if (action.equals("ACTION_SAVE_CCO")) {
 			Log.e("LocationService", "save cco");
 			// save check-in data to DB
-			cco = (CandidateCheckinObject) intent.getExtras().getSerializable("cco");
+			cco = (CandidateCheckinObject) intent.getExtras().getSerializable(
+					"cco");
+			// XXX cco is received, broadcast this location + cco in
+			// checkInDataList format, also save it to DB
+			dh.insert(checkinLocationBuffer, currentSid, currentTid, cco);
+			//the object to be returned
+			JSONObject addpos = new JSONObject();
+			try {
+				//the ckeckInDataList jsonarray
+				JSONArray array = new JSONArray();
+				//the object within jsonarray
+				JSONObject tmp = new JSONObject();
+				tmp.put("lat", checkinLocationBuffer.getLatitude());
+				tmp.put("lng", checkinLocationBuffer.getLongitude());
+				tmp.put("timestamp", checkinLocationBuffer.getTime());
+				//the object within one entry of data
+				JSONObject checkin = new JSONObject();
+				if(cco.getPicturePath() != null){
+					checkin.put("picture_uri", cco.getPicturePath());
+				}
+				if(cco.getEmotionID() != null){
+					checkin.put("emotion", cco.getEmotionID());
+				}
+				if(cco.getCheckinText() != null){
+					checkin.put("message", cco.getCheckinText());
+				}
+				tmp.put("CheckIn", checkin);
+				array.put(tmp);
+				addpos.put("CheckInDataList", array);
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			Intent ccoIntent = new Intent("ACTION_LOCATION_SERVICE_ADD_POSITION");
+			ccoIntent.putExtra("location", addpos.toString());
+			sendBroadcast(ccoIntent);
 			
-		} else if (action.equals("ACTION_CANCEL_CHECKIN")){
+		} else if (action.equals("ACTION_CANCEL_CHECKIN")) {
 			Log.e("LocationService", "cancel check-in");
 			// clear temp check-in location object
 			checkinLocationBuffer = null;
@@ -161,35 +216,9 @@ public class LocationService extends Service {
 			mTimer.purge();
 			mTimer = null;
 		}
-		if(dh != null){
+		if (dh != null) {
 			dh.closeDB();
 			dh = null;
-		}
-	}
-
-	/**
-	 * Set timer task with the saved user id, terminate process if there is no
-	 * valid user id
-	 */
-	void setTimer() {
-		final String userid = pref.getString("uid", null);
-		if (userid != null) {
-			mTimer = new Timer();
-			dh = new DBHelper128(getApplicationContext());
-			mTimer.scheduleAtFixedRate(new TimerTask() {
-				@Override
-				public void run() {
-					// save to DB
-					if (recorderLocationBuffer == null) {
-						// don't want to input null stuff into database
-						recorderLocationBuffer = getCurrentNullLocation();
-					}
-//					dh.insert(recorderLocationBuffer, userid, Long.valueOf(pref.getString("trip_id", "-1")));
-					Log.e("locationService", "mock DB insert");
-				}
-			}, 0, periodMS);
-		} else {
-			errorStopService(error_no_uid);
 		}
 	}
 
@@ -198,12 +227,17 @@ public class LocationService extends Service {
 	 * 
 	 * @param tid
 	 */
-	void setTimer(Long tid) {
-		final String userid = pref.getString("sid", null);
-		if (userid != null) {
+	void setTimer() {
+		// final String userid = pref.getString("sid", null);
+		if (currentSid != null) {
 			mTimer = new Timer();
 			dh = new DBHelper128(getApplicationContext());
-			dh.createNewTripInfo(userid, tid, new Timestamp(new Date().getTime()).toString());
+			// only create new trip info if we're starting a new trip
+			if (startNewTrip) {
+				dh.createNewTripInfo(currentSid, currentTid, new Timestamp(
+						new Date().getTime()).toString());
+				startNewTrip = false;
+			}
 			mTimer.scheduleAtFixedRate(new TimerTask() {
 				@Override
 				public void run() {
@@ -212,12 +246,25 @@ public class LocationService extends Service {
 						// don't want to input null stuff into database
 						recorderLocationBuffer = getCurrentNullLocation();
 					}
-//					dh.insert(recorderLocationBuffer, userid, Long.valueOf(pref.getString("trip_id", "-1")));
-					Log.e("locationService", "mock DB insert2");
+					dh.insert(recorderLocationBuffer, currentSid, currentTid);
+					Log.e("locationService", "actual DB insert2");
 					/**
-					 * if activity if running in foreground
-					 * broadcast location from recorderLocationBuffer
+					 * if activity is running in foreground broadcast location
+					 * from recorderLocationBuffer
 					 */
+					JSONObject addpos = new JSONObject();
+					try {
+						addpos.put("lat", recorderLocationBuffer.getLatitude());
+						addpos.put("lng", recorderLocationBuffer.getLongitude());
+						addpos.put("timestamp",
+								recorderLocationBuffer.getTime());
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+					Intent intent = new Intent();
+					intent.setAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
+					intent.putExtra("location", addpos.toString());
+					sendBroadcast(intent);
 				}
 			}, 0, periodMS);
 		} else {
@@ -234,16 +281,15 @@ public class LocationService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-		
+
 		Log.e("locationService", "onDestroy called");
-		
+
 		_xps.abort();
 
 		pref.edit().remove("trip_id").commit();
 
 		stopTimer();
 
-		
 	}
 
 	@Override
@@ -251,17 +297,16 @@ public class LocationService extends Service {
 		return null;
 	}
 
-	
-	private Location getCurrentNullLocation(){
+	private Location getCurrentNullLocation() {
 		nullLocation.setTime(System.currentTimeMillis());
 		return nullLocation;
 	}
-	
+
 	private final RecorderLocationCallback recorderCallback = new RecorderLocationCallback();
 	private final CheckinLocationCallback checkinCallback = new CheckinLocationCallback();
-	
-	public class CheckinLocationCallback implements WPSLocationCallback{
-		
+
+	public class CheckinLocationCallback implements WPSLocationCallback {
+
 		@Override
 		public void done() {
 			checkinCallbackCanCallAgain = true;
@@ -283,21 +328,23 @@ public class LocationService extends Service {
 		@Override
 		public void handleWPSLocation(WPSLocation arg0) {
 			checkinLocationBuffer = WPS2Location(arg0);
-			Log.d("location service","check-in location= " + checkinLocationBuffer.toString());
+			Log.d("location service", "check-in location= "
+					+ checkinLocationBuffer.toString());
 		}
-		
+
 	}
-	
-	public class RecorderLocationCallback implements WPSPeriodicLocationCallback{
+
+	public class RecorderLocationCallback implements
+			WPSPeriodicLocationCallback {
 
 		public void done() {
-			
+
 		}
 
 		public WPSContinuation handleError(WPSReturnCode error) {
 			if (isRecording) {
 				// save to location buffer when recording
-				//set the time so we can better analysis the situation
+				// set the time so we can better analysis the situation
 				recorderLocationBuffer = getCurrentNullLocation();
 			} else {
 				// broadcast when not recording
@@ -317,18 +364,17 @@ public class LocationService extends Service {
 			} else {
 				// Broadcasts when not recording
 				Intent intent = new Intent();
-				intent.setAction("ACTION_LOCATION_SERVICE_UPDATE");
+				intent.setAction("ACTION_LOCATION_SERVICE_SET_POSITION");
 				intent.putExtra("location", location);
 				sendBroadcast(intent);
 			}
 
-			Log.d("location service","periodic location= " + location.toString());
+			Log.d("location service",
+					"periodic location= " + location.toString());
 			return null;
 		}
 	}
 
-	
-	
 	private Location WPS2Location(WPSLocation l) {
 		Location location = new Location("skyhook");
 		location.setLatitude(l.getLatitude());

@@ -285,6 +285,9 @@ public class UploadService extends Service {
 			} catch(JSONException e){
 				e.printStackTrace();
 			}
+			if(dh.DBIsOpen()){
+				dh.closeDB();
+			}
 			return null;
 		}
 

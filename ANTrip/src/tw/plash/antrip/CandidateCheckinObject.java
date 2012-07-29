@@ -12,6 +12,7 @@ public class CandidateCheckinObject implements Serializable{
 	private Integer emotionID;
 	private String checkinText;
 	private String picturePath;
+	private String pictureName;
 	
 	/**
 	 * initialize all fields with null value
@@ -20,6 +21,7 @@ public class CandidateCheckinObject implements Serializable{
 		emotionID = null;
 		checkinText = null;
 		picturePath = null;
+		pictureName = null;
 	}
 
 	public Integer getEmotionID() {
@@ -37,12 +39,22 @@ public class CandidateCheckinObject implements Serializable{
 	public void setCheckinText(String checkinText) {
 		this.checkinText = checkinText;
 	}
-
+	
+	public String getPictureName(){
+		return pictureName;
+	}
+	
 	public String getPicturePath() {
 		return picturePath;
 	}
 
 	public void setPicturePath(String picturePath) {
 		this.picturePath = picturePath;
+		try{
+			this.pictureName = picturePath.substring(picturePath.lastIndexOf("/"));
+		}catch(IndexOutOfBoundsException e){
+			e.printStackTrace();
+			this.pictureName = null;
+		}
 	}
 }

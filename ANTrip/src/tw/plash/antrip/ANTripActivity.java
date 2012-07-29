@@ -51,10 +51,25 @@ public class ANTripActivity extends Activity {
 	private BroadcastReceiver br = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			Location loc = (Location) intent.getExtras().getParcelable("location");
-			String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + "," + loc.getLongitude() + ")";;
-			//push this location update to html
-			queuedLoadURL(singleLocationUpdateURL);
+			//not recording, just positioning
+			if(intent.getAction().equals("ACTION_LOCATION_SERVICE_SET_POSITION")){
+				Location loc = (Location) intent.getExtras().getParcelable("location");
+				String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + "," + loc.getLongitude() + ")";;
+				//push this location update to html
+				queuedLoadURL(singleLocationUpdateURL);
+				//recording, syncing the whole position list
+			} else if(intent.getAction().equals("ACTION_LOCATION_SERVICE_ADD_POSITION")){
+				String addpos = intent.getExtras().getString("location");
+				String addPositionUrl = "javascript:addPosition(" + addpos + ")";
+				queuedLoadURL(addPositionUrl);
+				//recording, adding a new point to the list
+			} else if(intent.getAction().equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")){
+				String syncpos = intent.getExtras().getString("location");
+				String syncPositionUrl = "javascript:syncPosition(" + syncpos + ")";
+				queuedLoadURL(syncPositionUrl);
+			} else{
+				//huh?
+			}
 		}
 	};
 	
@@ -158,10 +173,10 @@ public class ANTripActivity extends Activity {
 		 * start recording, and return the newly generated random tripid
 		 * @return
 		 */
-		public Long startRecording(){
+		public String startRecording(){
 			Long tid = System.nanoTime();
-			startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid));
-			return tid;
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid.toString()));
+			return tid.toString();
 		}
 		
 		/**
@@ -360,8 +375,13 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 	protected void onResume() {
 		super.onResume();
 		// need to notify location service to send location update
-		IntentFilter filter = new IntentFilter("ACTION_LOCATION_SERVICE_UPDATE");
+		IntentFilter filter = new IntentFilter();
+		filter.addAction("ACTION_LOCATION_SERVICE_SET_POSITION");
+		filter.addAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
+		filter.addAction("ACTION_LOCATION_SERVICE_SYNC_POSITION");
 		registerReceiver(br, filter);
+		//save to pref that activity is ready for broadcast
+		
 	}
 	
 	@Override
@@ -369,6 +389,8 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		super.onPause();
 		// need to notify location service not to send location update
 		unregisterReceiver(br);
+		//save to pref that activity is NOT ready for broadcast
+		
 	}
 	
 	@Override

@@ -186,7 +186,7 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long insert(Location location, String userid, Long tripid) {
+	synchronized public long insert(Location location, String userid, String tripid) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
 			locationStringConverter l2s = new locationStringConverter(location);
@@ -198,14 +198,14 @@ public class DBHelper128 {
 			cv.put("bearing", l2s.getBearing());
 			cv.put("accuracy", l2s.getAccuracy());
 			cv.put("userID", userid);
-			cv.put("tripID", String.valueOf(tripid));
+			cv.put("tripID", tripid);
 			return db.insert(TRIP_POINT_TABLE, null, cv);
 		} else {
 			return -2;
 		}
 	}
 	
-	synchronized public long insert(Location location, String userid, Long tripid, CandidateCheckinObject cco) {
+	synchronized public long insert(Location location, String userid, String tripid, CandidateCheckinObject cco) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
 			locationStringConverter l2s = new locationStringConverter(location);
@@ -217,7 +217,7 @@ public class DBHelper128 {
 			cv.put("bearing", l2s.getBearing());
 			cv.put("accuracy", l2s.getAccuracy());
 			cv.put("userID", userid);
-			cv.put("tripID", String.valueOf(tripid));
+			cv.put("tripID", tripid);
 			//cco fields
 			cv.put("picture", cco.getPicturePath());
 			cv.put("emotion", String.valueOf(cco.getEmotionID()));
@@ -228,10 +228,10 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long createNewTripInfo(String userid, Long tripid, String starttime){
+	synchronized public long createNewTripInfo(String userid, String tripid, String starttime){
 		if(db.isOpen()){
 			ContentValues cv = new ContentValues();
-			cv.put("tripid", String.valueOf(tripid));
+			cv.put("tripid", tripid);
 			cv.put("userid", userid);
 			cv.put("uploaded", 0);
 			cv.put("starttime", starttime);
@@ -511,7 +511,6 @@ public class DBHelper128 {
 						JSONArray cidl = new JSONArray();
 						do{
 							JSONObject tmp = new JSONObject();
-							//TODO need to ask yu-hsiang about the definition of our DB schema
 							tmp.put("lat", mCursor.getDouble(mCursor.getColumnIndex("latitude")));
 							tmp.put("lng", mCursor.getDouble(mCursor.getColumnIndex("longitude")));
 							tmp.put("timestamp", mCursor.getString(mCursor.getColumnIndex("timestamp")));
@@ -523,6 +522,7 @@ public class DBHelper128 {
 							JSONObject checkin = new JSONObject();
 							if(mCursor.getString(mCursor.getColumnIndex("picture")) != null){
 								//picture exists! put it in
+								//XXX cannot pass the complete path, need to strip it till only filename is left
 								checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")));
 							} else if(mCursor.getString(mCursor.getColumnIndex("emotion")) != null){
 								//emotion exists! put it in
@@ -543,6 +543,9 @@ public class DBHelper128 {
 						result.put("CheckInDataList", cidl);
 					} catch (JSONException e) {
 						e.printStackTrace();
+						if(!mCursor.isClosed()){
+							mCursor.close();
+						}
 						result = null;
 					}
 					if(!mCursor.isClosed()){
@@ -609,7 +612,7 @@ public class DBHelper128 {
 	 */
 	synchronized public JSONObject getAllTripInfoForHTML(String userid){
 		if(db.isOpen()){
-			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{""}, "userid=" + userid, null, null, null, "tripid DESC");
+			Cursor mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "tripid DESC");
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					JSONObject result = new JSONObject();
@@ -635,11 +638,13 @@ public class DBHelper128 {
 							list.put(tmp);
 						}while(mCursor.moveToNext());
 						//jsonarray all filled, put into result object
-						//TODO not finished yet...
-						result.put("", list);
+						result.put("tripInfoList", list);
 					} catch (JSONException e) {
 						e.printStackTrace();
 						//if anything goes wrong, return null
+						if(!mCursor.isClosed()){
+							mCursor.close();
+						}
 						return null;
 					}
 					//all is well

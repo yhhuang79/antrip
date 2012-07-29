@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public class GetLocalTripList {
-
+	
 	private Context mContext;
 	private JSONObject result;
 	private DBHelper128 dh;
@@ -17,17 +17,19 @@ public class GetLocalTripList {
 	public GetLocalTripList(Context c) {
 		mContext = c;
 		result = new JSONObject();
+		dh = new DBHelper128(c);
 	}
 	
 	public JSONObject execute() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		String uid = pref.getString("sid", null);
 		if (uid != null) {
-			
 			//query all trip infos with the input uid
-			
-//			return result;
-			return null;
+			result = dh.getAllTripInfoForHTML(uid);
+			if(dh.DBIsOpen()){
+				dh.closeDB();
+			}
+			return result;
 		} else {
 			return null;
 		}
