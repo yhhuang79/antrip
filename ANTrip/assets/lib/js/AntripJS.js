@@ -93,6 +93,16 @@
 		});
 	}
 
+	if(!Array.indexOf){
+		 Array.prototype.indexOf = function(obj){
+			 for(var i=0; i<this.length; i++){
+				 if(this[i]==obj){
+					return i;
+				 }
+			}
+			return -1;
+		}
+	}
 	//get parameters from URL
 	$.urlParam = function(name){
 		var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
@@ -910,47 +920,55 @@
 
 	function showLocalTripData(trip_id){
 		var localtripdata;
+		$('#map_canvas').show();
+		$('#map_canvas_2').hide();
 		if(window.antrip){
-			localtripdata = eval("("+window.antrip.getLocalTripData(trip_id)+")");
-			$('#map_canvas').gmap('destroy');
-			$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
-				var self = this;
-				g_tripPointArray = new Array(0);
-				g_tripMarkerArray = new Array(0);
-				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
-				$.each(localtripdata.CheckInDataList, function(i, point) {
-					var lat = point.lat.valueOf() / 1000000;
-					var lng = point.lng.valueOf() / 1000000;
-					var latlng = new google.maps.LatLng(lat, lng);
-					g_tripPointArray.push(latlng);
-					//throw "lat:"+lat+", lng:"+lng;
-					if (typeof point.CheckIn != 'undefined'){
-						var placemarker = self.addMarker({ 
-							'position': latlng, 
-							'bounds': true,
-							'icon': "images/placemarker.png"
-						}).click(function(){
-							var CheckInInfo = "<p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>";
-							self.openInfoWindow({'content': CheckInInfo}, this);
-						});
-						g_tripMarkerArray.push(placemarker);
-					} else {
-						self.addMarker({ 
-							'position': latlng, 
-							'bounds': true
-						}).click(function(){
-							self.openInfoWindow({'content': point.timestamp}, this);
-						});
-					}
-				});
-				self.addShape('Polyline',{
-					'strokeColor': "#FF0000", 
-					'strokeOpacity': 0.8, 
-					'strokeWeight': 4, 
-					'path': g_tripPointArray
-				});
-				$('#map_canvas').gmap('refresh');
-			}});
+			var localresult = window.antrip.getLocalTripData(trip_id);
+			if(window.antrip.getLocalTripData(trip_id)==-1){
+				return alert("error");
+			}
+			else{
+				localtripdata = eval("("+localresult+")");
+				$('#map_canvas').gmap('destroy');
+				$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
+					var self = this;
+					g_tripPointArray = new Array(0);
+					g_tripMarkerArray = new Array(0);
+					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
+					$.each(localtripdata.CheckInDataList, function(i, point) {
+						var lat = point.lat;
+						var lng = point.lng;
+						var latlng = new google.maps.LatLng(lat, lng);
+						g_tripPointArray.push(latlng);
+						//throw "lat:"+lat+", lng:"+lng;
+						if (typeof point.CheckIn != 'undefined'){
+							var placemarker = self.addMarker({ 
+								'position': latlng, 
+								'bounds': true,
+								'icon': "images/placemarker.png"
+							}).click(function(){
+								var CheckInInfo = "<p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>";
+								self.openInfoWindow({'content': CheckInInfo}, this);
+							});
+							g_tripMarkerArray.push(placemarker);
+						} else {
+							self.addMarker({ 
+								'position': latlng, 
+								'bounds': true
+							}).click(function(){
+								self.openInfoWindow({'content': point.timestamp}, this);
+							});
+						}
+					});
+					self.addShape('Polyline',{
+						'strokeColor': "#FF0000", 
+						'strokeOpacity': 0.8, 
+						'strokeWeight': 4, 
+						'path': g_tripPointArray
+					});
+					$('#map_canvas').gmap('refresh');
+				}});
+			}
 		}
 	}
 
