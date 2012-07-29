@@ -847,7 +847,7 @@
 
 		var localresult=-1;
 		if(window.antrip){
-			localresult = window.antrip.getLocalTripList();
+			localresult = eval("("+window.antrip.getLocalTripList()+")");
 		}
 
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
@@ -872,21 +872,19 @@
 					$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
 					if(window.antrip && localresult!=-1)
 					{
-//						$.each(localresult.tripInfoList, function(i,data){
-							var data = localresult.tripInfoList[0];
-							alert(localresult.tripInfoList[0]);
+						$.each(localresult.tripInfoList, function(i,data){
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
 				
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}showLocalTripData("+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 							
 							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 								$("div[id=products]").eq(0).append(appendcontent);
 							}
 
-	//						index++;
-//						});
+							index++;
+						});
 					}
 
 					$.each(result.tripInfoList, function(i,data){
@@ -908,6 +906,52 @@
 				}
 			}
 		});
+	}
+
+	function showLocalTripData(trip_id){
+		var localtripdata;
+		if(window.antrip){
+			localtripdata = eval("("+window.antrip.getLocalTripData(trip_id)+")");
+			$('#map_canvas').gmap('destroy');
+			$('#map_canvas').gmap({ 'zoom':g_zoom,'center':g_startLatLng, 'callback': function(map) {
+				var self = this;
+				g_tripPointArray = new Array(0);
+				g_tripMarkerArray = new Array(0);
+				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
+				$.each(result.CheckInDataList, function(i, point) {
+					var lat = point.lat.valueOf() / 1000000;
+					var lng = point.lng.valueOf() / 1000000;
+					var latlng = new google.maps.LatLng(lat, lng);
+					g_tripPointArray.push(latlng);
+					//throw "lat:"+lat+", lng:"+lng;
+					if (typeof point.CheckIn != 'undefined'){
+						var placemarker = self.addMarker({ 
+							'position': latlng, 
+							'bounds': true,
+							'icon': "images/placemarker.png"
+						}).click(function(){
+							var CheckInInfo = "<p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>";
+							self.openInfoWindow({'content': CheckInInfo}, this);
+						});
+						g_tripMarkerArray.push(placemarker);
+					} else {
+						self.addMarker({ 
+							'position': latlng, 
+							'bounds': true
+						}).click(function(){
+							self.openInfoWindow({'content': point.timestamp}, this);
+						});
+					}
+				});
+				self.addShape('Polyline',{
+					'strokeColor': "#FF0000", 
+					'strokeOpacity': 0.8, 
+					'strokeWeight': 4, 
+					'path': g_tripPointArray
+				});
+				$('#map_canvas').gmap('refresh');
+			}});
+		}
 	}
 
 	function prepageAction(){

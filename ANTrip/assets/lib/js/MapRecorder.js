@@ -503,8 +503,9 @@
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
 				$("#overlay").css("z-index","1010");
+				alert(Tooltip.indexOf(Tooltip[e.key]));
 				if(window.antrip){
-					window.antrip.setEmotion(id[e.key]);
+					window.antrip.setEmotion(Tooltip.indexOf(Tooltip[e.key]));
 				}
 			},
 			showToolTip: true,
