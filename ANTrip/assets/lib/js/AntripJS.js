@@ -870,7 +870,7 @@
 					if(window.antrip && localresult!=-1)
 					{
 						$.each(localresult.tripInfoList, function(i,data){
-							//data.trip_id;
+							data.trip_id = eval(data.trip_id);
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
