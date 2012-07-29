@@ -966,7 +966,7 @@
 									'position': latlng, 
 									'bounds': true
 								}).click(function(){
-									//self.openInfoWindow({'content': point.timestamp}, this);
+									self.openInfoWindow({'content': point.timestamp}, this);
 								});
 							}
 						}

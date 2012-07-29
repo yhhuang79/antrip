@@ -262,7 +262,7 @@
 					});		
 
 					//placemarker.setMap(self);	
-					g_tripMarkerArray_2.push(placemarker);
+					g_tripMarkerArray_2.push(checkinmarker);
 				} else {
 					var marker =  new google.maps.Marker({ 
 						'position': latlng, 
