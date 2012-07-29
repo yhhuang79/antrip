@@ -920,7 +920,7 @@
 		$('#map_canvas_2').hide();
 		if(window.antrip){
 			var localresult = window.antrip.getLocalTripData(trip_id);
-			if(window.antrip.getLocalTripData(trip_id)==-1){
+			if(localresult==-1){
 				return alert("error");
 			}
 			else{
@@ -930,39 +930,48 @@
 					var self = this;
 					g_tripPointArray = new Array(0);
 					g_tripMarkerArray = new Array(0);
-					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
+					//alert(g_startLatLng);
+//					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
+					var index=0;
 					$.each(localtripdata.CheckInDataList, function(i, point) {
-						var lat = point.lat;
-						var lng = point.lng;
-						var latlng = new google.maps.LatLng(lat, lng);
-						g_tripPointArray.push(latlng);
-						//throw "lat:"+lat+", lng:"+lng;
-						if (typeof point.CheckIn != 'undefined'){
-							var placemarker = self.addMarker({ 
-								'position': latlng, 
-								'bounds': true,
-								'icon': "images/placemarker.png"
-							}).click(function(){
-								var CheckInInfo = "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+lat+", "+lng+"</p>";
-								self.openInfoWindow({'content': CheckInInfo}, this);
+						//alert(point.lat);
+						if(index>localtripdata.CheckInDataList.length){
+							self.addShape('Polyline',{
+								'strokeColor': "#FF0000", 
+								'strokeOpacity': 0.8, 
+								'strokeWeight': 4, 
+								'path': g_tripPointArray
 							});
-							g_tripMarkerArray.push(placemarker);
-						} else {
-							self.addMarker({ 
-								'position': latlng, 
-								'bounds': true
-							}).click(function(){
-								//self.openInfoWindow({'content': point.timestamp}, this);
-							});
+							$('#map_canvas').gmap('refresh');
+							return;
 						}
+						else if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){
+							var lat = point.lat;
+							var lng = point.lng;
+							var latlng = new google.maps.LatLng(lat, lng);
+							g_tripPointArray.push(latlng);
+							//throw "lat:"+lat+", lng:"+lng;
+							if (typeof point.CheckIn != 'undefined'){
+								var placemarker = self.addMarker({ 
+									'position': latlng, 
+									'bounds': true,
+									'icon': "images/placemarker.png"
+								}).click(function(){
+									var CheckInInfo = "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+lat+", "+lng+"</p>";
+									self.openInfoWindow({'content': CheckInInfo}, this);
+								});
+								g_tripMarkerArray.push(placemarker);
+							} else {
+								self.addMarker({ 
+									'position': latlng, 
+									'bounds': true
+								}).click(function(){
+									//self.openInfoWindow({'content': point.timestamp}, this);
+								});
+							}
+						}
+						index++;
 					});
-					self.addShape('Polyline',{
-						'strokeColor': "#FF0000", 
-						'strokeOpacity': 0.8, 
-						'strokeWeight': 4, 
-						'path': g_tripPointArray
-					});
-					$('#map_canvas').gmap('refresh');
 				}});
 			}
 		}
