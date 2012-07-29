@@ -943,7 +943,7 @@
 								'bounds': true,
 								'icon': "images/placemarker.png"
 							}).click(function(){
-								var CheckInInfo = "<p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>";
+								var CheckInInfo = "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+lat+", "+lng+"</p>";
 								self.openInfoWindow({'content': CheckInInfo}, this);
 							});
 							g_tripMarkerArray.push(placemarker);
@@ -952,7 +952,7 @@
 								'position': latlng, 
 								'bounds': true
 							}).click(function(){
-								self.openInfoWindow({'content': point.timestamp}, this);
+								//self.openInfoWindow({'content': point.timestamp}, this);
 							});
 						}
 					});
