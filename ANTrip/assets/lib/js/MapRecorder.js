@@ -8,7 +8,7 @@
 	var g_tripMarkerObjArray = new Array(0);
 
 	var g_mapPath = null;
-
+	var g_currentmarker = null;
 	var latlng_undefined_value=-999;
 
 	var emotionMapping = {	
@@ -234,9 +234,12 @@
 
 		var self =  $('#map_canvas_2').gmap('get','map');
 		$.each(result.CheckInDataList, function(i, point) {
-			g_current_latitude = point.lat.valueOf() / 1000000;
-			g_current_longitude = point.lng.valueOf() / 1000000;
-			if(g_current_latitude != latlng_undefined_value && g_current_longitude !=latlng_undefined_value){
+			if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){	
+				if(g_currentmarker!=null){
+					g_currentmarker.setMap(self);
+				}
+				g_current_latitude = point.lat;
+				g_current_longitude = point.lng;
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 				self.setCenter(latlng);
 				self.setZoom(g_zoom);
@@ -267,7 +270,7 @@
 					});
 					var infowindow = new google.maps.InfoWindow(
 					{ 
-						'content': marker.timestamp
+						'content': g_current_latitude+", "+g_current_longitude
 					});
 					google.maps.event.addListener(marker, 'click', function() {
 						infowindow.open(self,marker);
@@ -300,7 +303,7 @@
 
 	function setPosition(latitude, longitude){
 		//$('#map_canvas').css('margin-top','-690px');
-		if(latitude==null || longitude==null ){
+		if(latitude==null || longitude==null || latitude == latlng_undefined_value || longitude ==latlng_undefined_value){
 			return;
 		}
 		g_current_latitude = latitude;
@@ -311,20 +314,17 @@
 		self.setCenter(latlng);
 		self.setZoom(g_zoom);
 
-		var marker =  new google.maps.Marker({ 
+		if(g_currentmarker!=null){
+			g_currentmarker.setMap(self);
+		}
+		g_currentmarker =  new google.maps.Marker({ 
 			'position': latlng, 
 			'bounds': true,
 			'icon': im+"ant_24.png",
 		});
-		var infowindow = new google.maps.InfoWindow(
-		{ 
-			'content': marker.timestamp
-		});
-		google.maps.event.addListener(marker, 'click', function() {
-			infowindow.open(self,marker);
-		});
 
-		marker.setMap(self);
+		g_currentmarker.setMap(self);
+		//g_tripMarkerObjArray.push(g_currentmarker);
 
 		$('#map_canvas_2').gmap('refresh');
 	}

@@ -860,7 +860,7 @@
 				if(page==null){
 					page=1;
 				}
-				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null|| localresult.tripInfoList.length==0) ){
+				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null) ){
 					var str_noTrip = g_str_notrip;
 					//alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
@@ -870,9 +870,11 @@
 					g_tripnum = result.tripInfoList[0].trip_id;
 					g_triplength = result.tripInfoList.length;
 					$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
-					if(window.antrip && localresult!=-1 &&localresult.tripInfoList.length!=0)
+					if(window.antrip && localresult!=-1)
 					{
-						$.each(localresult.tripInfoList, function(i,data){
+//						$.each(localresult.tripInfoList, function(i,data){
+							var data = localresult.tripInfoList[0];
+							alert(localresult.tripInfoList[0]);
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
@@ -883,8 +885,8 @@
 								$("div[id=products]").eq(0).append(appendcontent);
 							}
 
-							index++;
-						});
+	//						index++;
+//						});
 					}
 
 					$.each(result.tripInfoList, function(i,data){
