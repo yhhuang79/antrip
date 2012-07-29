@@ -470,6 +470,19 @@
 		//require("lib/jq_includes/jquery.imagemapster.js");
 		var image = $('#emotion-c');
 		//var excitedTooltip = 'Excited!';
+		var emotionArray=new Array();
+		emotionArray[0]="excited";
+		emotionArray[1]="happy";
+		emotionArray[2]="pleased";
+		emotionArray[3]="relaxed";
+		emotionArray[4]="peaceful";
+		emotionArray[5]="sleepy";
+		emotionArray[6]="sad";
+		emotionArray[7]="bored";
+		emotionArray[8]="nervous";
+		emotionArray[9]="angry";
+		emotionArray[10]="calm";
+
 		var Tooltip = {	
 			excited: g_str_excited,
 			happy: g_str_happy,
@@ -503,9 +516,8 @@
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
 				$("#overlay").css("z-index","1010");
-				alert(Tooltip.indexOf(Tooltip[e.key]));
 				if(window.antrip){
-					window.antrip.setEmotion(Tooltip.indexOf(Tooltip[e.key]));
+					window.antrip.setEmotion(emotionArray.indexOf(e.key));
 				}
 			},
 			showToolTip: true,

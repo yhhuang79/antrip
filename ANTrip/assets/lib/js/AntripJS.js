@@ -877,9 +877,6 @@
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
-					g_tripnum = result.tripInfoList[0].trip_id;
-					g_triplength = result.tripInfoList.length;
-					$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
 					if(window.antrip && localresult!=-1)
 					{
 						$.each(localresult.tripInfoList, function(i,data){
@@ -896,23 +893,28 @@
 							index++;
 						});
 					}
+					
+					if(result != null && result.tripInfoList != null && result.tripInfoList.length>0){
+						g_tripnum = result.tripInfoList[0].trip_id;
+						g_triplength = result.tripInfoList.length;
+						$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
+						$.each(result.tripInfoList, function(i,data){
+							
+							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
+							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
+							var appendcontent;
 
-					$.each(result.tripInfoList, function(i,data){
-						
-						var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
-						var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
-						var appendcontent;
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><img src='"+im+"uploadedmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":"+ data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 
-						appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href='" + tripurl  + "'><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='" + tripurl  + "' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='" + tripurl  + "' rel='external'><img src='"+im+"uploadedmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":"+ data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
+								$("div[id=products]").eq(0).append(appendcontent);
+							}
 
-						if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
-							$("div[id=products]").eq(0).append(appendcontent);
-						}
+							index++;
+						});
 
-						index++;
-					});
-
-					$("button","div[id*=products]" ).button();
+						$("button","div[id*=products]" ).button();
+					}
 				}
 			}
 		});
