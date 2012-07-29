@@ -360,3 +360,7 @@
 		font-family: 'Comic Sans MS';
 		background: #00ff00 url("../../images/btnline.png") no-repeat;
 	}
+
+	.scrollTopBtn{
+		background:rgba(255,255,255,0.5);
+	}

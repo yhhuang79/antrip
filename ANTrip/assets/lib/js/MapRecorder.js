@@ -93,7 +93,7 @@
 	}
 
 	function addPoint(){
-		alert('addPoint');
+		//alert('addPoint');
 		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
 			if ( status == 'OK' ) {
 					alert('OK');
@@ -318,7 +318,7 @@
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){
 			isRecording = window.antrip.getCookie("isRecording");
-			alert(isRecording);
+			//alert(isRecording);
 		}
 		//var isRecording = window.localStorage["isRecording"];
 		if(isRecording == null){
@@ -476,7 +476,7 @@
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
 				if(window.antrip){
-					window.antrip.endCheckin(id[e.key]);
+					window.antrip.setEmotion(id[e.key]);
 				}
 			},
 			showToolTip: true,

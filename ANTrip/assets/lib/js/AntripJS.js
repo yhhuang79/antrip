@@ -217,6 +217,7 @@
 
 		//initNoteDialog();
 		initTripNameDialog();
+		//initScrollTopBtn();
 
 		//$('#sym_topbtnGroup').show();
 	}
@@ -346,6 +347,40 @@
 				g_infowindow.close();
 				g_infowindow=null;
 			}
+		});
+	}
+
+	function initScrollTopBtn(){
+		var topBtns = [{}];
+	//	for (var i = 1; i < 2; i++) {
+			var wheel = {};
+			for (var j = 0; j < 101; j++) {
+				if(j%4==0){
+					wheel[j] = "<div id='Symbol_ub_home' class='class_top_bt' ><img src='"+im+"ub_home.png' class='class_top_bt' name='ub_home' id='ub_home' onClick='ChangeToUsedIcon($(this))' ></img></div>";
+				}
+				else if(j%4==1){
+					wheel[j] = "<div id='Symbol_trip_history' class='class_top_bt' ><img src='"+im+"ub_trip_history.png' class='class_top_bt' name='ub_trip_history' id='ub_trip_history' onClick='ChangeToUsedIcon($(this))' ></img></div>";
+				}
+				else if (j%4==2){
+					wheel[j] = "<div id='Symbol_ub_trip_m' class='class_top_bt'><img src='"+im+"ub_trip_management.png' class='class_top_bt' name='ub_trip_management'  id='ub_trip_management' onClick='ChangeToUsedIcon($(this))' ></img></div>";
+				}
+				else if (j%4==3){
+					wheel[j] = "<div id='Symbol_friend' class='class_top_bt' ><img src='"+im+"ub_friend.png' class='class_top_bt' name='ub_friend' id='ub_friend' onClick='ChangeToUsedIcon($(this))' ></img></div>";
+				}
+			}
+			topBtns[0]['topBtns'] = wheel;
+		//}
+
+		$('#scrollerInput').scroller({
+			//preset: 'select',
+			theme: 'default',
+			showLabel:false,
+			display: 'inline',
+			mode: 'scroller',
+			wheels: topBtns,
+			//rows: 4,
+			height: 40,
+			inputClass: 'scrollTopBtn'
 		});
 	}
 
