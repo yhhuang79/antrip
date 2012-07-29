@@ -603,6 +603,11 @@ public class DBHelper128 {
 						do{
 							//construct one entry of trip info
 							JSONObject tmp = new JSONObject();
+							//XXX
+							
+							//XXX
+							//added and extra "a" to bypass eval function in javascript from turning tripid into numbers with scientific display format
+							//XXX
 							tmp.put("trip_id", "a" + mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
 							tmp.put("trip_length", mCursor.getDouble(mCursor.getColumnIndexOrThrow("length")));
 							tmp.put("trip_et", mCursor.getString(mCursor.getColumnIndexOrThrow("endtime")));
