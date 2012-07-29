@@ -475,6 +475,7 @@ public class DBHelper128 {
 	synchronized public JSONObject getOneTripData(String userid, String tripid, boolean forUpload){
 		if(db.isOpen()){
 			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null, null, "id ASC");
+			Log.e("getOneTripData", "");
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					JSONObject result = new JSONObject();
@@ -601,7 +602,7 @@ public class DBHelper128 {
 						do{
 							//construct one entry of trip info
 							JSONObject tmp = new JSONObject();
-							tmp.put("trip_id", mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
+							tmp.put("trip_id", "a" + mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
 							tmp.put("trip_length", mCursor.getDouble(mCursor.getColumnIndexOrThrow("length")));
 							tmp.put("trip_et", mCursor.getString(mCursor.getColumnIndexOrThrow("endtime")));
 							tmp.put("trip_st", mCursor.getString(mCursor.getColumnIndexOrThrow("starttime")));
