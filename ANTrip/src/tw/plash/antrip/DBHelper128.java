@@ -476,7 +476,7 @@ public class DBHelper128 {
 		if(db.isOpen()){
 			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null, null, "id ASC");
 			if(mCursor != null){
-				if(!mCursor.moveToFirst()){
+				if(mCursor.moveToFirst()){
 					JSONObject result = new JSONObject();
 					try {
 						result.put("userid", userid);
@@ -484,31 +484,31 @@ public class DBHelper128 {
 						JSONArray cidl = new JSONArray();
 						do{
 							JSONObject tmp = new JSONObject();
-							tmp.put("lat", mCursor.getDouble(mCursor.getColumnIndex("latitude")));
-							tmp.put("lng", mCursor.getDouble(mCursor.getColumnIndex("longitude")));
-							tmp.put("timestamp", mCursor.getString(mCursor.getColumnIndex("timestamp")));
-							tmp.put("alt", mCursor.getString(mCursor.getColumnIndex("altitude")));
-							tmp.put("spd", mCursor.getString(mCursor.getColumnIndex("speed")));
-							tmp.put("bear", mCursor.getString(mCursor.getColumnIndex("bearing")));
-							tmp.put("accu", mCursor.getString(mCursor.getColumnIndex("accuracy")));
+							tmp.put("lat", mCursor.getDouble(mCursor.getColumnIndexOrThrow("latitude")));
+							tmp.put("lng", mCursor.getDouble(mCursor.getColumnIndexOrThrow("longitude")));
+							tmp.put("timestamp", mCursor.getString(mCursor.getColumnIndexOrThrow("timestamp")));
+							tmp.put("alt", mCursor.getString(mCursor.getColumnIndexOrThrow("altitude")));
+							tmp.put("spd", mCursor.getString(mCursor.getColumnIndexOrThrow("speed")));
+							tmp.put("bear", mCursor.getString(mCursor.getColumnIndexOrThrow("bearing")));
+							tmp.put("accu", mCursor.getString(mCursor.getColumnIndexOrThrow("accuracy")));
 							//empty jsonobject to put in check-in info
 							JSONObject checkin = new JSONObject();
-							if(mCursor.getString(mCursor.getColumnIndex("picture")) != null){
+							if(mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null){
 								//picture exists! put it in
 								//XXX cannot pass the complete path, need to strip it till only filename is left
 								if(forUpload){
 									//this call is for uploading, put in only the filename
-									checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")).substring(mCursor.getString(mCursor.getColumnIndex("picture")).lastIndexOf("/")));
+									checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).substring(mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).lastIndexOf("/")));
 								} else{
 									//return complete path, this call is for drawing purpose
-									checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")));
+									checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
 								}
-							} else if(mCursor.getString(mCursor.getColumnIndex("emotion")) != null){
+							} else if(mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null){
 								//emotion exists! put it in
-								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndex("emotion")));
-							} else if(mCursor.getString(mCursor.getColumnIndex("note")) != null){
+								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
+							} else if(mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null){
 								//message exists! put it in
-								checkin.put("message", mCursor.getString(mCursor.getColumnIndex("note")));
+								checkin.put("message", mCursor.getString(mCursor.getColumnIndexOrThrow("note")));
 							} else{
 								//no check-in info exists, set jsonobject to null
 								checkin = null;
