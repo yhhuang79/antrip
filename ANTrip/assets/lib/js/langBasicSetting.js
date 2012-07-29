@@ -1,6 +1,6 @@
 <!--
 	//set multi-langauge string to object
-	$('.login_bt_link').html("<p><font size=24px><b>" + g_str_login+"</b></font></p>");
+	$('.login_bt_link').html("<p style='font-szie:24px;'><font size=24px><b>" + g_str_login+"</b></font></p>");
 	$('.fblogin_bt_link').html("<p>" + g_str_fblogin+"</p>");
 	$("#username").attr("placeholder", g_username_holder);
 	$("#password").attr("placeholder", g_password_holder);

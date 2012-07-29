@@ -307,6 +307,21 @@
 		self.setCenter(latlng);
 		self.setZoom(g_zoom);
 
+		var marker =  new google.maps.Marker({ 
+			'position': latlng, 
+			'bounds': true,
+			'icon': im+"ant_24.png",
+		});
+		var infowindow = new google.maps.InfoWindow(
+		{ 
+			'content': marker.timestamp
+		});
+		google.maps.event.addListener(marker, 'click', function() {
+			infowindow.open(self,marker);
+		});
+
+		marker.setMap(self);
+
 		$('#map_canvas_2').gmap('refresh');
 	}
 

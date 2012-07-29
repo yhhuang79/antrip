@@ -380,3 +380,7 @@
 		opacity: 0.5;
 		z-index: 1010;
 	}
+
+	.login_bt_link{
+		font-szie:24px;
+	}
