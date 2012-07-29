@@ -176,7 +176,7 @@ public class LocationService extends Service {
 				JSONObject tmp = new JSONObject();
 				tmp.put("lat", checkinLocationBuffer.getLatitude());
 				tmp.put("lng", checkinLocationBuffer.getLongitude());
-				tmp.put("timestamp", checkinLocationBuffer.getTime());
+				tmp.put("timestamp", new Timestamp(checkinLocationBuffer.getTime()).toString());
 				// the object within one entry of data
 				JSONObject checkin = new JSONObject();
 				if (cco.getPicturePath() != null) {
@@ -272,7 +272,7 @@ public class LocationService extends Service {
 						JSONObject tmp = new JSONObject();
 						tmp.put("lat", recorderLocationBuffer.getLatitude());
 						tmp.put("lng", recorderLocationBuffer.getLongitude());
-						tmp.put("timestamp", recorderLocationBuffer.getTime());
+						tmp.put("timestamp", new Timestamp(recorderLocationBuffer.getTime()).toString());
 						array.put(tmp);
 						addpos.put("CheckInDataList", array);
 					} catch (JSONException e) {

@@ -179,14 +179,15 @@ public class ANTripActivity extends Activity {
 			}
 		}
 		
-		public String getLocalTripData(String tripid){
-			Log.e("activity", "getlocaltripdata called, tripid=" + tripid);
+		public String getLocalTripData(String id){
+			Log.e("activity", "getlocaltripdata called, id=" + id);
+			
 			JSONObject result = null;
 			
-			result = new GetLocalTrip(mContext).Data(tripid.substring(1));
+			result = new GetLocalTrip(mContext).Data(Integer.valueOf(id));
 			
 			if(result != null){
-				Log.e("activity", "localtrip tid=" + tripid + ", result=" + result.toString());
+				Log.e("activity", "localtrip tid=" + "" + ", result=" + result.toString());
 				return result.toString();
 			} else{
 				return "-1";

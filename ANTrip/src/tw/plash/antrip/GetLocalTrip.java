@@ -37,9 +37,9 @@ public class GetLocalTrip {
 		}
 	}
 	
-	public JSONObject Data(String tid){
+	public JSONObject Data(Integer id){
 		if(uid != null){
-			result = dh.getOneTripData(uid, tid, false);
+			result = dh.getOneTripData(uid, id);
 			if(dh.DBIsOpen()){
 				dh.closeDB();
 			}

@@ -1,5 +1,6 @@
 package tw.plash.antrip;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -193,7 +194,7 @@ public class DBHelper128 {
 			locationStringConverter l2s = new locationStringConverter(location);
 			cv.put("latitude", l2s.getLatitude());
 			cv.put("longitude", l2s.getLongitude());
-			cv.put("timestamp", l2s.getTime());
+			cv.put("timestamp", new Timestamp(Long.valueOf(l2s.getTime())).toString());
 			cv.put("altitude", l2s.getAltitude());
 			cv.put("speed", l2s.getSpeed());
 			cv.put("bearing", l2s.getBearing());
@@ -212,7 +213,7 @@ public class DBHelper128 {
 			locationStringConverter l2s = new locationStringConverter(location);
 			cv.put("latitude", l2s.getLatitude());
 			cv.put("longitude", l2s.getLongitude());
-			cv.put("timestamp", l2s.getTime());
+			cv.put("timestamp", new Timestamp(Long.valueOf(l2s.getTime())).toString());
 			cv.put("altitude", l2s.getAltitude());
 			cv.put("speed", l2s.getSpeed());
 			cv.put("bearing", l2s.getBearing());
@@ -473,7 +474,7 @@ public class DBHelper128 {
 	 * @return CheckInDataList styled trip data JSONObject
 	 */
 	synchronized public JSONObject getOneTripData(String userid, String tripid, boolean forUpload){
-		Log.e("getOneTripData", "userid=" + userid + ", tripid=" + tripid + (forUpload?"forUpload true":"forUpload false"));
+		Log.e("getOneTripData", "userid=" + userid + ", tripid=" + tripid + (forUpload?", forUpload true":", forUpload false"));
 		if(db.isOpen()){
 			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null, null, "id ASC");
 			
@@ -547,6 +548,78 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public JSONObject getOneTripData(String userid, Integer id){
+		Log.e("getOneTripData", "userid=" + userid + ", id=" + id);
+		if(db.isOpen()){
+			Cursor tmpCursor = db.query(TRIP_INFO_TABLE, null, "id=" + id, null, null, null, null);
+			String tripid = tmpCursor.moveToFirst()?tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("tripid")):"-1";
+			
+			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null, null, "id ASC");
+			if(mCursor != null){
+				if(mCursor.moveToFirst()){
+					JSONObject result = new JSONObject();
+					try {
+						result.put("userid", userid);
+						result.put("trip_id", tripid);
+						JSONArray cidl = new JSONArray();
+						do{
+							JSONObject tmp = new JSONObject();
+							tmp.put("lat", mCursor.getDouble(mCursor.getColumnIndexOrThrow("latitude")));
+							tmp.put("lng", mCursor.getDouble(mCursor.getColumnIndexOrThrow("longitude")));
+							tmp.put("timestamp", mCursor.getString(mCursor.getColumnIndexOrThrow("timestamp")));
+							tmp.put("alt", mCursor.getString(mCursor.getColumnIndexOrThrow("altitude")));
+							tmp.put("spd", mCursor.getString(mCursor.getColumnIndexOrThrow("speed")));
+							tmp.put("bear", mCursor.getString(mCursor.getColumnIndexOrThrow("bearing")));
+							tmp.put("accu", mCursor.getString(mCursor.getColumnIndexOrThrow("accuracy")));
+							//empty jsonobject to put in check-in info
+							JSONObject checkin = new JSONObject();
+							if(mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null){
+								//picture exists! put it in
+								//XXX cannot pass the complete path, need to strip it till only filename is left
+								checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
+							} else if(mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null){
+								//emotion exists! put it in
+								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
+							} else if(mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null){
+								//message exists! put it in
+								checkin.put("message", mCursor.getString(mCursor.getColumnIndexOrThrow("note")));
+							} else{
+								//no check-in info exists, set jsonobject to null
+								checkin = null;
+							}
+							if(checkin != null){
+								//only put in the check-in objecty if it is not null
+								tmp.put("CheckIn", checkin);
+							}
+							cidl.put(tmp);
+						} while(mCursor.moveToNext());
+						result.put("CheckInDataList", cidl);
+					} catch (JSONException e) {
+						e.printStackTrace();
+						result = null;
+					} catch(IllegalArgumentException e){
+						e.printStackTrace();
+						result = null;
+					}
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return result;
+				} else{
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
+			return null;
+		}
+	}
+	
+	
 	/**
 	 * Theoretically, multiple users could share the same device, thus userid is a required input
 	 * This function extracts all trip point in a trip, identified by userid+tripid
@@ -603,12 +676,14 @@ public class DBHelper128 {
 						do{
 							//construct one entry of trip info
 							JSONObject tmp = new JSONObject();
+							tmp.put("id", mCursor.getInt(mCursor.getColumnIndexOrThrow("id")));
 							//XXX
 							
 							//XXX
 							//added and extra "a" to bypass eval function in javascript from turning tripid into numbers with scientific display format
 							//XXX
-							tmp.put("trip_id", "a" + mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
+//							tmp.put("trip_id", "a" + mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
+							tmp.put("trip_id", mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
 							tmp.put("trip_length", mCursor.getDouble(mCursor.getColumnIndexOrThrow("length")));
 							tmp.put("trip_et", mCursor.getString(mCursor.getColumnIndexOrThrow("endtime")));
 							tmp.put("trip_st", mCursor.getString(mCursor.getColumnIndexOrThrow("starttime")));
