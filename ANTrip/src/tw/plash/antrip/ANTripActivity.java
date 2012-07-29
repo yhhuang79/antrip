@@ -180,7 +180,7 @@ public class ANTripActivity extends Activity {
 		}
 		
 		public String getLocalTripData(String tripid){
-			Log.e("activity", "getlocaltriplist called, tripid=" + tripid);
+			Log.e("activity", "getlocaltripdata called, tripid=" + tripid);
 			JSONObject result = null;
 			
 			result = new GetLocalTrip(mContext).Data(tripid);

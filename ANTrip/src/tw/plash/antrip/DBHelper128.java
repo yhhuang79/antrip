@@ -522,9 +522,9 @@ public class DBHelper128 {
 						result.put("CheckInDataList", cidl);
 					} catch (JSONException e) {
 						e.printStackTrace();
-						if(!mCursor.isClosed()){
-							mCursor.close();
-						}
+						result = null;
+					} catch(IllegalArgumentException e){
+						e.printStackTrace();
 						result = null;
 					}
 					if(!mCursor.isClosed()){
