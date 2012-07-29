@@ -183,7 +183,7 @@ public class ANTripActivity extends Activity {
 			Log.e("activity", "getlocaltripdata called, tripid=" + tripid);
 			JSONObject result = null;
 			
-			result = new GetLocalTrip(mContext).Data(tripid);
+			result = new GetLocalTrip(mContext).Data(tripid.substring(1));
 			
 			if(result != null){
 				Log.e("activity", "localtrip tid=" + tripid + ", result=" + result.toString());
