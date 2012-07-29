@@ -5,7 +5,7 @@
 	var g_emotion_html=null;
 	var g_tripPointArray_2 = new Array(0);
 	var g_tripMarkerArray_2 = new Array(0);
-	var g_tripMarkerObjArray = new Array(0);
+	//var g_tripMarkerObjArray = new Array(0);
 
 	var g_mapPath = null;
 	var g_currentmarker = null;
@@ -122,12 +122,12 @@
 	}
 
 	function cleanGlobalArray(){
-		for(i=0;i<g_tripMarkerObjArray.length;i++){
-			g_tripMarkerObjArray[i].setMap(null);
+		for(i=0;i<g_tripMarkerArray_2.length;i++){
+			g_tripMarkerArray_2[i].setMap(null);
 		}
 		g_tripPointArray_2 = new Array(0);
 		g_tripMarkerArray_2 = new Array(0);
-		g_tripMarkerObjArray = new Array(0);
+//		g_tripMarkerObjArray = new Array(0);
 		g_emotion_html=null;
 	}
 
@@ -415,7 +415,7 @@
 		
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 		g_tripPointArray_2.push(latlng);
-		g_tripMarkerArray_2.push(latlng);
+		//g_tripMarkerArray_2.push(latlng);
 
 		var marker = new google.maps.Marker({
 			'position': latlng, 
@@ -448,7 +448,7 @@
 		marker.setMap(self);
 		setPosition(g_current_latitude, g_current_longitude);
 
-		g_tripMarkerObjArray.push(marker);
+		g_tripMarkerArray_2.push(marker);
 
 		DrawLine();
 		$('#map_canvas_2').gmap('refresh');
