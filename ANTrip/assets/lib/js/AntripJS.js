@@ -219,6 +219,10 @@
 		initTripNameDialog();
 		//initScrollTopBtn();
 
+		var overlay = jQuery('<div id="overlay"> </div>');
+		overlay.appendTo(document.body)
+		$("#overlay").css("display","none");
+
 		//$('#sym_topbtnGroup').show();
 	}
 

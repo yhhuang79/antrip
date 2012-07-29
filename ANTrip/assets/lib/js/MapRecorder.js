@@ -362,9 +362,11 @@
 			$('#markplacewindow :input').removeAttr('disabled');
 			$('#markplacewindow').hide();
 			$('#emotion_compass').hide();
+			$("#overlay").css("display","none");
 		}else{
 			$('#edit_display_area').attr('disabled', true);
 			$('#sym_topbtnGroup').attr('disabled', true);
+			$("#overlay").css("display","block");
 			$('#takepicture').attr("src","");
 			$('#emotion-sel').html("");
 			$("#placemarktext").attr("value","");
@@ -439,6 +441,12 @@
 		openMarkplaceWindow();
 	}
 
+	function showEmtionCompass(){
+		$('#markplacewindow :input').attr('disabled', true);
+		$('#emotion_compass').show();
+		$("#overlay").css("z-index","1012");
+	}
+
 	function initEmotionMap(){
 		//require("lib/jq_includes/jquery.imagemapster.js");
 		var image = $('#emotion-c');
@@ -475,6 +483,7 @@
 				$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;font-size:24px;'><font size=10 color='#e9e5da'><b>"+Tooltip[e.key]+"</b></font></img>");
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
+				$("#overlay").css("z-index","1010");
 				if(window.antrip){
 					window.antrip.setEmotion(id[e.key]);
 				}

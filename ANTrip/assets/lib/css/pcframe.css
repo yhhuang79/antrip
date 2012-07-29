@@ -374,6 +374,7 @@
 		margin-top: 0px;
 		margin-left:0px;
 		display:none;
+		z-index:1011;
 	}
 
 	#emotion_compass{
@@ -382,6 +383,7 @@
 		margin-top:-620px;
 		margin-left:0px;
 		display:none;
+		z-index:1020;
 	}
 
 	#div_langOption{
@@ -402,3 +404,16 @@
 		background-size: 18px 18px;
 	}
 	
+	#overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: #000;
+		filter:alpha(opacity=50);
+		-moz-opacity:0.5;
+		-khtml-opacity: 0.5;
+		opacity: 0.5;
+		z-index: 1010;
+	}
