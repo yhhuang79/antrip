@@ -870,7 +870,7 @@
 					if(window.antrip && localresult!=-1)
 					{
 						$.each(localresult.tripInfoList, function(i,data){
-							var l_trip_id = new number(data.trip_id);
+							var l_trip_id = new Number(data.trip_id);
 							l_trip_id = l_trip_id.toFixed();
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
@@ -888,7 +888,8 @@
 					
 					if(result != null && result.tripInfoList != null && result.tripInfoList.length>0){
 						g_tripnum = result.tripInfoList[0].trip_id;
-						//g_tripnum = g_tripnum.toString().replace("a", "");
+													var l_trip_id = new Number(g_tripnum);
+							l_trip_id = l_trip_id.toFixed();
 						g_triplength = result.tripInfoList.length;
 						$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
 						$.each(result.tripInfoList, function(i,data){
