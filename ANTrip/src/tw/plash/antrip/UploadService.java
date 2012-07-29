@@ -248,7 +248,7 @@ public class UploadService extends Service {
 				// the method to be used, with url
 				HttpPost postRequest = new HttpPost(uploadUrl);
 				//GET DATA FROM DB
-				JSONObject data = dh.getOneTripData(userid, newTripid);
+				JSONObject data = dh.getOneTripData(userid, newTripid, true);
 				// pair our data with corresponding name
 				List<NameValuePair> param = new ArrayList<NameValuePair>();
 				param.add(new BasicNameValuePair("trip", data.toString()));

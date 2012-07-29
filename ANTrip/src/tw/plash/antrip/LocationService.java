@@ -121,9 +121,11 @@ public class LocationService extends Service {
 			// save it to DB
 			startNewTrip = true;
 			stats = new TripStats();
-			setTimer();
-
+			
 			isRecording = true;
+			
+			setTimer();
+			
 
 		} else if (action.equals("ACTION_STOP_RECORDING")) {
 
@@ -136,6 +138,7 @@ public class LocationService extends Service {
 			Log.e("locationService", "tripname= " + name);
 			dh.insertEndInfo(currentSid, currentTid, name, new Timestamp(
 					new Date().getTime()).toString(), stats.getLength());
+			
 			// stop saving location updates into DB
 			// kill the runnable that's been saving location to DB
 			stopTimer();
@@ -164,25 +167,25 @@ public class LocationService extends Service {
 			// XXX cco is received, broadcast this location + cco in
 			// checkInDataList format, also save it to DB
 			dh.insert(checkinLocationBuffer, currentSid, currentTid, cco);
-			//the object to be returned
+			// the object to be returned
 			JSONObject addpos = new JSONObject();
 			try {
-				//the ckeckInDataList jsonarray
+				// the ckeckInDataList jsonarray
 				JSONArray array = new JSONArray();
-				//the object within jsonarray
+				// the object within jsonarray
 				JSONObject tmp = new JSONObject();
 				tmp.put("lat", checkinLocationBuffer.getLatitude());
 				tmp.put("lng", checkinLocationBuffer.getLongitude());
 				tmp.put("timestamp", checkinLocationBuffer.getTime());
-				//the object within one entry of data
+				// the object within one entry of data
 				JSONObject checkin = new JSONObject();
-				if(cco.getPicturePath() != null){
+				if (cco.getPicturePath() != null) {
 					checkin.put("picture_uri", cco.getPicturePath());
 				}
-				if(cco.getEmotionID() != null){
+				if (cco.getEmotionID() != null) {
 					checkin.put("emotion", cco.getEmotionID());
 				}
-				if(cco.getCheckinText() != null){
+				if (cco.getCheckinText() != null) {
 					checkin.put("message", cco.getCheckinText());
 				}
 				tmp.put("CheckIn", checkin);
@@ -191,15 +194,26 @@ public class LocationService extends Service {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			Intent ccoIntent = new Intent("ACTION_LOCATION_SERVICE_ADD_POSITION");
+			Intent ccoIntent = new Intent(
+					"ACTION_LOCATION_SERVICE_ADD_POSITION");
 			ccoIntent.putExtra("location", addpos.toString());
 			sendBroadcast(ccoIntent);
-			
+
 		} else if (action.equals("ACTION_CANCEL_CHECKIN")) {
 			Log.e("LocationService", "cancel check-in");
 			// clear temp check-in location object
 			checkinLocationBuffer = null;
 			cco = null;
+		} else if (action.equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")) {
+			if(dh != null && dh.DBIsOpen()){
+				JSONObject syncPos = dh.getOneTripData(currentSid, currentTid, false);
+				Intent syncIntent = new Intent(
+						"ACTION_LOCATION_SERVICE_ADD_POSITION");
+				syncIntent.putExtra("location", syncPos.toString());
+				sendBroadcast(syncIntent);
+			} else{
+				errorStopService("dh is null or db is closed");
+			}
 		} else {
 			// unknown ACTION given, stop service
 			errorStopService(error_unknown_action);
@@ -254,10 +268,13 @@ public class LocationService extends Service {
 					 */
 					JSONObject addpos = new JSONObject();
 					try {
-						addpos.put("lat", recorderLocationBuffer.getLatitude());
-						addpos.put("lng", recorderLocationBuffer.getLongitude());
-						addpos.put("timestamp",
-								recorderLocationBuffer.getTime());
+						JSONArray array = new JSONArray();
+						JSONObject tmp = new JSONObject();
+						tmp.put("lat", recorderLocationBuffer.getLatitude());
+						tmp.put("lng", recorderLocationBuffer.getLongitude());
+						tmp.put("timestamp", recorderLocationBuffer.getTime());
+						array.put(tmp);
+						addpos.put("CheckInDataList", array);
 					} catch (JSONException e) {
 						e.printStackTrace();
 					}

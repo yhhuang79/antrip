@@ -156,6 +156,7 @@ public class ANTripActivity extends Activity {
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
 		public String getLocalTripList(){
+			Log.e("activity", "getlocaltriplist called");
 //			Toast.makeText(mContext, "getLocalTripList", Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
 			
@@ -163,8 +164,10 @@ public class ANTripActivity extends Activity {
 			
 			//null means no local trip history, don't return null, return -1 instead
 			if(result != null){
+				Log.e("activity", "localtriplist=" + result.toString());
 				return result.toString();
 			} else{
+				Log.e("activity", "localtriplist=-1");
 				return "-1";
 			}
 		}
@@ -198,6 +201,9 @@ public class ANTripActivity extends Activity {
 			case 3:
 				//start location service
 				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
+				if(pref.getString("isRecording", null) != null && pref.getString("isRecording", null).equals("true")){
+					startService(new Intent(mContext, LocationService.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
+				}
 				break;
 			case 1:
 			case 2:
@@ -322,15 +328,6 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 //			Log.e("locale/getVariant", Locale.getDefault().getVariant());
 			return Locale.getDefault().getLanguage();
 		}
-		
-//		public JSONObject getTripStats(){
-//			return null;
-//		}
-		
-//		public void setTripName(String name){
-//			//save trip name to DB
-//			
-//		}
 		
 		//TODO auto upload, no user interaction involved
 //		public void uploadTrip(String tripid){

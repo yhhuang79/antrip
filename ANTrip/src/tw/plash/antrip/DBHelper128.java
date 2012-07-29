@@ -17,6 +17,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.location.Location;
+import android.util.Log;
 
 /**
  * @author CSZU
@@ -298,8 +299,10 @@ public class DBHelper128 {
 			cv.put("endtime", endtime);
 			cv.put("length", length);
 			//count the number of points directly from DB
-			int count = (int) getNumberofPoints(tripid);
+			int count = (int) getNumberofPoints(userid, tripid);
 			cv.put("count", count);
+			
+			Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else{
 			return -2;
@@ -415,8 +418,8 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long getNumberofPoints(String tripid) {
-		String sql = "SELECT COUNT(id) FROM " + TRIP_POINT_TABLE + " WHERE uploaded=0";
+	synchronized public long getNumberofPoints(String userid, String tripid) {
+		String sql = "SELECT COUNT(id) FROM " + TRIP_POINT_TABLE + " WHERE userid=" + userid + " AND tripid=" + tripid;
 		if (db.isOpen()) {
 			SQLiteStatement statement = db.compileStatement(sql);
 			long result = statement.simpleQueryForLong();
@@ -499,7 +502,7 @@ public class DBHelper128 {
 	 * @param tripid
 	 * @return CheckInDataList styled trip data JSONObject
 	 */
-	synchronized public JSONObject getOneTripData(String userid, String tripid){
+	synchronized public JSONObject getOneTripData(String userid, String tripid, boolean forUpload){
 		if(db.isOpen()){
 			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null, null, "id ASC");
 			if(mCursor != null){
@@ -523,7 +526,13 @@ public class DBHelper128 {
 							if(mCursor.getString(mCursor.getColumnIndex("picture")) != null){
 								//picture exists! put it in
 								//XXX cannot pass the complete path, need to strip it till only filename is left
-								checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")));
+								if(forUpload){
+									//this call is for uploading, put in only the filename
+									checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")).substring(mCursor.getString(mCursor.getColumnIndex("picture")).lastIndexOf("/")));
+								} else{
+									//return complete path, this call is for drawing purpose
+									checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndex("picture")));
+								}
 							} else if(mCursor.getString(mCursor.getColumnIndex("emotion")) != null){
 								//emotion exists! put it in
 								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndex("emotion")));
