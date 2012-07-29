@@ -323,7 +323,13 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public JSONObject getPositionList(String userid, String tripid){
+	/**
+	 * for sync position function call
+	 * @param userid
+	 * @param tripid
+	 * @return
+	 */
+	synchronized public JSONObject getSyncPositionList(String userid, String tripid){
 		if(db.isOpen()){
 			Cursor mCursor = db.query(TRIP_POINT_TABLE, new String[]{""}, "something=something", null, null, null, "timestamp ASC");
 			if(mCursor != null){
@@ -350,42 +356,6 @@ public class DBHelper128 {
 			return null;
 		}
 	}
-	
-	
-	/**
-	 * get all points from realtime data table for drawing purpose
-	 * 
-	 * @return a list of cachedPoints with lat, lon values for drawing, null if
-	 *         anything goes wrong
-	 */
-	/*
-	synchronized public List<CachedPoints> getDrawingPoints(String tripid) {
-		if (db.isOpen()) {
-			Cursor mCursor = db.query(TRIP_POINT_TABLE, new String[] { "latitude", "longitude" },
-					"tripid = " + tripid, null, null, null, "id ASC");
-			if (mCursor != null) {
-				if (mCursor.moveToFirst()) {
-					List<CachedPoints> list = new ArrayList<CachedPoints>();
-					do {
-						list.add(new CachedPoints(mCursor.getDouble(0), mCursor.getDouble(1)));
-					} while (mCursor.moveToNext());
-					if (!mCursor.isClosed()) {
-						mCursor.close();
-					}
-					return list;
-				} else {
-					if (!mCursor.isClosed()) {
-						mCursor.close();
-					}
-					return null;
-				}
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}*/
 	
 	/**
 	 * update the temporary random tripid with actual tripid from plash server
@@ -625,8 +595,8 @@ public class DBHelper128 {
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					JSONObject result = new JSONObject();
-					JSONArray list = new JSONArray();
 					try {
+						JSONArray list = new JSONArray();
 						//movetofirst is true, there is at least one entry of data
 						do{
 							//construct one entry of trip info

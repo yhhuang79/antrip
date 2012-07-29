@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.Locale;
 import java.util.PriorityQueue;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -60,7 +62,12 @@ public class ANTripActivity extends Activity {
 				//recording, syncing the whole position list
 			} else if(intent.getAction().equals("ACTION_LOCATION_SERVICE_ADD_POSITION")){
 				String addpos = intent.getExtras().getString("location");
-				String addPositionUrl = "javascript:addPosition(" + addpos + ")";
+				String addPositionUrl = null;
+				try {
+					addPositionUrl = "javascript:addPosition(" + new JSONObject(new JSONTokener(addpos)) + ")";
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
 				queuedLoadURL(addPositionUrl);
 				//recording, adding a new point to the list
 			} else if(intent.getAction().equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")){
@@ -160,7 +167,7 @@ public class ANTripActivity extends Activity {
 //			Toast.makeText(mContext, "getLocalTripList", Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
 			
-			result = new GetLocalTripList(mContext).execute();
+			result = new GetLocalTrip(mContext).Info();
 			
 			//null means no local trip history, don't return null, return -1 instead
 			if(result != null){
@@ -170,6 +177,21 @@ public class ANTripActivity extends Activity {
 				Log.e("activity", "localtriplist=-1");
 				return "-1";
 			}
+		}
+		
+		public String getLocalTripData(String tripid){
+			Log.e("activity", "getlocaltriplist called");
+			JSONObject result = null;
+			
+			result = new GetLocalTrip(mContext).Data(tripid);
+			
+			if(result != null){
+				Log.e("activity", "localtrip tid=" + tripid + ", result=" + result.toString());
+				return result.toString();
+			} else{
+				return "-1";
+			}
+			
 		}
 		
 		/**
