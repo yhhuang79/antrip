@@ -9,6 +9,8 @@
 
 	var g_mapPath = null;
 
+	var latlng_undefined_value=-999;
+
 	var emotionMapping = {	
 		1: "excited",
 		2: "happy",
@@ -234,43 +236,45 @@
 		$.each(result.CheckInDataList, function(i, point) {
 			g_current_latitude = point.lat.valueOf() / 1000000;
 			g_current_longitude = point.lng.valueOf() / 1000000;
-			var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-			self.setCenter(latlng);
-			self.setZoom(g_zoom);
-			g_tripPointArray_2.push(latlng);
-			if (typeof point.CheckIn != 'undefined'){
-				var checkinmarker =  new google.maps.Marker({ 
-					'position': latlng, 
-					'bounds': true,
-					'icon': im+"placemarker.png",
-					map: self
-				});
-				var infowindow = new google.maps.InfoWindow(
-				{ 
-					//'content': "<p><img src='"+im+e.key+".png' /></p><p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>"
-					'content': "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>"
-					
-				});
-				google.maps.event.addListener(checkinmarker, 'click', function() {
-					infowindow.open(self,checkinmarker);
-				});		
+			if(g_current_latitude != latlng_undefined_value && g_current_longitude !=latlng_undefined_value){
+				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+				self.setCenter(latlng);
+				self.setZoom(g_zoom);
+				g_tripPointArray_2.push(latlng);
+				if (typeof point.CheckIn != 'undefined'){
+					var checkinmarker =  new google.maps.Marker({ 
+						'position': latlng, 
+						'bounds': true,
+						'icon': im+"placemarker.png",
+						map: self
+					});
+					var infowindow = new google.maps.InfoWindow(
+					{ 
+						//'content': "<p><img src='"+im+e.key+".png' /></p><p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>"
+						'content': "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>"
+						
+					});
+					google.maps.event.addListener(checkinmarker, 'click', function() {
+						infowindow.open(self,checkinmarker);
+					});		
 
-				//placemarker.setMap(self);	
-				g_tripMarkerArray_2.push(placemarker);
-			} else {
-				var marker =  new google.maps.Marker({ 
-					'position': latlng, 
-					'bounds': true
-				});
-				var infowindow = new google.maps.InfoWindow(
-				{ 
-					'content': marker.timestamp
-				});
-				google.maps.event.addListener(marker, 'click', function() {
-					infowindow.open(self,marker);
-				});
+					//placemarker.setMap(self);	
+					g_tripMarkerArray_2.push(placemarker);
+				} else {
+					var marker =  new google.maps.Marker({ 
+						'position': latlng, 
+						'bounds': true
+					});
+					var infowindow = new google.maps.InfoWindow(
+					{ 
+						'content': marker.timestamp
+					});
+					google.maps.event.addListener(marker, 'click', function() {
+						infowindow.open(self,marker);
+					});
 
-				marker.setMap(self);
+					marker.setMap(self);
+				}
 			}
 		});
 		DrawLine();
