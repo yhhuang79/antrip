@@ -278,7 +278,9 @@
 
 					marker.setMap(self);
 				}
-//				$("#overlay").css("display","none");
+				if( $('#markplacewindow').is(":visible") == false) {
+					$("#overlay").css("display","none");
+				}
 			}
 		});
 		DrawLine();
