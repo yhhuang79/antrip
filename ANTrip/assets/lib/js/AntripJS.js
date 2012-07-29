@@ -918,7 +918,7 @@
 				g_tripPointArray = new Array(0);
 				g_tripMarkerArray = new Array(0);
 				self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
-				$.each(result.CheckInDataList, function(i, point) {
+				$.each(localtripdata.CheckInDataList, function(i, point) {
 					var lat = point.lat.valueOf() / 1000000;
 					var lng = point.lng.valueOf() / 1000000;
 					var latlng = new google.maps.LatLng(lat, lng);
