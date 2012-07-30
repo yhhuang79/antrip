@@ -38,7 +38,7 @@
 							'bounds': true,
 							'icon': im+"placemarker.png",
 						}).click(function(){
-							var CheckInInfo;
+							var CheckInInfo="";
 							if(point.CheckIn.picture_uri!=null || typeof point.CheckIn.picture_uri!='undefined'){
 								CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='300' /></p>";
 							}

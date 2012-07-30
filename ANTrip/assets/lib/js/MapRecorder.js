@@ -188,7 +188,7 @@
 						'icon': im+"placemarker.png",
 						map: self
 					});
-					var CheckInInfo;
+					var CheckInInfo="";
 					if(point.CheckIn.picture_uri!=null || typeof point.CheckIn.picture_uri!='undefined'){
 						CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='300' /></p>";
 					}
