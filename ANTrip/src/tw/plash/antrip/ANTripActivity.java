@@ -62,12 +62,7 @@ public class ANTripActivity extends Activity {
 				//recording, syncing the whole position list
 			} else if(intent.getAction().equals("ACTION_LOCATION_SERVICE_ADD_POSITION")){
 				String addpos = intent.getExtras().getString("location");
-				String addPositionUrl = null;
-				try {
-					addPositionUrl = "javascript:addPosition(" + new JSONObject(new JSONTokener(addpos)) + ")";
-				} catch (JSONException e) {
-					e.printStackTrace();
-				}
+				String addPositionUrl = "javascript:addPosition(" + addpos + ")";
 				queuedLoadURL(addPositionUrl);
 				//recording, adding a new point to the list
 			} else if(intent.getAction().equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")){
@@ -253,7 +248,7 @@ public class ANTripActivity extends Activity {
 			String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
 			//complete file path for picture
 			imageUri = Uri.fromFile(new File(imagepath, imagename));
-Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
+Log.e("startcamera", "imageUri= " + imageUri.getPath());
 			//intent to launch Android camera app to take pictures
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			//input the desired filepath + filename
@@ -270,6 +265,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 */
 		public void setEmotion(int id){
 			if(cco!=null){
+				Log.e("activity", "setEmotion= " + id);
 				cco.setEmotionID(id);
 			}
 		}
@@ -279,6 +275,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 */
 		public void setText(String text){
 			if(cco != null){
+				Log.e("activity", "setText= " + text);
 				cco.setCheckinText(text);
 			}
 		}
@@ -288,6 +285,7 @@ Log.e("startcamera", "imageUri= \"" + imageUri.getPath()+"\"");
 		 * also request a coordinate from location service
 		 */
 		public void startCheckin(){
+			Log.e("activity", "start checkin called");
 			cco = new CandidateCheckinObject();
 			//request a check-in location from service
 			startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
