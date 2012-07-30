@@ -1,9 +1,6 @@
 package tw.plash.antrip;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -664,9 +661,17 @@ public class DBHelper128 {
 	 * @param userid
 	 * @return JSONObject format trip info
 	 */
-	synchronized public JSONObject getAllTripInfoForHTML(String userid){
+	synchronized public JSONObject getAllTripInfoForHTML(String userid, String currentTripid){
 		if(db.isOpen()){
-			Cursor mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "tripid DESC");
+			Cursor mCursor = null;
+			if(currentTripid != null){
+				Log.e("getalltripinfoforhtml", "tripid!=null");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid, null, null, null, "tripid DESC");
+			} else{
+				Log.e("getalltripinfoforhtml", "tripid=null");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "tripid DESC");
+			}
+			
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					JSONObject result = new JSONObject();

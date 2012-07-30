@@ -183,7 +183,7 @@ public class ANTripActivity extends Activity {
 			result = new GetLocalTrip(mContext).Data(Integer.valueOf(id));
 			
 			if(result != null){
-				Log.e("activity", "localtrip tid=" + "" + ", result=" + result.toString());
+				Log.e("activity", "getlocaltripdata=" + result.toString());
 				return result.toString();
 			} else{
 				return "-1";

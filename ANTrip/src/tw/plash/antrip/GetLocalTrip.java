@@ -27,7 +27,7 @@ public class GetLocalTrip {
 	public JSONObject Info() {
 		if (uid != null) {
 			//query all trip infos with the input uid
-			result = dh.getAllTripInfoForHTML(uid);
+			result = dh.getAllTripInfoForHTML(uid, pref.getString("trip_id", null));
 			if(dh.DBIsOpen()){
 				dh.closeDB();
 			}
