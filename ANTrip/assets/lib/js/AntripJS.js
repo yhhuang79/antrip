@@ -75,7 +75,7 @@
 			  fileref.setAttribute("type", "text/css");
 			  fileref.setAttribute("href", filename);
 		 }
-		 if (typeof fileref!="undefined"){
+		 if (typeof fileref!='undefined'){
 			  document.getElementsByTagName("head")[0].appendChild(fileref);
 		 }
 	}
@@ -891,13 +891,13 @@
 									'icon': im+"placemarker.png",
 								}).click(function(){
 									var CheckInInfo;
-									if(point.CheckIn.picture_uri!=null || point.CheckIn.picture_uri!="undefined"){
+									if(point.CheckIn.picture_uri!=null || typeof point.CheckIn.picture_uri!='undefined'){
 										CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p>";
 									}
-									if(point.CheckIn.emotion!=null || point.CheckIn.emotion!="undefined"){
+									if(point.CheckIn.emotion!=null || typeof point.CheckIn.emotion!='undefined'){
 										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
 									}
-									if(point.CheckIn.message!=null || point.CheckIn.message!="undefined"){
+									if(point.CheckIn.message!=null || typeof point.CheckIn.message!='undefined'){
 										CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
 									}
 

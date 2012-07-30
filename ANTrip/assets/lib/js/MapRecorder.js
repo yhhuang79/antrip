@@ -5,6 +5,7 @@
 	var g_emotion_html=null;
 	var g_tripPointArray_2 = new Array(0);
 	var g_tripMarkerArray_2 = new Array(0);
+	var g_tripPointObjArray_2 = new Array(0);
 
 	var g_mapPath = null;
 	var g_currentmarker = null;
@@ -68,8 +69,12 @@
 		for(i=0;i<g_tripMarkerArray_2.length;i++){
 			g_tripMarkerArray_2[i].setMap(null);
 		}
+		for(i=0;i<g_tripPointObjArray_2.length;i++){
+			g_tripPointObjArray_2[i].setMap(null);
+		}
 		g_tripPointArray_2 = new Array(0);
 		g_tripMarkerArray_2 = new Array(0);
+		g_tripPointObjArray_2 = new Array(0);
 		g_emotion_html=null;
 	}
 
@@ -161,10 +166,10 @@
 		var self =  $('#map_canvas_2').gmap('get','map');
 		$.each(result.CheckInDataList, function(i, point) {
 			if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){	
-				if(g_currentmarker!=null){
+				/*if(g_currentmarker!=null){
 					g_currentmarker.setMap(null);
 					g_currentmarker = null;
-				}
+				}*/
 				g_current_latitude = point.lat;
 				g_current_longitude = point.lng;
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
@@ -179,13 +184,13 @@
 						map: self
 					});
 					var CheckInInfo;
-					if(point.CheckIn.picture_uri!=null || point.CheckIn.picture_uri!="undefined"){
+					if(point.CheckIn.picture_uri!=null || typeof point.CheckIn.picture_uri!='undefined'){
 						CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p>";
 					}
-					if(point.CheckIn.emotion!=null || point.CheckIn.emotion!="undefined"){
+					if(point.CheckIn.emotion!=null || typeof point.CheckIn.emotion!='undefined'){
 						CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
 					}
-					if(point.CheckIn.message!=null || point.CheckIn.message!="undefined"){
+					if(point.CheckIn.message!=null || typeof point.CheckIn.message!='undefined'){
 						CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
 					}
 					CheckInInfo +="<p>"+g_current_latitude+", "+g_current_longitude+"</p>";
@@ -222,6 +227,7 @@
 					});
 
 					marker.setMap(self);
+					g_tripPointObjArray_2.push(marker);
 				}
 				if( $('#markplacewindow').is(":visible") == false) {
 					$("#overlay").css("display","none");
