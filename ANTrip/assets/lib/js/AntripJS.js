@@ -902,8 +902,8 @@
 									}
 
 									CheckInInfo +="<p>"+lat+", "+lng+"</p>";
-									//self.openInfoWindow({'content': CheckInInfo}, this);
-									if(g_infowindow==null){
+									self.openInfoWindow({'content': CheckInInfo}, this);
+									/*if(g_infowindow==null){
 										g_infowindow = new google.maps.InfoWindow({
 											content: CheckInInfo
 										});
@@ -912,7 +912,7 @@
 									else{
 										g_infowindow.close();
 										g_infowindow=null;
-									}
+									}*/
 								});
 								g_tripMarkerArray.push(placemarker);
 							} else {
@@ -920,8 +920,8 @@
 									'position': latlng, 
 									'bounds': true
 								}).click(function(){
-									//self.openInfoWindow({'content': point.timestamp}, this);
-									if(g_infowindow==null){
+									self.openInfoWindow({'content': point.timestamp}, this);
+									/*if(g_infowindow==null){
 										g_infowindow = new google.maps.InfoWindow({
 											content: point.timestamp
 										});
@@ -930,7 +930,7 @@
 									else{
 										g_infowindow.close();
 										g_infowindow=null;
-									}
+									}*/
 								});
 							}
 						}

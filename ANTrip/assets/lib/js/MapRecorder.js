@@ -385,7 +385,6 @@
 			else{
 				infowindow.close();
 			}
-			//self.openInfoWindow({'content': CheckInInfo}, this);
 		});
 		marker.setMap(self);
 		setPosition(g_current_latitude, g_current_longitude);
