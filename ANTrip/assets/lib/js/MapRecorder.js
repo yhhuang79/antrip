@@ -128,6 +128,7 @@
 					if(window.antrip){
 						window.antrip.stopRecording($('#trip_name').val());
 						window.antrip.removeCookie("isRecording");
+						window.antrip.removeCookie("trip_id");
 					}
 					else{
 						alert("ANTrip APP Exception!");
