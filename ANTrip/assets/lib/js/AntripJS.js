@@ -978,6 +978,13 @@
 						}
 						index++;
 					});
+					self.addShape('Polyline',{
+						'strokeColor': "#FF0000", 
+						'strokeOpacity': 0.8, 
+						'strokeWeight': 4, 
+						'path': g_tripPointArray
+					});
+					$('#map_canvas').gmap('refresh');
 					$("#overlay").css("display","none");
 					$("#overlay").html("");
 				}});
