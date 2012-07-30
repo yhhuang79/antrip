@@ -222,6 +222,7 @@ public class ANTripActivity extends Activity {
 			case 3:
 				//start location service
 				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
 				if(isrec != null && isrec.equals("true")){
 					startService(new Intent(mContext, LocationService.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
 				}
@@ -403,7 +404,7 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		registerReceiver(br, filter);
 		// only notify service to start broadcasting if it is running, either isrec = true, or we're in mode 3
 		String isrec = pref.getString("isRecording", null);
-		if(isrec != null && isrec.equals("true") || currentMode == 3){
+		if(isrec != null && isrec.equals("true") || (currentMode != null && currentMode == 3)){
 			startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
 		}
 	}
@@ -414,7 +415,7 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		//save to pref that activity is NOT ready for broadcast
 		String isrec = pref.getString("isRecording", null);
 		//only 2 cases where service is running, isrec = true, or we're in mode 3
-		if(isrec != null && isrec.equals("true") || currentMode == 3){
+		if(isrec != null && isrec.equals("true") || (currentMode != null && currentMode == 3)){
 			startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
 		}
 		// need to notify location service not to send location update

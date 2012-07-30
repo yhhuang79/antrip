@@ -94,6 +94,7 @@ public class LocationService extends Service {
 		Log.e("locationService", "period= " + periodMS + " milliseconds");
 		
 		String action = intent.getAction();
+		Log.e("location service", "action= " + action);
 		if (action == null) {
 			// does not accept startService call without any given ACTION
 			errorStopService(error_no_action);
@@ -161,21 +162,14 @@ public class LocationService extends Service {
 			cco = (CandidateCheckinObject) intent.getExtras().getSerializable("cco");
 			// only save check-in to DB when lcheckinlocationbuffer is not null
 			String picPath = cco.getPicturePath();
-			if (checkinLocationBuffer != null) {
-				if (picPath != null) {
-					GeoTagPicture(picPath, checkinLocationBuffer.getLatitude(), checkinLocationBuffer.getLongitude());
-				}
-				dh.insert(checkinLocationBuffer, currentSid, currentTid, cco);
-			} else {
-				// otherwise use the nearest recorderlocationbuffer to replace it
-				// XXX this is a last resort kind of method, saving multiple
-				// check-in to the same location will compromise the user experience
-				if (picPath != null) {
-					//need to geotag the picture before saving it to DB
-					GeoTagPicture(picPath, recorderLocationBuffer.getLatitude(), recorderLocationBuffer.getLongitude());
-				}
-				dh.insert(recorderLocationBuffer, currentSid, currentTid, cco);
+			//replace null checkin location buffer with recorder location buffer
+			if (checkinLocationBuffer == null) {
+				checkinLocationBuffer = recorderLocationBuffer;
+			} 
+			if (picPath != null) {
+				GeoTagPicture(picPath, checkinLocationBuffer.getLatitude(), checkinLocationBuffer.getLongitude());
 			}
+			dh.insert(checkinLocationBuffer, currentSid, currentTid, cco);
 			// the object to be returned
 			JSONObject addpos = new JSONObject();
 			try {
@@ -395,6 +389,11 @@ public class LocationService extends Service {
 			} else {
 				// if < maximum retry, try again
 				if (checkinTryCounter < MAX_RETRY) {
+					try {
+						Thread.sleep(300);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 					getCheckinLocation();
 				}
 			}
