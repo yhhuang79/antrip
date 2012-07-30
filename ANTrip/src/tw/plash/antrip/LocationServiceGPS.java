@@ -22,22 +22,12 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.skyhookwireless.wps.WPSAuthentication;
-import com.skyhookwireless.wps.WPSContinuation;
-import com.skyhookwireless.wps.WPSLocation;
-import com.skyhookwireless.wps.WPSLocationCallback;
-import com.skyhookwireless.wps.WPSPeriodicLocationCallback;
-import com.skyhookwireless.wps.WPSReturnCode;
-import com.skyhookwireless.wps.XPS;
-
-public class LocationService extends Service {
+public class LocationServiceGPS extends Service {
 	/**
 	 * check-in related stuff
 	 */
 	private Location checkinLocationBuffer = null;
 	private CandidateCheckinObject cco;
-	private final int MAX_RETRY = 5;
-	private int checkinTryCounter;
 	/**
 	 * recording related
 	 */
@@ -54,8 +44,8 @@ public class LocationService extends Service {
 	 * generic
 	 */
 	private boolean activityCanBroadcast;
-	private XPS _xps;
-	private WPSAuthentication auth;
+//	private XPS _xps;
+//	private WPSAuthentication auth;
 	private SharedPreferences pref;
 	private Integer periodSEC;
 	private Long periodMS;
@@ -67,6 +57,34 @@ public class LocationService extends Service {
 	private String error_no_action = "NO ACTION SPECIFIED, TERMINATE SERVICE";
 	private String error_unknown_action = "UNKNOWN ACTION GIVEN, TERMINATE SERVICE";
 	
+	private LocationManager lm;
+	private LocationListener listener = new LocationListener() {
+		
+		@Override
+		public void onStatusChanged(String provider, int status, Bundle extras) {}
+		
+		@Override
+		public void onProviderEnabled(String provider) {}
+		
+		@Override
+		public void onProviderDisabled(String provider) {}
+		
+		@Override
+		public void onLocationChanged(Location location) {
+			recorderLocationBuffer = location;
+			if (!isRecording) {
+				// Broadcasts when not recording
+				Intent intent = new Intent();
+				intent.setAction("ACTION_LOCATION_SERVICE_SET_POSITION");
+				intent.putExtra("location", recorderLocationBuffer);
+				if (activityCanBroadcast) {
+					sendBroadcast(intent);
+				}
+			}
+			Log.d("location service", "periodic location= " + recorderLocationBuffer.toString());
+		}
+	};
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -77,8 +95,10 @@ public class LocationService extends Service {
 		pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		currentSid = pref.getString("sid", "-1");
 		
-		_xps = new XPS(getApplicationContext());
-		auth = new WPSAuthentication("plash", "iis.sinica.edu.tw");
+		lm = (LocationManager) getSystemService(LOCATION_SERVICE);
+		
+//		_xps = new XPS(getApplicationContext());
+//		auth = new WPSAuthentication("plash", "iis.sinica.edu.tw");
 		
 		nullLocation = new Location("");
 		nullLocation.setLatitude(-999.0);
@@ -107,9 +127,11 @@ public class LocationService extends Service {
 			// interval change
 			if (periodSEC != oldPeriodSEC) {
 				Log.e("getXPSLocation", "period= " + periodSEC);
-				_xps.getXPSLocation(auth, periodSEC, XPS.EXACT_ACCURACY, recorderCallback);
+				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, listener);
+//				_xps.getXPSLocation(auth, periodSEC, XPS.EXACT_ACCURACY, recorderCallback);
 				// if recording, update the timer
 				if (isRecording) {
+					Log.e("location service", "should not see this");
 					stopTimer();
 					setTimer();
 				}
@@ -154,11 +176,8 @@ public class LocationService extends Service {
 			
 		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
 			Log.e("LocationService", "get check-in location");
-			// try to get a location for check-in purpose, maximum retry is 5
-			// times
-			// request one location for picture geotagging
-			checkinTryCounter = 0;
-			getCheckinLocation();
+			checkinLocationBuffer = recorderLocationBuffer;
+			
 		} else if (action.equals("ACTION_SAVE_CCO")) {
 			Log.e("LocationService", "save cco");
 			// save check-in data to DB
@@ -167,9 +186,6 @@ public class LocationService extends Service {
 			String picPath = cco.getPicturePath();
 			// replace null checkin location buffer with recorder location
 			// buffer
-			if (checkinLocationBuffer == null) {
-				checkinLocationBuffer = recorderLocationBuffer;
-			}
 			if (picPath != null) {
 				GeoTagPicture(picPath, checkinLocationBuffer.getLatitude(), checkinLocationBuffer.getLongitude());
 			}
@@ -233,10 +249,6 @@ public class LocationService extends Service {
 			errorStopService(error_unknown_action);
 		}
 		return super.onStartCommand(intent, flags, startId);
-	}
-	
-	private void getCheckinLocation() {
-		_xps.getLocation(auth, null, checkinCallback);
 	}
 	
 	/**
@@ -361,7 +373,7 @@ public class LocationService extends Service {
 		
 		Log.e("locationService", "onDestroy called");
 		
-		_xps.abort();
+		lm.removeUpdates(listener);
 		
 		pref.edit().remove("trip_id").commit();
 		
@@ -377,89 +389,5 @@ public class LocationService extends Service {
 	private Location getCurrentNullLocation() {
 		nullLocation.setTime(System.currentTimeMillis());
 		return nullLocation;
-	}
-	
-	private final RecorderLocationCallback recorderCallback = new RecorderLocationCallback();
-	private final CheckinLocationCallback checkinCallback = new CheckinLocationCallback();
-	
-	public class CheckinLocationCallback implements WPSLocationCallback {
-		
-		@Override
-		public void done() {
-			checkinTryCounter += 1;
-			if (checkinLocationBuffer == null && checkinTryCounter < MAX_RETRY) {
-				// if < maximum retry, try again
-				try {
-					Thread.sleep(300);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				getCheckinLocation();
-			}
-		}
-		
-		@Override
-		public WPSContinuation handleError(WPSReturnCode arg0) {
-			checkinLocationBuffer = null;
-			
-			Log.d("location service", "error code = " + arg0.toString());
-			return WPSContinuation.WPS_CONTINUE;
-		}
-		
-		/**
-		 * This will be the location callback for check in points. Recorder will
-		 * be default at a lower frequency, so a check-in point might not be
-		 * able to tie with a nearby point, thus check-in points need to request
-		 * their own location
-		 */
-		@Override
-		public void handleWPSLocation(WPSLocation arg0) {
-			checkinLocationBuffer = WPS2Location(arg0);
-			Log.d("location service", "check-in location= " + checkinLocationBuffer.toString());
-		}
-	}
-	
-	public class RecorderLocationCallback implements WPSPeriodicLocationCallback {
-		
-		public void done() {}
-		
-		public WPSContinuation handleError(WPSReturnCode error) {
-			if (isRecording) {
-				// save to location buffer when recording
-				// set the time so we can better analysis the situation
-				recorderLocationBuffer = getCurrentNullLocation();
-			}
-			
-			Log.d("location service", "error code = " + error.toString());
-			return WPSContinuation.WPS_CONTINUE;
-		}
-		
-		public WPSContinuation handleWPSPeriodicLocation(WPSLocation wpslocation) {
-			recorderLocationBuffer = WPS2Location(wpslocation);
-			
-			if (!isRecording) {
-				// Broadcasts when not recording
-				Intent intent = new Intent();
-				intent.setAction("ACTION_LOCATION_SERVICE_SET_POSITION");
-				intent.putExtra("location", recorderLocationBuffer);
-				if (activityCanBroadcast) {
-					sendBroadcast(intent);
-				}
-			}
-			Log.d("location service", "periodic location= " + recorderLocationBuffer.toString());
-			return null;
-		}
-	}
-	
-	private Location WPS2Location(WPSLocation l) {
-		Location location = new Location("skyhook");
-		location.setLatitude(l.getLatitude());
-		location.setLongitude(l.getLongitude());
-		location.setTime(l.getTime());
-		location.setAltitude(l.getAltitude());
-		location.setSpeed((float) l.getSpeed());
-		location.setBearing((float) l.getBearing());
-		location.setAccuracy((float) l.getHPE());
-		return location;
 	}
 }
