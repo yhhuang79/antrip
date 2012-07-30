@@ -164,6 +164,15 @@
 	}
 	function PreloadandSet(){
 
+		// reset viewport for mobile device resolution
+		var viewportWidth = $(window).width();
+		var viewportHeight = $(window).height();
+
+		var dpi = (480/(viewportWidth/window.devicePixelRatio))*160;
+		var viewportContent = 'height='+viewportHeight+', target-densityDpi='+dpi+'dpi, initial-scale=1, maximum-scale=1, user-scalable=no';
+		jQuery('#viewportMeta').attr("content", viewportContent);
+		$('head meta[name=viewport]').attr('content', viewportContent);
+ 
 		g_startLatLng = new google.maps.LatLng(25.04752,121.614189);
 		g_myOptions = {zoom:g_zoom,center:g_startLatLng,mapTypeId:google.maps.MapTypeId.ROADMAP};
 
