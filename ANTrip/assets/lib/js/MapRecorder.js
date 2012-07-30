@@ -444,7 +444,7 @@
 				$('#emotion_compass').hide();
 				$("#overlay").css("z-index","1010");
 				if(window.antrip){
-					window.antrip.setEmotion(emotionArray.indexOf(e.key));
+					window.antrip.setEmotion(emotionArray.indexOf(e.key)+1);
 				}
 			},
 			showToolTip: true,
