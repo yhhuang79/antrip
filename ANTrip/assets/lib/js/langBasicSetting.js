@@ -1,5 +1,19 @@
 <!--
 	//set multi-langauge string to object
+	var g_Tooltip = {	
+		excited: g_str_excited,
+		happy: g_str_happy,
+		pleased: g_str_pleased,
+		relaxed: g_str_relaxed,
+		peaceful: g_str_peaceful,
+		sleepy: g_str_sleepy,
+		sad: g_str_sad,
+		bored: g_str_bored,
+		nervous: g_str_nervous,
+		angry: g_str_angry,
+		calm: g_str_calm
+	};
+
 	$('.login_bt_link').html("<p style='font-szie:24px;'><font size=24px><b>" + g_str_login+"</b></font></p>");
 	$('.fblogin_bt_link').html("<p>" + g_str_fblogin+"</p>");
 	$("#username").attr("placeholder", g_username_holder);

@@ -226,48 +226,6 @@
 		//$('#sym_topbtnGroup').show();
 	}
 
-	/*function inputNoteDialog(){
-		var data="<p class=\"validateTips\">"+g_str_tripnotedes+"</p><textarea id='notetextarea'  class=\"text ui-widget-content ui-corner-all\" style=\"width:350px;height:300px;resize:none;\"></textarea>"; 
-		$('#dialog').html( data );
-		$("#dialog").dialog({
-			title: g_str_tripnote,
-				bgiframe: false,
-				width: 450,
-				height: 550,
-				modal: true,
-				draggable: false,
-				resizable: false,
-				//overlay:{opacity: 0.5, background: "black" },
-				buttons: {
-					'OK': function() {
-						$('#dialog').dialog('close');
-					}
-				},
-				close: function() {
-					//$('#dialog').dialog('close');
-				}
-			});
-	}
-
-	function TripListDialog(){
-		g_page=1;
-		ShowTripList(g_page);
-		$("#sym_triplist_in_open_dialog").dialog({
-			title: g_str_triplist,
-				bgiframe: false,
-				width: g_triplist_width,
-				height: g_triplist_height,
-				modal: true,
-				draggable: false,
-				resizable: false,
-				color: "black",
-				//overlay:{opacity: 0.5, background: "black" },
-				close: function() {
-					//$("#sym_triplist_in_open_dialog").dialog('close');
-				}
-			});
-	}*/
-
 	function initNoteDialog(){
 
 	}
@@ -327,31 +285,6 @@
 
 	function show_edit_div(){
 		$('#sym_editpage').show();
-	}
-
-	function showGMap(){
-		g_map = new google.maps.Map(document.getElementById("map_canvas"),g_myOptions);
-		var $marker = new google.maps.Marker({
-			  position: g_startLatLng, 
-			  map: g_map,
-			  title:"Trip Name",
-			  icon: "images/placemarker.png",
-			  draggable: true
-		  });
-
-		google.maps.event.addListener($marker, 'click', function() {
-			if(g_infowindow==null){
-				g_infowindow = new google.maps.InfoWindow({
-					content: 'Information'
-				});
-
-				g_infowindow.open(g_map, $marker);
-			}
-			else{
-				g_infowindow.close();
-				g_infowindow=null;
-			}
-		});
 	}
 
 	function initScrollTopBtn(){
@@ -838,7 +771,6 @@
 	
 	// trip list
 	function ShowTripList(page){
-		//$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
 		var div_data = [];
 		var sid = $.cookie("sid");
 		if(window.antrip){
@@ -864,16 +796,15 @@
 				}
 				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null) ){
 					var str_noTrip = g_str_notrip;
-					//alert(str_noTrip);
 					var appendcontent="<div class='class_friend_bt' style='margin-top:200px;position:static; height:480px;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
 					$("div[id=products]").eq(0).append(appendcontent);
 				}
 				else{
+					g_triplength = 0;
 					if(window.antrip && localresult!=-1)
 					{
+						g_triplength += localresult.tripInfoList.length;
 						$.each(localresult.tripInfoList, function(i,data){
-						//	var l_trip_id = new Number(data.trip_id);
-						//	l_trip_id = l_trip_id.toFixed();
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
@@ -890,9 +821,7 @@
 					
 					if(result != null && result.tripInfoList != null && result.tripInfoList.length>0){
 						g_tripnum = result.tripInfoList[0].trip_id;
-													var l_trip_id = new Number(g_tripnum);
-							l_trip_id = l_trip_id.toFixed();
-						g_triplength = result.tripInfoList.length;
+						g_triplength += result.tripInfoList.length;
 						$("div[id*=tripsum]").append(g_str_numberoftrip+g_triplength);
 						$.each(result.tripInfoList, function(i,data){
 							
@@ -919,19 +848,6 @@
 	}
 
 	function showLocalTripData(trip_id){
-		var Tooltip = {	
-			excited: g_str_excited,
-			happy: g_str_happy,
-			pleased: g_str_pleased,
-			relaxed: g_str_relaxed,
-			peaceful: g_str_peaceful,
-			sleepy: g_str_sleepy,
-			sad: g_str_sad,
-			bored: g_str_bored,
-			nervous: g_str_nervous,
-			angry: g_str_angry,
-			calm: g_str_calm
-		};
 		var localtripdata;
 		$('#map_canvas').show();
 		$('#map_canvas_2').hide();
@@ -947,8 +863,6 @@
 					var self = this;
 					g_tripPointArray = new Array(0);
 					g_tripMarkerArray = new Array(0);
-					//alert(g_startLatLng);
-//					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 					var index=0;
 					$("#overlay").css("display","block");
 					$("#overlay").html(g_str_loading);
@@ -981,14 +895,24 @@
 										CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p>";
 									}
 									if(point.CheckIn.emotion!=null || point.CheckIn.emotion!="undefined"){
-										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
+										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
 									}
 									if(point.CheckIn.message!=null || point.CheckIn.message!="undefined"){
 										CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
 									}
 
 									CheckInInfo +="<p>"+lat+", "+lng+"</p>";
-									self.openInfoWindow({'content': CheckInInfo}, this);
+									//self.openInfoWindow({'content': CheckInInfo}, this);
+									if(g_infowindow==null){
+										g_infowindow = new google.maps.InfoWindow({
+											content: CheckInInfo
+										});
+										g_infowindow.open(self, this);
+									}
+									else{
+										g_infowindow.close();
+										g_infowindow=null;
+									}
 								});
 								g_tripMarkerArray.push(placemarker);
 							} else {
@@ -996,7 +920,17 @@
 									'position': latlng, 
 									'bounds': true
 								}).click(function(){
-									self.openInfoWindow({'content': point.timestamp}, this);
+									//self.openInfoWindow({'content': point.timestamp}, this);
+									if(g_infowindow==null){
+										g_infowindow = new google.maps.InfoWindow({
+											content: point.timestamp
+										});
+										g_infowindow.open(self, this);
+									}
+									else{
+										g_infowindow.close();
+										g_infowindow=null;
+									}
 								});
 							}
 						}
