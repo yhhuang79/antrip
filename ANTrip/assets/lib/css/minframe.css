@@ -324,7 +324,7 @@
 	#markplacewindow{
 		float:left;
 		position: relative;
-		margin-top:-620px;
+		margin-top:-690px;
 		margin-left:0px;
 		display:none;
 		z-index:1012;
@@ -390,4 +390,26 @@
 
 	.login_bt_link{
 		font-szie:24px;
+	}
+	
+	#takepicture_id{
+		width:480px;
+		height:301px;
+	}
+
+	#takepicture{
+		width:450px;
+		height:300px;
+	}
+
+	#sym_textarea_div{
+		width:480px;
+		height:101px;
+		resize:none;
+		background:url('images/s/typenotearea.png') no-repeat
+	}
+
+	#Symbol_ub_home{
+		float:right;
+		text-align:right;
 	}

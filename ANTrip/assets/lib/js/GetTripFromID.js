@@ -40,7 +40,7 @@
 						}).click(function(){
 							var CheckInInfo;
 							if(point.CheckIn.picture_uri!=null || typeof point.CheckIn.picture_uri!='undefined'){
-								CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p>";
+								CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='300' /></p>";
 							}
 							if(point.CheckIn.emotion!=null || typeof point.CheckIn.emotion!='undefined'){
 								CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
