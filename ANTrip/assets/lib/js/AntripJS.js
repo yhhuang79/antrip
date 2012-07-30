@@ -61,6 +61,7 @@
 	var g_ready=false;
 
 	var g_eMode={'eHome':1,'eTripList':2,'eTripDisplay':3,'eFriendList':4};
+	var g_mapPath = null;
 
 	/*! global usage function*/
 	function loadjscssfile(filename, filetype){
@@ -697,6 +698,8 @@
 			}); 
 		}
 		$.cookie("sid", null);
+		$("#username").attr("value","");
+		$("#password").attr("value","");
 		//$.cookie("trip_id", null);
 		if(window.antrip){
 			window.antrip.removeCookie("trip_id");
@@ -869,13 +872,19 @@
 					$.each(localtripdata.CheckInDataList, function(i, point) {
 						//alert(point.lat);
 						if(index>localtripdata.CheckInDataList.length){
-							self.addShape('Polyline',{
+							var self =  $('#map_canvas').gmap('get','map');
+							if(g_mapPath!=null)
+							{
+								g_mapPath.setMap(null);
+								g_mapPath = null;
+							}
+							g_mapPath = new google.maps.Polyline({
 								'strokeColor': "#FF0000", 
 								'strokeOpacity': 0.8, 
 								'strokeWeight': 4, 
 								'path': g_tripPointArray
 							});
-							$('#map_canvas').gmap('refresh');
+							g_mapPath.setMap(self);
 							return;
 						}
 						else if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){

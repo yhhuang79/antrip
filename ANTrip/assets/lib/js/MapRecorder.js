@@ -7,7 +7,6 @@
 	var g_tripMarkerArray_2 = new Array(0);
 	var g_tripPointObjArray_2 = new Array(0);
 
-	var g_mapPath = null;
 	var g_currentmarker = null;
 	var latlng_undefined_value=-999;
 
@@ -360,7 +359,7 @@
 			return;
 		}
 		
-		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+		/*var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 		g_tripPointArray_2.push(latlng);
 
 		var marker = new google.maps.Marker({
@@ -398,7 +397,7 @@
 		g_tripMarkerArray_2.push(marker);
 
 		DrawLine();
-		$('#map_canvas_2').gmap('refresh');
+		$('#map_canvas_2').gmap('refresh');*/
 
 		if(window.antrip){
 			window.antrip.endCheckin();
