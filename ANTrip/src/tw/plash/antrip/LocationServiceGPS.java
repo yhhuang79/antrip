@@ -353,6 +353,7 @@ public class LocationServiceGPS extends Service {
 						// don't want to input null stuff into database
 						recorderLocationBuffer = getCurrentNullLocation();
 					}
+					stats.addOnePoint(recorderLocationBuffer);
 					dh.insert(recorderLocationBuffer, currentSid, currentTid);
 					Log.e("locationService", "actual DB insert2");
 					/**

@@ -34,6 +34,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class ANTripActivity extends Activity {
+	private final boolean useSkyhook = true;
+	
 	private Context mContext;
 	private WebView mWebView;
 	
@@ -197,8 +199,11 @@ public class ANTripActivity extends Activity {
 		 */
 		public String startRecording(){
 			Long tid = System.nanoTime();
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid.toString()));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid.toString()));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid.toString()));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_RECORDING").putExtra("tid", tid.toString()));
+			}
 			return tid.toString();
 		}
 		
@@ -206,8 +211,11 @@ public class ANTripActivity extends Activity {
 		 * 
 		 */
 		public void stopRecording(String tripname){
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING").putExtra("tripname", tripname));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_STOP_RECORDING").putExtra("tripname", tripname));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING").putExtra("tripname", tripname));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_STOP_RECORDING").putExtra("tripname", tripname));
+			}
 		}
 		
 		/*
@@ -223,13 +231,19 @@ public class ANTripActivity extends Activity {
 			switch(currentMode){
 			case 3:
 				//start location service
-//				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
-//				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_SERVICE"));
-				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+				if(useSkyhook){
+					startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
+					startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+				} else{
+					startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_SERVICE"));
+					startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+				}
 				if(isrec != null && isrec.equals("true")){
-//					startService(new Intent(mContext, LocationService.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
-					startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
+					if(useSkyhook){
+						startService(new Intent(mContext, LocationService.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
+					} else{
+						startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
+					}
 				}
 				break;
 			case 1:
@@ -240,8 +254,11 @@ public class ANTripActivity extends Activity {
 				
 				Log.e("setMode", "isrec= " + isrec);
 				if(isrec == null || !isrec.equals("true")){
-//					stopService(new Intent(mContext, LocationService.class));
-					stopService(new Intent(mContext, LocationServiceGPS.class));
+					if(useSkyhook){
+						stopService(new Intent(mContext, LocationService.class));
+					} else{
+						stopService(new Intent(mContext, LocationServiceGPS.class));
+					}
 				}
 				break;
 			}
@@ -298,8 +315,11 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 			Log.e("activity", "start checkin called");
 			cco = new CandidateCheckinObject();
 			//request a check-in location from service
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
+			}
 		}
 		/**
 		 * **check-in method family**
@@ -307,8 +327,11 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		 */
 		public void endCheckin(){
 			//send cco to service via startService call with action and extras
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_SAVE_CCO").putExtra("cco", cco));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_SAVE_CCO").putExtra("cco", cco));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_SAVE_CCO").putExtra("cco", cco));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_SAVE_CCO").putExtra("cco", cco));
+			}
 		}
 		/**
 		 * **check-in method family**
@@ -316,8 +339,11 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		 */
 		public void cancelCheckin(){
 			cco = null;
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_CANCEL_CHECKIN"));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_CANCEL_CHECKIN"));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_CANCEL_CHECKIN"));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_CANCEL_CHECKIN"));
+			}
 		}
 		
 		/**
@@ -413,8 +439,11 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		// only notify service to start broadcasting if it is running, either isrec = true, or we're in mode 3
 		String isrec = pref.getString("isRecording", null);
 		if(isrec != null && isrec.equals("true") || (currentMode != null && currentMode == 3)){
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+			}
 		}
 	}
 	
@@ -425,8 +454,11 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		String isrec = pref.getString("isRecording", null);
 		//only 2 cases where service is running, isrec = true, or we're in mode 3
 		if(isrec != null && isrec.equals("true") || (currentMode != null && currentMode == 3)){
-//			startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
-			startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
+			}
 		}
 		// need to notify location service not to send location update
 		unregisterReceiver(br);
