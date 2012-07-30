@@ -872,7 +872,7 @@
 					$.each(localtripdata.CheckInDataList, function(i, point) {
 						//alert(point.lat);
 						if(index>localtripdata.CheckInDataList.length){
-							var self =  $('#map_canvas').gmap('get','map');
+							var _map =  $('#map_canvas').gmap('get','map');
 							if(g_mapPath!=null)
 							{
 								g_mapPath.setMap(null);
@@ -884,7 +884,7 @@
 								'strokeWeight': 4, 
 								'path': g_tripPointArray
 							});
-							g_mapPath.setMap(self);
+							g_mapPath.setMap(_map);
 							return;
 						}
 						else if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){
