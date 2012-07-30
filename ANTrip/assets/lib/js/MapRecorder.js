@@ -231,7 +231,6 @@
 			angry: g_str_angry,
 			calm: g_str_calm
 		};
-
 		var self =  $('#map_canvas_2').gmap('get','map');
 		$.each(result.CheckInDataList, function(i, point) {
 			if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){	
@@ -365,7 +364,7 @@
 				g_current_latitude = position.coords.latitude;
 				g_current_longitude = position.coords.longitude;
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-				g_tripPointArray_2.push(latlng);
+				//g_tripPointArray_2.push(latlng);
 				setPosition(g_current_latitude, g_current_longitude);
 			}
 		});
@@ -434,15 +433,17 @@
 		var infoWindow = new google.maps.InfoWindow(); 
 		google.maps.event.addListener(marker, 'click', function() {
 			var CheckInInfo;
-			if($("#takepicture").attr("src")==""){
-				CheckInInfo ="<p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
-				if(g_emotion_html==null){
-					CheckInInfo ="<p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
-				}
+			if($("#takepicture").attr("src")!=""){
+				CheckInInfo +="<p><img height='120' src='"+ $("#takepicture").attr("src") +"' /></p>";
 			}
-			else{
-				CheckInInfo ="<p><img height='120' src='"+ $("#takepicture").attr("src") +"' /></p><p>"+ g_emotion_html  +"</p><p>"+ $("#placemarktext").val() +"</p><p>"+g_current_latitude+", "+g_current_longitude+"</p>";
+			if(g_emotion_html!=null){
+				CheckInInfo +="<p>"+ g_emotion_html  +"</p>";
 			}
+			if($("#placemarktext").val()!=null){
+				CheckInInfo +="<p>"+ $("#placemarktext").val() +"</p>";
+			}
+			CheckInInfo +="<p>"+g_current_latitude+", "+g_current_longitude+"</p>";
+
 			infoWindow.setContent(CheckInInfo);
 			if (infoWindow.getMap()==null){
 				infoWindow.open(self,marker);

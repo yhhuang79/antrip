@@ -919,6 +919,19 @@
 	}
 
 	function showLocalTripData(trip_id){
+		var Tooltip = {	
+			excited: g_str_excited,
+			happy: g_str_happy,
+			pleased: g_str_pleased,
+			relaxed: g_str_relaxed,
+			peaceful: g_str_peaceful,
+			sleepy: g_str_sleepy,
+			sad: g_str_sad,
+			bored: g_str_bored,
+			nervous: g_str_nervous,
+			angry: g_str_angry,
+			calm: g_str_calm
+		};
 		var localtripdata;
 		$('#map_canvas').show();
 		$('#map_canvas_2').hide();
@@ -961,9 +974,20 @@
 								var placemarker = self.addMarker({ 
 									'position': latlng, 
 									'bounds': true,
-									'icon': "images/placemarker.png"
+									'icon': im+"placemarker.png",
 								}).click(function(){
-									var CheckInInfo = "<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p><p><img width='72px' src='"+emotionMapping[im+point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[im+point.CheckIn.emotion]]+"</img></p><p>"+ point.CheckIn.message +"</p><p>"+lat+", "+lng+"</p>";
+									var CheckInInfo;
+									if(point.CheckIn.picture_uri!="undefined"){
+										CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='120' /></p>";
+									}
+									if(point.CheckIn.emotion!="undefined"){
+										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
+									}
+									if(point.CheckIn.message!="undefined"){
+										CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
+									}
+
+									CheckInInfo +="<p>"+lat+", "+lng+"</p>";
 									self.openInfoWindow({'content': CheckInInfo}, this);
 								});
 								g_tripMarkerArray.push(placemarker);

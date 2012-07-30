@@ -36,7 +36,7 @@
 						var placemarker = self.addMarker({ 
 							'position': latlng, 
 							'bounds': true,
-							'icon': "images/placemarker.png"
+							'icon': im+"placemarker.png",
 						}).click(function(){
 							var CheckInInfo = "<p>"+ point.CheckIn.message +"</p><img src='"+ point.CheckIn.picture_uri +"' height='120'/>";
 							self.openInfoWindow({'content': CheckInInfo}, this);
