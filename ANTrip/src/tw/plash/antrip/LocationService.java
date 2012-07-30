@@ -50,7 +50,7 @@ public class LocationService extends Service {
 	/**
 	 * generic
 	 */
-	
+	private boolean activityCanBroadcast;
 	private XPS _xps;
 	private WPSAuthentication auth;
 	private SharedPreferences pref;
@@ -69,7 +69,7 @@ public class LocationService extends Service {
 		super.onCreate();
 		
 		isRecording = false;
-		// checkinCallbackCanCallAgain = true;
+		activityCanBroadcast = false;
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		currentSid = pref.getString("sid", "-1");
@@ -205,7 +205,9 @@ public class LocationService extends Service {
 			}
 			Intent ccoIntent = new Intent("ACTION_LOCATION_SERVICE_ADD_POSITION");
 			ccoIntent.putExtra("location", addpos.toString());
-			sendBroadcast(ccoIntent);
+			if(activityCanBroadcast){
+				sendBroadcast(ccoIntent);
+			}
 			
 		} else if (action.equals("ACTION_CANCEL_CHECKIN")) {
 			Log.e("LocationService", "cancel check-in");
@@ -213,15 +215,22 @@ public class LocationService extends Service {
 			checkinLocationBuffer = null;
 			cco = null;
 		} else if (action.equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")) {
+			Log.e("location service", "sync position");
 			if (dh != null && dh.DBIsOpen()) {
 				JSONObject syncPos = dh.getOneTripData(currentSid, currentTid, false);
 				Intent syncIntent = new Intent("ACTION_LOCATION_SERVICE_SYNC_POSITION");
 				syncIntent.putExtra("location", syncPos.toString());
-				sendBroadcast(syncIntent);
+				if(activityCanBroadcast){
+					sendBroadcast(syncIntent);
+				}
 			} else {
 				errorStopService("dh is null or db is closed");
 			}
-		} else {
+		} else if(action.equals("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST")){
+			activityCanBroadcast = false;
+		}else if(action.equals("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST")){
+			activityCanBroadcast = true;
+		}else{
 			// unknown ACTION given, stop service
 			errorStopService(error_unknown_action);
 		}
@@ -332,7 +341,9 @@ public class LocationService extends Service {
 					Intent intent = new Intent();
 					intent.setAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
 					intent.putExtra("location", addpos.toString());
-					sendBroadcast(intent);
+					if(activityCanBroadcast){
+						sendBroadcast(intent);
+					}
 				}
 			}, 0, periodMS);
 		} else {
@@ -438,7 +449,9 @@ public class LocationService extends Service {
 				Intent intent = new Intent();
 				intent.setAction("ACTION_LOCATION_SERVICE_SET_POSITION");
 				intent.putExtra("location", recorderLocationBuffer);
-				sendBroadcast(intent);
+				if(activityCanBroadcast){
+					sendBroadcast(intent);
+				}
 			}
 			Log.d("location service", "periodic location= " + recorderLocationBuffer.toString());
 			return null;

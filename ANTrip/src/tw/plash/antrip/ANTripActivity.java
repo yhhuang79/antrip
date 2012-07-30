@@ -38,6 +38,7 @@ public class ANTripActivity extends Activity {
 	private WebView mWebView;
 	
 	private Integer previousMode;
+	private Integer currentMode;
 	
 	private CandidateCheckinObject cco;
 	
@@ -214,12 +215,14 @@ public class ANTripActivity extends Activity {
 		 * 4: friend list screen
 		 */
 		public void setMode(int mode){
-			Log.e("setMode", "mode= " + mode);
-			switch(mode){
+			currentMode = mode;
+			Log.e("setMode", "mode= " + currentMode);
+			String isrec = pref.getString("isRecording", null);
+			switch(currentMode){
 			case 3:
 				//start location service
 				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
-				if(pref.getString("isRecording", null) != null && pref.getString("isRecording", null).equals("true")){
+				if(isrec != null && isrec.equals("true")){
 					startService(new Intent(mContext, LocationService.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
 				}
 				break;
@@ -228,7 +231,7 @@ public class ANTripActivity extends Activity {
 			case 4:
 			default:
 				//stop location service if not recording
-				String isrec = pref.getString("isRecording", null);
+				
 				Log.e("setMode", "isrec= " + isrec);
 				if(isrec == null || !isrec.equals("true")){
 					stopService(new Intent(mContext, LocationService.class));
@@ -236,7 +239,7 @@ public class ANTripActivity extends Activity {
 				break;
 			}
 			// not sure if I need to know what the previous mode was, save it anyway
-			previousMode = mode;
+			previousMode = currentMode;
 		}
 		
 		/**
@@ -398,17 +401,24 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		filter.addAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
 		filter.addAction("ACTION_LOCATION_SERVICE_SYNC_POSITION");
 		registerReceiver(br, filter);
-		//save to pref that activity is ready for broadcast
-		
+		// only notify service to start broadcasting if it is running, either isrec = true, or we're in mode 3
+		String isrec = pref.getString("isRecording", null);
+		if(isrec != null && isrec.equals("true") || currentMode == 3){
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+		}
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
+		//save to pref that activity is NOT ready for broadcast
+		String isrec = pref.getString("isRecording", null);
+		//only 2 cases where service is running, isrec = true, or we're in mode 3
+		if(isrec != null && isrec.equals("true") || currentMode == 3){
+			startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
+		}
 		// need to notify location service not to send location update
 		unregisterReceiver(br);
-		//save to pref that activity is NOT ready for broadcast
-		
 	}
 	
 	@Override
