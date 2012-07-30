@@ -144,8 +144,6 @@ public class LocationServiceGPS extends Service {
 				}
 			}
 		} else if (action.equals("ACTION_START_RECORDING")) {
-//			Intent noIntent = new Intent(getApplicationContext(), ANTripActivity.class);
-//			noIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			Intent noIntent = new Intent();
 			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, noIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 			Notification noti;

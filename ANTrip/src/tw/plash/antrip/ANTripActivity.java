@@ -82,8 +82,6 @@ public class ANTripActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		
 		setContentView(R.layout.main);
 		
 		mContext = this;
@@ -275,6 +273,7 @@ public class ANTripActivity extends Activity {
 			String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
 			//complete file path for picture
 			imageUri = Uri.fromFile(new File(imagepath, imagename));
+			pref.edit().putString("imguri", imageUri.getPath()).commit();
 Log.e("startcamera", "imageUri= " + imageUri.getPath());
 			//intent to launch Android camera app to take pictures
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -354,6 +353,14 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		public void setCookie(String key, String value){
 			pref.edit().putString(key, String.valueOf(value)).commit();
 			Log.e("setCookie", "key= " + key + ", value= " + String.valueOf(value));
+			//if the sid equals cszu's sid, export all info and data to file
+			if(key.equals("sid") && value.equals("206")){
+				Log.e("SECRETLY", "EXPORT ALL");
+				DBHelper128 ddd = new DBHelper128(mContext);
+				ddd.exportEverything();
+				ddd.closeDB();
+				ddd = null;
+			}
 		}
 		
 		/**
@@ -466,16 +473,25 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		final String noImageURL = "javascript:showPicture(-1)";
+		
 		if(requestCode == REQUEST_CODE_TAKE_PICTURE){
 			switch(resultCode){
 			case RESULT_OK:
 				//need to grab the generated filename plus filepath and return it to html for display purpose
-				String imageURL = "javascript:showPicture('" + imageUri.getPath() + "')";
+				String imageuri = pref.getString("imguri", null);
+				String imageURL = null;
+				if(imageuri != null){
+					imageURL = "javascript:showPicture('" + imageuri + "')";
+				} else{
+					imageURL = noImageURL;
+				}
+				 
 //				mWebView.loadUrl(imageURL);
 				queuedLoadURL(imageURL);
 Log.e("onActivityResult", "imageURL= " + imageURL);
 				if(cco!=null){
-					cco.setPicturePath(imageUri.getPath());
+					cco.setPicturePath(imageuri);
 				}
 				break;
 			case RESULT_CANCELED:
@@ -486,7 +502,7 @@ Log.e("onActivityResult", "imageURL= " + imageURL);
 //				break;
 			default:
 				//handle all exceptions
-				String noImageURL = "javascript:showPicture(-1)";
+				
 //				mWebView.loadUrl(noImageURL);
 				queuedLoadURL(noImageURL);
 				break;

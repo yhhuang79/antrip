@@ -3,6 +3,7 @@ package tw.plash.antrip;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -10,6 +11,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -115,6 +118,18 @@ public class LocationService extends Service {
 				}
 			}
 		} else if (action.equals("ACTION_START_RECORDING")) {
+			Intent noIntent = new Intent();
+			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, noIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+			Notification noti;
+			if(Locale.getDefault().getLanguage().contains("zh")){
+				noti = new Notification(R.drawable.ant_24, "一個新的旅程開始了", System.currentTimeMillis());
+				noti.setLatestEventInfo(getApplicationContext(), "雲水途誌", "正在紀錄一個旅程...", pIntent);
+			} else{
+				noti = new Notification(R.drawable.ant_24, "A NEW RECORDING HAS BEGUN", System.currentTimeMillis());
+				noti.setLatestEventInfo(getApplicationContext(), "Antrip", "is recording a trip...", pIntent);
+			}
+			noti.flags = Notification.FLAG_ONGOING_EVENT;
+			startForeground(1337, noti);
 			// start saving location updates into DB
 			// create a unique key as local trip id
 			currentTid = intent.getExtras().getString("tid");
@@ -151,6 +166,8 @@ public class LocationService extends Service {
 			stats = null;
 			currentTid = null;
 			pref.edit().remove("trip_id").commit();
+			
+			stopForeground(true);
 			
 		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
 			Log.e("LocationService", "get check-in location");
