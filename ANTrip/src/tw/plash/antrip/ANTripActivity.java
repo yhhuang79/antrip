@@ -34,7 +34,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class ANTripActivity extends Activity {
-	private final boolean useSkyhook = true;
+	private final boolean useSkyhook = false;
 	
 	private Context mContext;
 	private WebView mWebView;
@@ -445,13 +445,23 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		registerReceiver(br, filter);
 		// only notify service to start broadcasting if it is running, either isrec = true, or we're in mode 3
 		String isrec = pref.getString("isRecording", null);
-		if(isrec != null && isrec.equals("true") || (currentMode != null && currentMode == 3)){
+		if(isrec != null && isrec.equals("true")){
 			if(useSkyhook){
 				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
 			} else{
 				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
 			}
+		} else if(currentMode != null && currentMode == 3){
+			//need to re-start the service if it is in recorder mode
+			if(useSkyhook){
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+			} else{
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_SERVICE"));
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+			}
 		}
+		
 	}
 	
 	@Override
@@ -460,11 +470,18 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		//save to pref that activity is NOT ready for broadcast
 		String isrec = pref.getString("isRecording", null);
 		//only 2 cases where service is running, isrec = true, or we're in mode 3
-		if(isrec != null && isrec.equals("true") || (currentMode != null && currentMode == 3)){
+		if(isrec != null && isrec.equals("true")){
 			if(useSkyhook){
 				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
 			} else{
 				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
+			}
+		} else{
+			//not recording
+			if(useSkyhook){
+				stopService(new Intent(mContext, LocationService.class));
+			} else{
+				stopService(new Intent(mContext, LocationServiceGPS.class));
 			}
 		}
 		// need to notify location service not to send location update
