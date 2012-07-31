@@ -293,6 +293,9 @@
 		$('#map_canvas').hide();
 		$('#map_canvas_2').show();
 		$('#map_canvas_2').css('margin-top','-690px');
+		$("#Symbol_ub_trip_m").css("z-index",9999);
+		$("#sym_topbtnGroup").css("z-index",9999);
+		$("#ub_trip_management").css("z-index",9999);
 		$("#overlay").css("display","block");
 		$("#overlay").html(g_str_localizationing);
 		var isRecording = null;

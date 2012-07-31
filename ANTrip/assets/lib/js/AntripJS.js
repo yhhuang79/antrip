@@ -169,7 +169,8 @@
 		var viewportHeight = $(window).height();
 
 		var dpi = (480/(viewportWidth/window.devicePixelRatio))*160;
-		var viewportContent = 'height='+viewportHeight+', target-densityDpi='+dpi+'dpi, initial-scale=1, maximum-scale=1, user-scalable=no';
+		//alert(dpi);
+		var viewportContent = 'height='+viewportHeight+', target-densityDpi='+dpi+', initial-scale=1, maximum-scale=1, user-scalable=no';
 		jQuery('#viewportMeta').attr("content", viewportContent);
 		$('head meta[name=viewport]').attr('content', viewportContent);
  
@@ -283,7 +284,7 @@
 		if(sid!=null){
 			$("#sym_loginarea").hide();
 			$(".class_login_bt").hide();
-	//		$(".class_fblogin_bt").hide();
+			//$(".class_fblogin_bt").hide();
 			$(".class_logout_bt").hide();
 			//alert(g_str_logout);
 			Logout();
@@ -291,7 +292,7 @@
 		else{
 			$('#sym_loginarea').show();
 			$('.class_login_bt').show();
-	//		$(".class_fblogin_bt").show();
+			//$(".class_fblogin_bt").show();
 			$('.class_logout_bt').hide();
 		}
 		$("#end_Text").show();
@@ -912,7 +913,7 @@
 								'strokeWeight': 4, 
 								'path': g_tripPointArray
 							});
-									alert("index>localtripdata");
+								//	alert("index>localtripdata");
 						//	alert(point.lng);
 						//	g_mapPath.setMap(_map);
 							//$("#overlay").css("display","none");
@@ -985,13 +986,19 @@
 						//alert("g_showtripmap==true");
 						g_showtripmap = false;
 					}
-					self.addShape('Polyline',{
+					var _map =  $('#map_canvas').gmap('get','map');
+					if(g_mapPath!=null)
+					{
+						g_mapPath.setMap(null);
+						g_mapPath = null;
+					}
+					g_mapPath = new google.maps.Polyline({
 						'strokeColor': "#FF0000", 
 						'strokeOpacity': 0.8, 
 						'strokeWeight': 4, 
 						'path': g_tripPointArray
 					});
-					$('#map_canvas').gmap('refresh');
+					g_mapPath.setMap(_map);
 					$("#overlay").css("display","none");
 					$("#overlay").html("");
 					//alert("g_showtripmap==true1");
