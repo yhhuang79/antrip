@@ -625,33 +625,6 @@ public class DBHelper128 {
 	}
 	
 	/**
-	 * Theoretically, multiple users could share the same device, thus userid is
-	 * a required input This function extracts all trip point in a trip,
-	 * identified by userid+tripid
-	 * 
-	 * @param userid
-	 * @param tripid
-	 * @return JSONObject, formatted like the return value from yu-hsiang's php
-	 *         component
-	 */
-	/*
-	 * synchronized public PLASHLocationObject getTrip(String userid, String
-	 * tripid) { if (db.isOpen()) { // get the newest point first Cursor mCursor
-	 * = db.query(TRIP_POINT_TABLE, null, "tripid=" + tripid, null, null, null,
-	 * "id DESC"); if (mCursor != null) { if (mCursor.moveToFirst()) {
-	 * PLASHLocationObject obj = new PLASHLocationObject(mCursor.getInt(0),
-	 * mCursor.getDouble(1), mCursor.getDouble(2), mCursor.getString(3),
-	 * mCursor.getString(4), mCursor.getString(5), mCursor.getString(6),
-	 * mCursor.getString(7), mCursor.getString(8), mCursor.getString(9)); if
-	 * (!mCursor.isClosed()) { // we're done with the cursor, // close it here
-	 * mCursor.close(); } return obj; } else { // cursor not null, but empty
-	 * query, close the cursor // and exit if (!mCursor.isClosed()) {
-	 * mCursor.close(); } return null; } } else { // cursor is null, possibly
-	 * error in query return null; } } else { // db not even opened return null;
-	 * } }
-	 */
-	
-	/**
 	 * Get all trip info formatted to yu-hsiang's php component with the given
 	 * userid
 	 * 
@@ -736,31 +709,6 @@ public class DBHelper128 {
 			return null;
 		}
 	}
-	
-	/*
-	 * synchronized public ArrayList<HashMap<String, Object>> getAllTripInfo(){
-	 * if(db.isOpen()){ Cursor mCursor = db.query(TRIP_INFO_TABLE, null, null,
-	 * null, null, null, "tripid DESC"); if(mCursor != null){
-	 * if(mCursor.moveToFirst()){ //do stuff here ArrayList<HashMap<String,
-	 * Object>> allInfos = new ArrayList<HashMap<String,Object>>();
-	 * HashMap<String, Object> row; do{ row = new HashMap<String, Object>();
-	 * row.put("tripid", mCursor.getString(0)); row.put("userid",
-	 * mCursor.getString(1)); row.put("name", mCursor.getString(2));
-	 * row.put("starttime", mCursor.getString(3)); row.put("endtime",
-	 * mCursor.getString(4)); row.put("length", mCursor.getDouble(5));
-	 * row.put("count", mCursor.getInt(6)); row.put("startaddrpt1",
-	 * mCursor.getString(7)); row.put("startaddrpt2", mCursor.getString(8));
-	 * row.put("startaddrpt3", mCursor.getString(9)); row.put("startaddrpt4",
-	 * mCursor.getString(10)); row.put("startaddrpt5", mCursor.getString(11));
-	 * row.put("endaddrpt1", mCursor.getString(12)); row.put("endaddrpt2",
-	 * mCursor.getString(13)); row.put("endaddrpt3", mCursor.getString(14));
-	 * row.put("endaddrpt4", mCursor.getString(15)); row.put("endaddrpt5",
-	 * mCursor.getString(16)); row.put("uploaded", mCursor.getInt(17));
-	 * allInfos.add(row); }while(mCursor.moveToNext()); if(!mCursor.isClosed()){
-	 * mCursor.close(); } return allInfos; } else{ if(!mCursor.isClosed()){
-	 * mCursor.close(); } return null; } } else{ return null; } } else { return
-	 * null; } }
-	 */
 	/**
 	 * used to delete all the uploaded trip points from local cache when not
 	 * recording

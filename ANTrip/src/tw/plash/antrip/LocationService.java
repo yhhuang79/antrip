@@ -36,6 +36,7 @@ public class LocationService extends Service {
 	 */
 	private Location checkinLocationBuffer = null;
 	private CandidateCheckinObject cco;
+	private boolean duringCheckin;
 	/**
 	 * recording related
 	 */
@@ -71,32 +72,13 @@ public class LocationService extends Service {
 		
 		isRecording = false;
 		activityCanBroadcast = false;
+		duringCheckin = false;
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		currentSid = pref.getString("sid", "-1");
 		
 		_xps = new XPS(getApplicationContext());
 		auth = new WPSAuthentication("plash", "iis.sinica.edu.tw");
-		
-		class regCallback implements RegistrationCallback {
-			@Override
-			public void done() {
-				Log.e("location service", "skyhook registration done");
-			}
-			
-			@Override
-			public WPSContinuation handleError(WPSReturnCode arg0) {
-				Log.e("location service", "skyhook registration error: " + arg0.toString());
-				return null;
-			}
-			
-			@Override
-			public void handleSuccess() {
-				Log.e("location service", "skyhook registration is good");
-			}
-			
-		}
-		// _xps.registerUser(auth, null, new regCallback());
 		
 		nullLocation = new Location("");
 		nullLocation.setLatitude(-999.0);
@@ -186,14 +168,9 @@ public class LocationService extends Service {
 			
 		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
 			Log.e("LocationService", "get check-in location");
-			// try to get a location for check-in purpose, maximum retry is 5
-			// times
-			// request one location for picture geotagging
-			if (recorderLocationBuffer != null) {
-				checkinLocationBuffer = recorderLocationBuffer;
-			} else {
-				checkinLocationBuffer = getCurrentNullLocation();
-			}
+			
+			duringCheckin = true;
+			
 		} else if (action.equals("ACTION_SAVE_CCO")) {
 			Log.e("LocationService", "save cco");
 			Location location = checkinLocationBuffer;
@@ -241,14 +218,17 @@ public class LocationService extends Service {
 			Intent ccoIntent = new Intent("ACTION_LOCATION_SERVICE_ADD_POSITION");
 			ccoIntent.putExtra("location", addpos.toString());
 			if (activityCanBroadcast) {
-				sendBroadcast(ccoIntent);
+				//merge cco with positions in queue and broadcast together
+				
+//				sendBroadcast(ccoIntent);
 			}
-			
+			duringCheckin = false;
 		} else if (action.equals("ACTION_CANCEL_CHECKIN")) {
 			Log.e("LocationService", "cancel check-in");
 			// clear temp check-in location object
 			checkinLocationBuffer = null;
 			cco = null;
+			duringCheckin = false;
 		} else if (action.equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")) {
 			Log.e("location service", "sync position");
 			if (dh != null && dh.DBIsOpen()) {
@@ -376,7 +356,12 @@ public class LocationService extends Service {
 					intent.setAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
 					intent.putExtra("location", addpos.toString());
 					if (activityCanBroadcast) {
-						sendBroadcast(intent);
+						if(duringCheckin){
+							//put into queue
+							
+						} else{
+							sendBroadcast(intent);
+						}
 					}
 				}
 			}, 0, periodMS);
