@@ -125,8 +125,6 @@
 				$(this).focus();
 				$("#sym_edit_bt_list").css("position","static");
 				$('#map_canvas_2').css('margin-top','-696px');
-			//	$(this).css('z-index', "1030");
-			//	$('.ui-widget-overlay').css('z-index', "1012");
 				$("#sym_topbtnGroup").removeClass("topbtnTripClass");
 				$("button").css({
 					color: "#000000",

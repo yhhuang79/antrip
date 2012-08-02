@@ -497,8 +497,8 @@
 						height:200,
 						modal: true,
 						open: function (event, ui) {
-					//			$(this).css('z-index', "1030");
-						//		$('.ui-widget-overlay').css('z-index', "1012");
+								$("#sym_edit_bt_list").css("position","static");
+								$('#map_canvas_2').css('margin-top','-696px');
 								$(this).focus();
 								$("#sym_topbtnGroup").removeClass("topbtnTripClass");
 								$('.ui-dialog-buttonpane').css({
@@ -512,6 +512,8 @@
 						buttons: {
 							"Yes": function() {
 								$( this ).dialog( "close" );
+								$("#sym_edit_bt_list").css("position","fixed");
+								$('#map_canvas_2').css('margin-top','0px');
 								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								startRecordTrip();
 								g_logoutbyIcon = true;
@@ -519,6 +521,8 @@
 							},
 							"No": function() {
 								$( this ).dialog( "close" );
+								$("#sym_edit_bt_list").css("position","fixed");
+								$('#map_canvas_2').css('margin-top','0px');
 								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								return;
 							}
