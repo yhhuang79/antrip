@@ -44,7 +44,7 @@
 	var g_scale=1.2;
 	// google map var
 	var g_startLatLng;
-	var g_zoom=20;
+	var g_zoom=17;
 	var g_myOptions;
 	var g_map = null;
 	var g_infowindow=null;
@@ -164,13 +164,21 @@
 	}
 	function PreloadandSet(){
 
+		var overlay = jQuery('<div valign=center id="overlay"></div>');
+		overlay.appendTo(document.body);
+		$("#overlay").css("display","block");
+
 		// reset viewport for mobile device resolution
 		var viewportWidth = $(window).width();
 		var viewportHeight = $(window).height();
 
 		var dpi = (480/(viewportWidth/window.devicePixelRatio))*160;
+		//alert(viewportWidth);
 		//alert(dpi);
-		var viewportContent = 'height='+viewportHeight+', target-densityDpi='+dpi+', initial-scale=1, maximum-scale=1, user-scalable=no';
+		//alert(window.devicePixelRatio);
+		var scale = 1/window.devicePixelRatio;
+		//alert(scale);
+		var viewportContent = 'width='+viewportWidth+', height='+viewportHeight+', target-densityDpi='+dpi+', initial-scale='+scale+', maximum-scale='+scale+', user-scalable=no';
 		jQuery('#viewportMeta').attr("content", viewportContent);
 		$('head meta[name=viewport]').attr('content', viewportContent);
  
@@ -200,7 +208,7 @@
 		tip_img = im+"tipline.png";
 		trip_m_img = im+"ub_trip_management_r.png";
 	
-		MM_preloadImages(back_img);
+	//	MM_preloadImages(back_img);
 		MM_preloadImages(scroll_img);
 		
 		MM_preloadImages(backlogo_img);
@@ -226,7 +234,7 @@
 		$("#sym_triplist").hide();
 
 		//ChangeToUsedIcon($('#ub_home'));
-		$('#body').css("background-image", url+back_img+")");
+//		$('#body').css("background-image", url+back_img+")");
 		$('#Stage').css("background-image", url+scroll_img+")");
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
@@ -234,8 +242,8 @@
 		initTripNameDialog();
 		//initScrollTopBtn();
 
-		var overlay = jQuery('<div valign=center id="overlay"></div>');
-		overlay.appendTo(document.body)
+		//var overlay = jQuery('<div valign=center id="overlay"></div>');
+		//overlay.appendTo(document.body);
 		$("#overlay").css("display","none");
 
 		//$('#sym_topbtnGroup').show();
@@ -350,6 +358,8 @@
 		if(window.antrip){
 			sid = window.antrip.getCookie("sid");
 		}
+		window.scrollTo(0,0);
+		$("#body").css("overflow","scroll");
 		if(g_enableDebugMode==true)
 		{
 			alert(sid);
@@ -400,6 +410,7 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$("#sym_topbtnGroup").addClass("topbtnTripClass");
 			$('#sym_topbtnGroup').show();
 			g_page=1;
 			ShowTripList(g_page);
@@ -422,6 +433,8 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$("#body").css("overflow","hidden");
+			$("#sym_topbtnGroup").addClass("topbtnTripClass");
 			$('#sym_topbtnGroup').show();
 			show_edit_div();
 			g_mode ="eTripDisplay";
@@ -438,6 +451,7 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
+			$("#sym_topbtnGroup").addClass("topbtnTripClass");
 			$('#sym_topbtnGroup').show();
 			showfriendList();
 
@@ -483,6 +497,10 @@
 						height:200,
 						modal: true,
 						open: function (event, ui) {
+					//			$(this).css('z-index', "1030");
+						//		$('.ui-widget-overlay').css('z-index', "1012");
+								$(this).focus();
+								$("#sym_topbtnGroup").removeClass("topbtnTripClass");
 								$('.ui-dialog-buttonpane').css({
 									'background-image':url+im+"typenotearea.png)",
 									'background-position':"center center",
@@ -494,12 +512,14 @@
 						buttons: {
 							"Yes": function() {
 								$( this ).dialog( "close" );
+								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								startRecordTrip();
 								g_logoutbyIcon = true;
 								return;
 							},
 							"No": function() {
 								$( this ).dialog( "close" );
+								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								return;
 							}
 						}
@@ -686,7 +706,7 @@
 					window.antrip.setCookie("usrname", username.toString());
 					window.antrip.setCookie("sid", result.sid.toString());
 				}
-				ChangeToUsedIcon($("#ub_trip_history"));
+				ChangeToUsedIcon($("#ub_trip_management"));
 			} else { 
 				alert("Login Fail");
 			}
@@ -761,7 +781,7 @@
 									if(window.antrip){
 										window.antrip.setCookie("sid", result.sid.toString());
 									}
-									ChangeToUsedIcon($('#ub_trip_history'));
+									ChangeToUsedIcon($('#ub_trip_management'));
 								} else { 
 									$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookRegister.php',
 										data:{username: username, email: email, facebookid: facebookid},							 
@@ -774,7 +794,7 @@
 												if(window.antrip){
 													window.antrip.setCookie("sid", result.sid.toString());
 												}
-												ChangeToUsedIcon($('#ub_trip_history'));
+												ChangeToUsedIcon($('#ub_trip_management'));
 											}
 										}
 									});
@@ -937,7 +957,9 @@
 										CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='300' /></p>";
 									}
 									if(point.CheckIn.emotion!=null || typeof point.CheckIn.emotion!='undefined'){
-										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
+								//	alert(point.CheckIn.emotion.toString());
+								//	alert(emotionMapping[point.CheckIn.emotion.toString()]);
+										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion.toString()]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion.toString()]]+"</img></p>";
 									}
 									if(point.CheckIn.message!=null || typeof point.CheckIn.message!='undefined'){
 										CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";

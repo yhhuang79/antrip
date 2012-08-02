@@ -15,8 +15,8 @@
 	}
 	#Stage {
 		float:left;
-		margin:-5px 0px;
-		background-repeat: no-repeat;
+		margin:0px 0px;
+		background-repeat: repeat-y;
 		background-position: top center;
 		background-attachment:fixed;
 		width: 100%;
@@ -56,11 +56,18 @@
 	#sym_topbtnGroup{
 		float:center;
 		background-repeat: no-repeat;
-		background-position: top left;
 		margin-top:0px;
 		width: 480px;
 		z-index:1011;
 	}
+
+	.topbtnTripClass{
+		position:fixed;
+		background-position: top center;
+		left:50%;
+		margin-left:-240px;
+	}
+
 	#banner_logo{
 		float:left;
 		margin-top:-50px;
@@ -80,20 +87,19 @@
 	}
 	#map_canvas, #map_canvas_2{
 		float:left;
-		position: relative;
-		margin-top:-690px;
+		margin-top:0px;
 		margin-left:0px;
 		width: 480px; 
-		height: 670px;
+		height: 680px;
 	}
 	#sym_edit_bt_list{
 		margin-top:620px;
 		margin-left:0px;
 		margin-right:0px;
 		float:left;
-		position: relative;
+		position: fixed;
 		text-align:center;
-		z-index: 100;
+		z-index: 1000;
 		width:480px;
 	}
 	#end_Text{
@@ -104,7 +110,7 @@
 	}
 	#sym_triplist, #sym_friends{
 		float:left;
-		margin-top:0px;
+		margin-top:20px;
 	}
 	#sym_editpage{
 		margin-top:70px;
@@ -299,9 +305,10 @@
 	}
 
 	#tripsum{
-		float:center;
-		width:100%;
+		float:right;
 		margin-top:10px;
+		margin-right:15px;
+		text-align:right;
 	}
 
 	.trip_prenext_bt{
@@ -393,12 +400,18 @@
 	}
 	
 	#takepicture_id{
+		margin-left: -5px;
 		width:480px;
 		height:301px;
 	}
 
+	#emotion-sel{
+		margin-left: -5px;
+	}
+
 	#takepicture{
-		width:450px;
+		margin-left: -30px;
+		width:400px;
 		height:300px;
 	}
 

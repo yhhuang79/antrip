@@ -79,7 +79,6 @@
 	}
 	#map_canvas, #map_canvas_2{
 		float:center;
-		position: relative;
 		margin-top:0px;
 		margin-left:0px;
 		border:10px solid #555;

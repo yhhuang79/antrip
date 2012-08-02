@@ -35,6 +35,7 @@
 	$('#takepicture_id').css("background", url+takepic_img+") no-repeat");
 	$('#emotion-sel').css("background", url+selemotion_img+") no-repeat");
 	$('#emotion-c').attr("src", emocompass_img);
+	$('#placemarktext').attr("placeholder", g_str_placemarkertext);
 
 	var elements = $('#sym_takepicture');
 	elements.each(function() {
@@ -56,5 +57,5 @@
 
 	initEmotionMap();
 
-	ChangeToUsedIcon($('#ub_trip_history'),false);
+	ChangeToUsedIcon($('#ub_trip_management'),false);
 //-->
