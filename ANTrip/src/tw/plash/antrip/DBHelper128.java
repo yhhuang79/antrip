@@ -637,10 +637,10 @@ public class DBHelper128 {
 			if (currentTripid != null) {
 				Log.e("getalltripinfoforhtml", "tripid!=null");
 				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid, null,
-						null, null, "tripid DESC");
+						null, null, "starttime DESC");
 			} else {
 				Log.e("getalltripinfoforhtml", "tripid=null");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "tripid DESC");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
 			}
 			
 			if (mCursor != null) {
