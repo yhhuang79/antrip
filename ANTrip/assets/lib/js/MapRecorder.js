@@ -242,6 +242,7 @@
 
 					marker.setMap(self);
 					g_tripPointObjArray_2.push(marker);
+					var markerCluster = new MarkerClusterer(self, g_tripPointObjArray_2);
 				}
 				if( $('#markplacewindow').is(":visible") == false) {
 					$("#overlay").css("display","none");
