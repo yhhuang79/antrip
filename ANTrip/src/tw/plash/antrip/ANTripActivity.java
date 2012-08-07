@@ -27,6 +27,8 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+import android.view.Window;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
@@ -42,6 +44,9 @@ public class ANTripActivity extends Activity {
 	
 	private Integer previousMode;
 	private Integer currentMode;
+	
+	private View usableArea;
+	private boolean loadIndex = false;
 	
 	private CandidateCheckinObject cco;
 	
@@ -76,6 +81,19 @@ public class ANTripActivity extends Activity {
 			} else{
 				//huh?
 			}
+		}
+	};
+	
+	public void onWindowFocusChanged(boolean hasFocus) {
+		usableArea = getWindow().findViewById(Window.ID_ANDROID_CONTENT);
+		if(hasFocus){
+			Log.e("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " hasFocus la");
+		} else{
+			Log.e("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
+		}
+		if(loadIndex){
+			queuedLoadURL("file:///android_asset/index.html");
+			loadIndex = false;
 		}
 	};
 	
@@ -141,7 +159,8 @@ public class ANTripActivity extends Activity {
 		mWebView.addJavascriptInterface(new jsinter(), "antrip");
 		//now after all the settings, load the html file
 //		mWebView.loadUrl("file:///android_asset/index.html");
-		queuedLoadURL("file:///android_asset/index.html");
+//		queuedLoadURL("file:///android_asset/index.html");
+		loadIndex = true;
 	}
 	
 	public interface JavaScriptCallback{}
@@ -422,7 +441,7 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		public float[] getScreenInfo(){
 			DisplayMetrics dm = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(dm);
-			return new float[]{dm.density, dm.scaledDensity, dm.xdpi, dm.ydpi, dm.widthPixels, dm.heightPixels};
+			return new float[]{dm.density, dm.scaledDensity, dm.xdpi, dm.ydpi, usableArea.getWidth(), usableArea.getHeight()};
 		}
 	}
 	
