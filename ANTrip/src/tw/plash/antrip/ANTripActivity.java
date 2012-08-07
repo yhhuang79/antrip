@@ -25,6 +25,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
@@ -403,6 +404,11 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 //			.putExtra("tripid", tripid)
 //			.putExtra("userid", pref.getString("sid", null)));
 //		}
+		public float getdpi(){
+			DisplayMetrics dm = new DisplayMetrics();
+			getWindowManager().getDefaultDisplay().getMetrics(dm);
+			return dm.density;
+		}
 	}
 	
 	/**
