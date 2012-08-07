@@ -404,10 +404,25 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 //			.putExtra("tripid", tripid)
 //			.putExtra("userid", pref.getString("sid", null)));
 //		}
+		/**
+		 * return screen density value
+		 * @return
+		 */
 		public float getdpi(){
 			DisplayMetrics dm = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(dm);
 			return dm.density;
+		}
+		
+		/**
+		 * return all display related metrics in the following order
+		 * density; scaled density; x dpi; y dpi; width pixels; height pixels
+		 * @return float[] containing the 6 display metrics
+		 */
+		public float[] getScreenInfo(){
+			DisplayMetrics dm = new DisplayMetrics();
+			getWindowManager().getDefaultDisplay().getMetrics(dm);
+			return new float[]{dm.density, dm.scaledDensity, dm.xdpi, dm.ydpi, dm.widthPixels, dm.heightPixels};
 		}
 	}
 	
