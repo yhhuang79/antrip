@@ -9,6 +9,7 @@
 
 	var g_currentmarker = null;
 	var latlng_undefined_value=-999;
+	var g_bounds = new google.maps.LatLngBounds();
 
 	var emotionMapping = {	
 		"1": "excited",
@@ -80,6 +81,7 @@
 			g_mapPath = null;
 		}
 		g_emotion_html=null;
+		g_bounds = new google.maps.LatLngBounds();
 	}
 
 	function startRecordTrip(){
@@ -185,9 +187,10 @@
 				g_current_latitude = point.lat;
 				g_current_longitude = point.lng;
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-				self.setCenter(latlng);
-				self.setZoom(g_zoom);
+		//		self.setCenter(latlng);
+		//		self.setZoom(g_zoom);
 				g_tripPointArray_2.push(latlng);
+				g_bounds.extend(latlng);
 				if (typeof point.CheckIn != 'undefined'){
 					var checkinmarker =  new google.maps.Marker({ 
 						'position': latlng, 
@@ -291,8 +294,10 @@
 			'bounds': true,
 			'icon': im+"ant_24.png",
 		});
+		g_bounds.extend(latlng);
 
 		g_currentmarker.setMap(self);
+		self.fitBounds(g_bounds);
 		$("#overlay").css("display","none");
 		$("#overlay").html("");
 
