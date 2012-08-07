@@ -34,7 +34,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class ANTripActivity extends Activity {
-	private final boolean useSkyhook = false;
+	private final boolean useSkyhook = true;
 	
 	private Context mContext;
 	private WebView mWebView;
@@ -155,6 +155,7 @@ public class ANTripActivity extends Activity {
 		public void logout(){
 			//remove sid and stop stuffs
 			Log.e("logged", "out");
+			
 		}
 		
 		// need a function to provide detailed trip data(reviewing historic trip)
@@ -448,8 +449,10 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		if(isrec != null && isrec.equals("true")){
 			if(useSkyhook){
 				startService(new Intent(mContext, LocationService.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
 			} else{
 				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
 			}
 		} else if(currentMode != null && currentMode == 3){
 			//need to re-start the service if it is in recorder mode
