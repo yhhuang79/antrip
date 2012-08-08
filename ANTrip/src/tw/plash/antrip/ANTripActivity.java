@@ -417,12 +417,13 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		}
 		
 		//TODO auto upload, no user interaction involved
-//		public void uploadTrip(String tripid){
-//			startService(new Intent(mContext, UploadService.class)
-//			.setAction("ACTION_UPLOAD_TRIP")
-//			.putExtra("tripid", tripid)
-//			.putExtra("userid", pref.getString("sid", null)));
-//		}
+		public void uploadTrip(String tripid){
+			startService(new Intent(mContext, UploadService.class)
+			.setAction("ACTION_UPLOAD_TRIP")
+			.putExtra("tripid", tripid)
+			.putExtra("userid", pref.getString("sid", null)));
+		}
+		
 		/**
 		 * return screen density value
 		 * @return
@@ -437,11 +438,15 @@ Log.e("startcamera", "imageUri= " + imageUri.getPath());
 		 * return all display related metrics in the following order
 		 * density; scaled density; x dpi; y dpi; width pixels; height pixels
 		 * @return float[] containing the 6 display metrics
+		 * @throws JSONException 
 		 */
-		public float[] getScreenInfo(){
+		public String getScreenInfo() throws JSONException{
 			DisplayMetrics dm = new DisplayMetrics();
 			getWindowManager().getDefaultDisplay().getMetrics(dm);
-			return new float[]{dm.density, dm.scaledDensity, dm.xdpi, dm.ydpi, usableArea.getWidth(), usableArea.getHeight()};
+//			return new float[]{dm.density, dm.scaledDensity, dm.xdpi, dm.ydpi, usableArea.getWidth(), usableArea.getHeight()};
+			String s = "{\"density\":\"" + dm.density + "\", \"scaledDensity\":\"" + dm.scaledDensity + "\", \"xdpi\":\"" + dm.xdpi + "\", \"ydpi\":\"" + dm.ydpi + "\", \"width\":\"" + usableArea.getWidth() + "\", \"height\":\"" + usableArea.getHeight() + "\"}";
+			Log.e("screeninfo", s);
+			return new JSONObject(s).toString();
 		}
 	}
 	
