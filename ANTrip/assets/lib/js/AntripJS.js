@@ -57,7 +57,7 @@
 	var g_enableDebugMode = false;
 	var g_enablewithoutLogin=false;
 	//set default language to Chinese
-	var g_lang="English";
+	var g_lang="Chinese";
 	var g_ready=false;
 
 	var g_eMode={'eHome':1,'eTripList':2,'eTripDisplay':3,'eFriendList':4};
@@ -171,12 +171,44 @@
 		// reset viewport for mobile device resolution
 		var viewportWidth = $(window).width();
 		var viewportHeight = $(window).height();
+		var devicePixelRatio = window.devicePixelRatio;
 
-		var dpi = (480/(viewportWidth/window.devicePixelRatio))*160;
+		var dpi;
+		var scale;
+		var screenInfoArray;
+		if(window.antrip)
+		{
+		//	 alert(window.antrip.getdpi());
+			 // dpi
+			 // scale dpi
+			 // xdpi
+			 // ydpi
+			 // width pixel
+			 // height pixel
+			 screenInfoArray = eval("("+window.antrip.getScreenInfo()+")");
+
+			 if(screenInfoArray!==-1)
+			{
+			/*	 alert("dpi:" + screenInfoArray.density);
+				 alert("scale dpi:" + screenInfoArray.scaledDensity);
+				 alert("xdpi:" + screenInfoArray.xdpi);
+				 alert("ydpi:" + screenInfoArray.ydpi);
+				 alert("width:" + screenInfoArray.width);
+				 alert("height:" + screenInfoArray.height);*/
+			}
+			dpi = (480/(screenInfoArray.width/screenInfoArray.scaledDensity))*160;
+			scale = 1/screenInfoArray.scaledDensity;
+		}
+		else{
+			dpi = (480/(viewportWidth/devicePixelRatio))*160;
+			scale = 1/devicePixelRatio;
+		}
+
+		//var dpi = (480/(screenInfoArray.width/screenInfoArray.scaledDensity))*160;
 		//alert(viewportWidth);
 		//alert(dpi);
 		//alert(window.devicePixelRatio);
-		var scale = 1/window.devicePixelRatio;
+		//var scale = 1/screenInfoArray.scaledDensity;
 		//alert(scale);
 		var viewportContent = 'width='+viewportWidth+', height='+viewportHeight+', target-densityDpi='+dpi+', initial-scale='+scale+', maximum-scale='+scale+', user-scalable=no';
 		jQuery('#viewportMeta').attr("content", viewportContent);
@@ -374,6 +406,7 @@
 			g_mode = "eAbout";
 		}
 		else if(object.attr('name')==$("#ub_download").attr('name')){
+			$("#body").css("overflow","hidden");
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
@@ -392,6 +425,7 @@
 			MM_swapImage($("#ub_trip_history").attr('name'),'',im+$("#ub_trip_history").attr('name')+'_r.png',1);
 		}
 		else if( g_enablewithoutLogin==false &&((sid==null) || (object.attr('name')==$("#ub_home").attr('name')))){
+			$("#body").css("overflow","hidden");
 			if(g_enableDebugMode==true)
 			{	
 				alert("start");
@@ -850,7 +884,7 @@
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
 				
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}g_showtripmap=true;showLocalTripData("+data.id+");\" href=''><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='' rel='external'><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}g_showtripmap=true;showLocalTripData("+data.id+");window.antrip.uploadTrip("+data.id+");\" href=''><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='' rel='external'><img src='"+im+"uploadmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 							
 							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 								$("div[id=products]").eq(0).append(appendcontent);
@@ -1025,6 +1059,7 @@
 						'path': g_tripPointArray
 					});
 					g_mapPath.setMap(_map);
+					self.set('MarkerClusterer', new MarkerClusterer(_map, self.get('markers')));
 					$("#overlay").css("display","none");
 					$("#overlay").html("");
 					//alert("g_showtripmap==true1");
