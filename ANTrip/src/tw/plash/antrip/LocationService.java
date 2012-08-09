@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Locale;
+import java.util.PriorityQueue;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -245,7 +246,25 @@ public class LocationService extends Service {
 			activityCanBroadcast = false;
 		} else if (action.equals("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST")) {
 			activityCanBroadcast = true;
-		} else {
+		} else if (action.equals("ACTION_CLEAN_UP")){
+			
+			String tid = pref.getString("trip_id", null);
+			String sid = pref.getString("sid", null);
+			
+			if(tid != null && sid != null){
+				DBHelper128 dh = new DBHelper128(getApplicationContext());
+				dh.insertEndInfo(sid, tid, "Untitled", new Timestamp(new Date().getTime()).toString(), 0.0);
+				
+				stopTimer();
+				
+				pref.edit().remove("sid");
+				pref.edit().remove("trip_id");
+			}
+			
+			//done cleaning up, time to shut down
+			stopSelf();
+			
+		} else{
 			// unknown ACTION given, stop service
 			errorStopService(error_unknown_action);
 		}
@@ -314,6 +333,7 @@ public class LocationService extends Service {
 	 * @param tid
 	 */
 	void setTimer() {
+		final PriorityQueue<JSONObject> pauseQ = new PriorityQueue<JSONObject>();
 		// final String userid = pref.getString("sid", null);
 		if (currentSid != null) {
 			mTimer = new Timer();
@@ -340,26 +360,33 @@ public class LocationService extends Service {
 					 * if activity is running in foreground broadcast location
 					 * from recorderLocationBuffer
 					 */
-					JSONObject addpos = new JSONObject();
-					try {
-						JSONArray array = new JSONArray();
-						JSONObject tmp = new JSONObject();
-						tmp.put("lat", location.getLatitude());
-						tmp.put("lng", location.getLongitude());
-						tmp.put("timestamp", new Timestamp(location.getTime()).toString());
-						array.put(tmp);
-						addpos.put("CheckInDataList", array);
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-					Intent intent = new Intent();
-					intent.setAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
-					intent.putExtra("location", addpos.toString());
 					if (activityCanBroadcast) {
-						if(duringCheckin){
-							//put into queue
-							
-						} else{
+						//build a entry
+						try {
+							JSONObject tmp = new JSONObject();
+							tmp.put("lat", location.getLatitude());
+							tmp.put("lng", location.getLongitude());
+							tmp.put("timestamp", new Timestamp(location.getTime()).toString());
+							//put the entry in the queue
+							pauseQ.offer(tmp);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						if(!duringCheckin){
+							//poll all entries from the queue and broadcast
+							JSONObject addpos = new JSONObject();
+							try {
+								JSONArray array = new JSONArray();
+								while(pauseQ.peek() != null){
+									array.put(pauseQ.poll());
+								}
+								addpos.put("CheckInDataList", array);
+							} catch (JSONException e) {
+								e.printStackTrace();
+							}
+							Intent intent = new Intent();
+							intent.setAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
+							intent.putExtra("location", addpos.toString());
 							sendBroadcast(intent);
 						}
 					}

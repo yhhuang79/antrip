@@ -43,7 +43,9 @@ import android.os.IBinder;
 import android.util.Log;
 
 public class UploadService extends Service {
-
+	
+	
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -61,12 +63,12 @@ public class UploadService extends Service {
 		if (action == null) {
 			stopSelf();
 		} else if (action.equals("ACTION_UPLOAD_TRIP")) {
-			//get tripid
-			String tid = intent.getExtras().getString("tripid");
-			String sid = intent.getExtras().getString("userid");
-			Log.e("uploadService", "old tripid= " + tid);
+			//get unique id
+			String id = intent.getExtras().getString("id");
+			String sid = "";
+			Log.e("uploadService", "old tripid= " + id);
 			//give the task a dh to handle its own business with DB
-			new uploadThread().execute(tid, sid);
+			new uploadThread().execute(id, sid);
 		} else {
 			stopSelf();
 		}
