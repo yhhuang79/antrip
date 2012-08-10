@@ -666,7 +666,7 @@
 
 	/* Tooltip sample*/
 	$(function() {
-		$('div[class*=class_left_bt]').each(function() {
+		$('div[class*=class_left_bt],div[class*=class_top_bt]').each(function() {
 			var tip = $(this).find('.tip');
 			$(this).hover(
 

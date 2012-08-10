@@ -25,6 +25,12 @@
 	$('#b_seq_trip').find('.tip').html(g_str_markplace);
 	$('#b_add_note').find('.tip').html(g_str_startrecording);
 
+	$('#tip_ub_trip_m').html(g_str_recordtrip);
+	$('#tip_ub_trip_h').html(g_str_triphistory);
+	$('#tip_ub_f').html(g_str_frined);
+	$('#tip_ub_d').html(g_str_prepage);
+	$('#tip_ub_home').html(g_str_logout);
+
 	$('#b_add_note').find('.tip').html(g_str_startrecording);
 	$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
