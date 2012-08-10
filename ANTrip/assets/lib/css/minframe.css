@@ -185,7 +185,7 @@
 		background-repeat: no-repeat;
 		background-position: top left;
 		padding: 0px;
-		position: absolute;
+		position: fixed;
 		z-index: 1000;
 		-webkit-border-radius: 3px;
 		-moz-border-radius: 3px;
