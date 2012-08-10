@@ -686,6 +686,7 @@
 					top: y,
 					'background-image': url+tip_img+")",
 					visibility:"visible",
+					"padding-left":"20px",
 					display:"block"
 				});
 			}).mouseout(function(e) {

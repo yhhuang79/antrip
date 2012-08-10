@@ -11,7 +11,7 @@
 	var latlng_undefined_value=-999;
 	var g_bounds = new google.maps.LatLngBounds();
 
-	var g_markerCluster;
+	var g_markerCluster=null;
 
 	var emotionMapping = {	
 		"1": "excited",
@@ -93,6 +93,10 @@
 		{
 			g_mapPath.setMap(null);
 			g_mapPath = null;
+		}
+		if(g_markerCluster!=null){
+			g_markerCluster.setMap(null);
+			g_markerCluster = null;
 		}
 
 		g_emotion_html=null;
@@ -261,7 +265,6 @@
 
 					marker.setMap(self);
 					g_tripPointObjArray_2.push(marker);
-					g_markerCluster = new MarkerClusterer(self, g_tripPointObjArray_2);
 				}
 				if( $('#markplacewindow').is(":visible") == false) {
 					$("#overlay").css("display","none");
@@ -269,6 +272,12 @@
 			}
 		});
 		DrawLine();
+
+		if(g_markerCluster!=null){
+			g_markerCluster.setMap(null);
+			g_markerCluster = null;
+		}
+		g_markerCluster = new MarkerClusterer(self, g_tripPointObjArray_2);
 
 		$('#map_canvas_2').gmap('refresh');
 	}

@@ -343,11 +343,11 @@
 
 	#emotion_compass{
 		float:left;
-		position: relative;
-		margin-top:-620px;
+		position: fixed;
+		margin-top:100px;
 		margin-left:0px;
 		display:none;
-		z-index:1020;
+		z-index:1026;
 	}
 
 	#div_langOption{
