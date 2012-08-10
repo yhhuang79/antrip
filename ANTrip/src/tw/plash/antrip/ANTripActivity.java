@@ -263,11 +263,22 @@ public class ANTripActivity extends Activity {
 		 */
 		public void stopRecording(String tripname) {
 			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING").putExtra(
-						"tripname", tripname));
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING")
+					.putExtra("tripname", tripname));
 			} else {
 				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_STOP_RECORDING")
-						.putExtra("tripname", tripname));
+					.putExtra("tripname", tripname));
+			}
+		}
+		
+		/**
+		 * user is naming their trip, don't broadcast positions
+		 */
+		public void prepareStopRecording(){
+			if (useSkyhook) {
+				startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
+			} else {
+				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
 			}
 		}
 		

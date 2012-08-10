@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Locale;
-import java.util.PriorityQueue;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,7 +23,6 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import com.skyhookwireless.wps.RegistrationCallback;
 import com.skyhookwireless.wps.WPSAuthentication;
 import com.skyhookwireless.wps.WPSContinuation;
 import com.skyhookwireless.wps.WPSLocation;
@@ -97,7 +96,13 @@ public class LocationService extends Service {
 		Log.e("locationService", "period= " + periodSEC + " seconds");
 		Log.e("locationService", "period= " + periodMS + " milliseconds");
 		
-		String action = intent.getAction();
+		String action = null;
+		if(intent != null){
+			action = intent.getAction();
+		}else{
+			errorStopService("null intent");
+		}
+		
 		Log.e("location service", "action= " + action);
 		if (action == null) {
 			// does not accept startService call without any given ACTION
@@ -146,6 +151,10 @@ public class LocationService extends Service {
 			setTimer();
 			
 		} else if (action.equals("ACTION_STOP_RECORDING")) {
+			
+			//TODO feels like i should flush the queue before stopping timer
+			//if so, i need to move the queue part to a separate function, so that it can be called from other places
+			duringCheckin = false;
 			
 			isRecording = false;
 			
@@ -333,7 +342,7 @@ public class LocationService extends Service {
 	 * @param tid
 	 */
 	void setTimer() {
-		final PriorityQueue<JSONObject> pauseQ = new PriorityQueue<JSONObject>();
+		final ConcurrentLinkedQueue<JSONObject> pauseQ = new ConcurrentLinkedQueue<JSONObject>();
 		// final String userid = pref.getString("sid", null);
 		if (currentSid != null) {
 			mTimer = new Timer();
