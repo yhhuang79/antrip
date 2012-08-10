@@ -112,24 +112,7 @@
 	  		<div class="class_pretrip_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#pretrip' class="pre_trip_link"></a></div>
 			<div class="class_nextrip_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#nextrip' class="next_trip_link"></a></div>
 		</div>
-		 <div id="sym_edit_bt_list" style="display:none">
-				<div id="b_open_trip" class="class_left_bt">	
-					<img src="" id="img_open_trip" class="class_left_bt"  onClick="if(g_isForMobile==false){TripListDialog();}else{ShowRecorderMap();}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
-					<span class="tip" id="open_trip_tip"></span>
-				</div>
-				<div id="b_seq_trip" class="class_left_bt">	
-					<img src="" id="img_seq_trip" name="img_seq_trip" class="class_left_bt" onClick="if(g_isForMobile==false){changeCursorToCut($(this));}else{openMarkplaceWindow();}" onMouseOver="if($(this).attr('src')!=im+'MarkPlace_b.png'){rotateInterval($(this));}" onMouseOut="if($(this).attr('src')!=im+'MarkPlace_b.png'){stopRotateInterval($(this));}"></img>				
-					<span class="tip" id="seg_trip_tip"></span>
-				</div>
-				<div id="b_add_note" class="class_left_bt">	
-					<img src="" id="img_add_note" class="class_left_bt" onClick="if(g_isForMobile==false){inputNoteDialog();}else{startRecordTrip();}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
-					<span class="tip" id="add_note_tip"></span>
-				</div>
-				<div id="b_export_trip" class="class_left_bt">	
-					<img src="" id="img_exp_trip" class="class_left_bt"  onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
-					<span class="tip" id="exp_trip_tip"></span>
-				</div>
-		 </div>
+	
 		 <div id="edit_display_area">
 			 <div id="dialog" title="Trip Note" class="ui-widget"></div>
 			 <div id="map_canvas">
@@ -138,6 +121,24 @@
 			 <div id="map_canvas_2">
 		
 			 </div>
+		 </div>
+		<div id="sym_edit_bt_list" style="display:none">
+				<div id="b_open_trip" class="class_left_bt">	
+					<img src="" id="img_open_trip" class="class_left_bt"  onClick="if(g_isForMobile==false){TripListDialog();}else{ShowRecorderMap();}" ></img>
+					<span class="tip" id="open_trip_tip"></span>
+				</div>
+				<div id="b_seq_trip" class="class_left_bt">	
+					<img src="" id="img_seq_trip" name="img_seq_trip" class="class_left_bt" onClick="if(g_isForMobile==false){changeCursorToCut($(this));}else{openMarkplaceWindow();}"></img>				
+					<span class="tip" id="seg_trip_tip"></span>
+				</div>
+				<div id="b_add_note" class="class_left_bt">	
+					<img src="" id="img_add_note" class="class_left_bt" onClick="if(g_isForMobile==false){inputNoteDialog();}else{startRecordTrip();}" ></img>
+					<span class="tip" id="add_note_tip"></span>
+				</div>
+				<div id="b_export_trip" class="class_left_bt">	
+					<img src="" id="img_exp_trip" class="class_left_bt"  onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
+					<span class="tip" id="exp_trip_tip"></span>
+				</div>
 		 </div>
 		  <div id="markplacewindow" class="class_mark_place class_fun_div">
 			<div class="content-primary" id="markplace_fn_content">	

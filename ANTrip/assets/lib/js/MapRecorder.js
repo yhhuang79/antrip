@@ -4,8 +4,8 @@
 	var g_current_longitude;
 	var g_emotion_html=null;
 	var g_tripPointArray_2 = new Array(0);
-	var g_tripMarkerArray_2 = new Array(0);
-	var g_tripPointObjArray_2 = new Array(0);
+	var g_tripMarkerArray_2 = null;
+	var g_tripPointObjArray_2 = null;
 
 	var g_currentmarker = null;
 	var latlng_undefined_value=-999;
@@ -33,6 +33,8 @@
 			$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecording.png');
 			$('#b_add_note').find('.tip').html(g_str_nowrecording);
 			scaleInterval($('#b_add_note'));
+			stopRotateInterval($('#img_add_note'));
+			clockwiseInterval($('#img_add_note'));
 	}
 
 	function addPoint(){
@@ -66,11 +68,21 @@
 	}
 
 	function cleanGlobalArray(){
-		for(i=0;i<g_tripMarkerArray_2.length;i++){
-			g_tripMarkerArray_2[i].setMap(null);
+		if(g_tripMarkerArray_2!=null){
+			for(i=0;i<g_tripMarkerArray_2.length;i++){
+				//if(g_tripMarkerArray_2[i]!=null){
+					g_tripMarkerArray_2[i].setMap(null);
+					g_tripMarkerArray_2[i] = null;
+			//	}
+			}
 		}
-		for(i=0;i<g_tripPointObjArray_2.length;i++){
-			g_tripPointObjArray_2[i].setMap(null);
+		if(g_tripPointObjArray_2!=null){
+			for(i=0;i<g_tripPointObjArray_2.length;i++){
+			//	if(g_tripPointObjArray_2[i]!=null){
+					g_tripPointObjArray_2[i].setMap(null);
+					g_tripPointObjArray_2[i] = null;
+			//	}
+			}
 		}
 		g_tripPointArray_2 = new Array(0);
 		g_tripMarkerArray_2 = new Array(0);
@@ -80,6 +92,7 @@
 			g_mapPath.setMap(null);
 			g_mapPath = null;
 		}
+
 		g_emotion_html=null;
 		g_bounds = new google.maps.LatLngBounds();
 	}
@@ -94,7 +107,7 @@
 			var sid = null;
 			sid = $.cookie("sid");
 			$.cookie("isRecording", true);
-			cleanGlobalArray();
+			//cleanGlobalArray();
 			if(window.antrip){
 				isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
@@ -104,9 +117,12 @@
 				alert("ANTrip APP Exception!");
 			}
 			changeIconToRecoding();
+			ShowRecorderMap();
 		} else {
 			$("#dialog-tripname").dialog('open');
+			stopRotateInterval($('#img_add_note'));
 		}
+		setRotate($('#img_add_note'));
 	}
 
 	function initTripNameDialog(){
@@ -124,9 +140,9 @@
 					'background-image':url+im+"typenotearea.png)",
 					'background-position':"center center",
 				});
-				$(this).focus();
-				$("#sym_edit_bt_list").css("position","static");
-				$('#map_canvas_2').css('margin-top','-696px');
+			//	$(this).focus();
+				//$("#sym_edit_bt_list").css("position","static");
+				//$('#map_canvas_2').css('margin-top','-696px');
 				$("#sym_topbtnGroup").removeClass("topbtnTripClass");
 				$("button").css({
 					color: "#000000",
@@ -148,13 +164,11 @@
 					$('#b_add_note').find('.class_left_bt').attr('src', im+'PlaceRecorder.png');
 					$('#b_add_note').find('.tip').html(g_str_startrecording);
 					scaleRestore($('#b_add_note'));
-					//window.clearInterval(g_intval);
 					if(g_logoutbyIcon == true){
 						logoutbyIcon();
 					}
 					$( this ).dialog( "close" );
 					$("#sym_topbtnGroup").addClass("topbtnTripClass");
-					$("#sym_edit_bt_list").css("position","fixed");
 					$('#map_canvas_2').css('margin-top','0px');
 				}
 			},
@@ -282,35 +296,48 @@
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 
 		var self =  $('#map_canvas_2').gmap('get','map');
-		self.setCenter(latlng);
-		self.setZoom(g_zoom);
-
+		var curlatlng = null;
 		if(g_currentmarker!=null){
-			g_currentmarker.setMap(null);
-			g_currentmarker = null;
+			curlatlng = g_currentmarker.getPosition();
+			//alert(curlatlng);
 		}
-		g_currentmarker =  new google.maps.Marker({ 
-			'position': latlng, 
-			'bounds': true,
-			'icon': im+"ant_24.png",
-		});
-		g_bounds.extend(latlng);
 
-		g_currentmarker.setMap(self);
-		self.fitBounds(g_bounds);
+		if(curlatlng == null || curlatlng.equals(latlng) != true){
+			//alert(curlatlng);
+			//alert(latlng);
+			if(g_currentmarker!=null){
+				g_currentmarker.setMap(null);
+				g_currentmarker = null;
+			}
+			g_currentmarker =  new google.maps.Marker({ 
+					'position': latlng, 
+					'bounds': true,
+					'icon': im+"ant_24.png",
+			});
+			g_bounds.extend(latlng);
+			g_currentmarker.setMap(self);
+			self.setCenter(latlng);
+			self.setZoom(g_zoom);
+			self.fitBounds(g_bounds);
+			$('#map_canvas_2').gmap('refresh');
+		}
+
+		$("#overlay").css("height", "100%");
 		$("#overlay").css("display","none");
+		$("#overlay").css("padding-top", "50%");
+		$("#overlay").css("padding-bottom", "50%");
+		$("#overlay").css("line-height", "100%");
 		$("#overlay").html("");
-
-		$('#map_canvas_2').gmap('refresh');
+		$('#sym_edit_bt_list').show();
 	}
 
 	function ShowRecorderMap(){
 		$('#map_canvas').hide();
 		$('#map_canvas_2').show();
-	//	$('#map_canvas_2').css('margin-top','-690px');
-	//	$("#Symbol_ub_trip_m").css("z-index",9999);
-	//	$("#sym_topbtnGroup").css("z-index",9999);
-	//	$("#ub_trip_management").css("z-index",9999);
+		$("#overlay").css("height", "100px");
+		$("#overlay").css("padding-top", "50px");
+		$("#overlay").css("padding-bottom", "50px");
+		$("#overlay").css("line-height", "100px");
 		$("#overlay").css("display","block");
 		$("#overlay").html(g_str_localizationing);
 		var isRecording = null;
@@ -322,10 +349,15 @@
 		if(isRecording == null){
 			$('#b_seq_trip').find('.class_left_bt').attr("src", im+"MarkPlace_b.png");
 			cleanGlobalArray();
+			if(g_currentmarker!=null){
+					g_currentmarker.setMap(null);
+					g_currentmarker = null;
+			}
 		}
 		else{
 			changeIconToRecoding();
 		}
+
 		$('#map_canvas_2').gmap('watchPosition', function (position, status) {
 			if ( status == 'OK' ) {
 				g_current_latitude = position.coords.latitude;
@@ -336,10 +368,9 @@
 		});
 		setPosition(g_current_latitude, g_current_longitude);
 
-		$('#sym_edit_bt_list').show();
 		$('#markplacewindow :input').removeAttr('disabled');
 		$('#emotion_compass').hide();
-		$('#map_canvas').hide();
+	//	$('#map_canvas').hide();
 		$('#map_canvas_2').gmap('refresh');
 	}
 
@@ -356,6 +387,7 @@
 			$('#markplacewindow :input').removeAttr('disabled');
 			$('#markplacewindow').hide();
 			$('#emotion_compass').hide();
+			$("#overlay").css("z-index","1010");
 			$("#overlay").css("display","none");
 		}else{
 			$("#sym_topbtnGroup").hide();
@@ -363,6 +395,7 @@
 			$("#sym_topbtnGroup").show();
 			$('#edit_display_area').attr('disabled', true);
 			$('#sym_topbtnGroup').attr('disabled', true);
+			$("#overlay").css("z-index","1012");
 			$("#overlay").css("display","block");
 			$('#takepicture').attr("src","");
 			$('#emotion-sel').html("");
@@ -465,7 +498,7 @@
 			fillColor: "d42e16",
 			strokeColor: "4fb6d1",
 			strokeOpacity: 0.8,
-			strokeWidth: 4,
+			strokeWidth: 6,
 			stroke: true,
 			isSelectable: true,
 			singleSelect: true,
@@ -476,7 +509,7 @@
 				$('#emotion-sel').html("<img width='72px' src='"+im+e.key+".png' style='margin-left:-100px;font-size:24px;'><font size=10 color='#e9e5da'><b>"+Tooltip[e.key]+"</b></font></img>");
 				$('#markplacewindow :input').removeAttr('disabled');
 				$('#emotion_compass').hide();
-				$("#overlay").css("z-index","1010");
+				$("#overlay").css("z-index","1012");
 				if(window.antrip){
 					var str = emotionArray.indexOf(e.key)+1;
 					window.antrip.setEmotion(str);

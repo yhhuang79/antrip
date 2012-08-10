@@ -178,24 +178,13 @@
 		var screenInfoArray;
 		if(window.antrip)
 		{
-		//	 alert(window.antrip.getdpi());
 			 // dpi
 			 // scale dpi
 			 // xdpi
 			 // ydpi
 			 // width pixel
 			 // height pixel
-			 screenInfoArray = eval("("+window.antrip.getScreenInfo()+")");
-
-			 if(screenInfoArray!==-1)
-			{
-			/*	 alert("dpi:" + screenInfoArray.density);
-				 alert("scale dpi:" + screenInfoArray.scaledDensity);
-				 alert("xdpi:" + screenInfoArray.xdpi);
-				 alert("ydpi:" + screenInfoArray.ydpi);
-				 alert("width:" + screenInfoArray.width);
-				 alert("height:" + screenInfoArray.height);*/
-			}
+			screenInfoArray = eval("("+window.antrip.getScreenInfo()+")");
 			dpi = (480/(screenInfoArray.width/screenInfoArray.scaledDensity))*160;
 			scale = 1/screenInfoArray.scaledDensity;
 		}
@@ -204,12 +193,6 @@
 			scale = 1/devicePixelRatio;
 		}
 
-		//var dpi = (480/(screenInfoArray.width/screenInfoArray.scaledDensity))*160;
-		//alert(viewportWidth);
-		//alert(dpi);
-		//alert(window.devicePixelRatio);
-		//var scale = 1/screenInfoArray.scaledDensity;
-		//alert(scale);
 		var viewportContent = 'width='+viewportWidth+', height='+viewportHeight+', target-densityDpi='+dpi+', initial-scale='+scale+', maximum-scale='+scale+', user-scalable=no';
 		jQuery('#viewportMeta').attr("content", viewportContent);
 		$('head meta[name=viewport]').attr('content', viewportContent);
@@ -470,6 +453,7 @@
 			$("#body").css("overflow","hidden");
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
 			$('#sym_topbtnGroup').show();
+			$('#sym_edit_bt_list').hide();
 			show_edit_div();
 			g_mode ="eTripDisplay";
 			if(g_trip==-1)
@@ -531,9 +515,9 @@
 						height:200,
 						modal: true,
 						open: function (event, ui) {
-								$("#sym_edit_bt_list").css("position","static");
-								$('#map_canvas_2').css('margin-top','-696px');
-								$(this).focus();
+							//	$("#sym_edit_bt_list").css("position","static");
+							//	$('#map_canvas_2').css('margin-top','-696px');
+								//$(this).focus();
 								$("#sym_topbtnGroup").removeClass("topbtnTripClass");
 								$('.ui-dialog-buttonpane').css({
 									'background-image':url+im+"typenotearea.png)",
@@ -546,7 +530,7 @@
 						buttons: {
 							"Yes": function() {
 								$( this ).dialog( "close" );
-								$("#sym_edit_bt_list").css("position","fixed");
+								//$("#sym_edit_bt_list").css("position","fixed");
 								$('#map_canvas_2').css('margin-top','0px');
 								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								startRecordTrip();
@@ -555,7 +539,7 @@
 							},
 							"No": function() {
 								$( this ).dialog( "close" );
-								$("#sym_edit_bt_list").css("position","fixed");
+								//$("#sym_edit_bt_list").css("position","fixed");
 								$('#map_canvas_2').css('margin-top','0px');
 								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								return;
@@ -612,8 +596,8 @@
 	}
 
 	//**<-- left buttons rotate animation -->**
-	var g_intval="";
-	var g_clockintval="";
+	var g_intval=-1;
+	var g_clockintval=-1;
 	var g_angle=45;
 	var g_rotatetime='2s';
 	function rotateImg(object){
@@ -622,12 +606,22 @@
 		object.css('-webkit-transform','rotate('+g_angle+'deg)');
 	}
 
+	function setRotate(object){
+	}
+
 	function stopRotateInterval(object){
-		if(g_clockintval!=-1){
+		if(g_intval!=-1){
 			window.clearInterval(g_intval);
+			g_intval = -1;
 			object.css('-webkit-transition-duration', g_rotatetime);
 			object.css('-webkit-transform','rotate(0deg)');
 			g_angle=45;
+		}
+		if(g_clockintval!=-1){
+			window.clearInterval(g_clockintval);
+			g_angle = 0;
+			clockwiseImg(object, g_angle);
+			g_clockintval =-1;
 		}
 	}
 
