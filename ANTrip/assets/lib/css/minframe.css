@@ -1,6 +1,6 @@
 	#body {
 		text-align:center;
-		overflow:hidden;
+		overflow:scroll;
 		overflow-x:hidden;
 		margin:0;padding:0;
 		background-repeat:repeat-x;
@@ -431,6 +431,24 @@
 		text-align:right;
 	}
 
+	#Symbol_about{
+		float:right;
+		text-align:right;
+	}
+
 	#logoutwhenrecord{
 		text-align:left;
+	}
+
+	#tripname{
+		float:center;
+		position:fixed;
+		vertical-align: center;
+		margin-top:20px;
+		margin-left:150px;
+		margin-right:150px;
+		text-align:center;
+		z-index:1035;
+		height:72px;
+		font-size: 24px;
 	}

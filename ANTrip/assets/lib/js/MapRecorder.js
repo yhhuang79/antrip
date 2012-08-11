@@ -146,7 +146,7 @@
 					'background-image':url+im+"typenotearea.png)",
 					'background-position':"center center",
 				});
-			//	$(this).focus();
+				//$(this).css("z-index","1026");
 				//$("#sym_edit_bt_list").css("position","static");
 				//$('#map_canvas_2').css('margin-top','-696px');
 				$("#sym_topbtnGroup").removeClass("topbtnTripClass");
@@ -154,6 +154,9 @@
 					color: "#000000",
 				});
 				$(".ui-dialog-titlebar-close").hide();
+				if(window.antrip){
+						window.antrip.prepareStopRecording();
+				}
 			},
 			buttons: {
 				"OK": function() {
@@ -375,6 +378,7 @@
 				g_current_longitude = position.coords.longitude;
 				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
 				setPosition(g_current_latitude, g_current_longitude);
+				$('#map_canvas_2').gmap('clearWatch');
 			}
 		});
 		setPosition(g_current_latitude, g_current_longitude);

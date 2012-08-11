@@ -63,6 +63,8 @@
 	var g_eMode={'eHome':1,'eTripList':2,'eTripDisplay':3,'eFriendList':4};
 	var g_mapPath = null;
 
+	var g_tripname = null;
+
 	/*! global usage function*/
 	function loadjscssfile(filename, filetype){
 		 if (filetype=="js"){ //if filename is a external JavaScript file
@@ -382,10 +384,14 @@
 		$("#end_Text").hide();
 
 		if(object.attr('name')==$("#ub_about").attr('name')){
-			$('div[class*=class_fun_div]').each(function() {
+		/*	$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
-			});
-			$('#about_page').show();
+			});*/
+			alert('upload!');
+			if(window.antrip){
+				window.antrip.uploadTrip("");
+			}
+		//	$('#about_page').show();
 			g_mode = "eAbout";
 		}
 		else if(object.attr('name')==$("#ub_download").attr('name')){
@@ -398,11 +404,14 @@
 			$("#sym_editpage").hide();
 			$('#markplacewindow').hide();
 
+			$("#tripname").html("");
 			$("#Symbol_ub_home").show();
 			$("#Symbol_trip_history").show();
 			$("#Symbol_ub_trip_m").show();
 			$("#Symbol_friend").show();
 			$("#Symbol_download").hide();
+			$("#Symbol_about").hide();
+			
 
 			TopBtChangeToDefaultImg($("#ub_trip_history").attr('name'));
 			MM_swapImage($("#ub_trip_history").attr('name'),'',im+$("#ub_trip_history").attr('name')+'_r.png',1);
@@ -878,8 +887,10 @@
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
+
+							var tripname = data.trip_name;
 				
-							appendcontent="<button class='tripItem' href=''><div class='product'><div class='wrapper'><div class='listview_image'><img  onClick=\"alert('upload!');if(window.antrip){window.antrip.uploadTrip("+data.id+");}\"  src='"+uploadicon_img+"' width='100px' style='border:2px solid #555;'/></div><div class='listview_description'  onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}g_showtripmap=true;showLocalTripData("+data.id+");\"><a class='listview' href='' rel='external'><img src='"+im+"uploadmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button class='tripItem' href=''><div class='product'><div class='wrapper'><div class='listview_image'><img  onClick=\"alert('upload!');if(window.antrip){window.antrip.uploadTrip("+data.id+");}\"  src='"+uploadicon_img+"' width='100px' style='border:2px solid #555;'/></div><div class='listview_description'  onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";g_tripname='"+ tripname+"';OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#Symbol_about').show();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}g_showtripmap=true;showLocalTripData("+data.id+");\"><a class='listview' href='' rel='external'><img src='"+im+"uploadmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 							
 							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 								$("div[id=products]").eq(0).append(appendcontent);
@@ -899,7 +910,9 @@
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
 							var appendcontent;
 
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href=''><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='' rel='external'><img src='"+im+"uploadedmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":"+ data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							var tripname = data.trip_name;
+
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";g_tripname='"+ tripname+"';OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href=''><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='' rel='external'><img src='"+im+"uploadedmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":"+ data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 
 							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 								$("div[id=products]").eq(0).append(appendcontent);
@@ -923,8 +936,11 @@
 			return;
 		}
 		var localtripdata;
+		
 		$('#map_canvas').show();
 		$('#map_canvas_2').hide();
+
+		$("#tripname").html(g_tripname.toString());
 		if(window.antrip){
 			var localresult = window.antrip.getLocalTripData(trip_id);
 			if(localresult==-1){
@@ -947,6 +963,7 @@
 					var self = this;
 					g_tripPointArray = new Array(0);
 					g_tripMarkerArray = new Array(0);
+					var tripPointObjArray = new Array(0);
 					var index=0;
 					$("#overlay").css("display","block");
 					$("#overlay").html(g_str_loading);
@@ -1013,7 +1030,7 @@
 								});
 								g_tripMarkerArray.push(placemarker);
 							} else {
-								self.addMarker({ 
+								var marker = self.addMarker({ 
 									'position': latlng, 
 									'bounds': true
 								}).click(function(){
@@ -1029,6 +1046,7 @@
 										g_infowindow=null;
 									}*/
 								});
+								tripPointObjArray.push(marker);
 							}
 						}
 						index++;
@@ -1055,6 +1073,10 @@
 					});
 					g_mapPath.setMap(_map);
 					self.set('MarkerClusterer', new MarkerClusterer(_map, self.get('markers')));
+			//		var markerClusterer = new MarkerClusterer(_map,  self.get('markers'));
+				/*	for(var i=0;i<tripPointObjArray.length;i++){
+						tripPointObjArray[i].setMap(null);
+					}*/
 					$("#overlay").css("display","none");
 					$("#overlay").html("");
 					//alert("g_showtripmap==true1");
@@ -1179,6 +1201,7 @@
 		g_showtripmap = true;
 		$('#map_canvas').show();
 		$('#map_canvas_2').hide();
+		$("#tripname").html(g_tripname.toString());
 		GetTripPointfromID(userid, trip_id);
 		g_trip=trip_id;
 	}
