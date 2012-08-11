@@ -3,10 +3,14 @@ package tw.plash.antrip;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -36,15 +40,19 @@ import org.json.JSONTokener;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class UploadService extends Service {
 	
-	
+	private SharedPreferences pref;
 	
 	@Override
 	public void onCreate() {
@@ -54,6 +62,8 @@ public class UploadService extends Service {
 			// no internet, don't proceed
 			Log.e("uploadService", "internet not available");
 			stopSelf();
+		} else{
+			pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 		}
 	}
 
@@ -65,10 +75,15 @@ public class UploadService extends Service {
 		} else if (action.equals("ACTION_UPLOAD_TRIP")) {
 			//get unique id
 			String id = intent.getExtras().getString("id");
-			String sid = "";
+			String sid = pref.getString("sid", null);
 			Log.e("uploadService", "old tripid= " + id);
 			//give the task a dh to handle its own business with DB
-			new uploadThread().execute(id, sid);
+			if(id != null && sid != null){
+				new uploadThread().execute(id, sid);
+			} else{
+				Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
+				stopSelf();
+			}
 		} else {
 			stopSelf();
 		}
@@ -83,33 +98,46 @@ public class UploadService extends Service {
 
 	private class uploadThread extends AsyncTask<String, Integer, Void> {
 		
-		private boolean[] checkList = {false, false, false, false, false};
+		private boolean[] checkList = {false, false, false, false, false, false};
+		
+		private String correctURLEncoder(String inURL){
+			String inParameter = inURL.substring(inURL.lastIndexOf("?") + 1);
+			Log.e("correct url encoder", "inParam=" + inParameter);
+			String outParameter= null;
+			try {
+				outParameter = URLEncoder.encode(inParameter, "UTF-8");
+				Log.e("correct url encoder", "outParam=" + outParameter);
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			String result = inURL.replace(inParameter, outParameter);
+			Log.e("correct url encoder", "result=" + result);
+			return result;
+		}
 		
 		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... values) {
-			super.onProgressUpdate(values);
-			
-		}
-
-		@Override
 		protected Void doInBackground(String... params) {
-			String oldTripid = params[0];
+			String uniqueid = params[0];
+			String oldTripid = null;
 			String newTripid = null;
 			String userid = params[1];
 			DBHelper128 dh = new DBHelper128(getApplicationContext());
 			try {
+				//first we get the old tripid using the unique id value
+				oldTripid = dh.getTripid(uniqueid);
+				if(oldTripid != null){
+					checkList[0] = true;
+				} else{
+					return null;
+				}
+				
 				// the client to handle sending/receiving requests
 				HttpClient httpsClient = getHttpClient();
 				//first, update trip info and data with the correct tripid
 				String newTripidUrl = "https://plash.iis.sinica.edu.tw:8080/GetNewTripId?userid=" + userid;
 				Log.e("newTripidUrl", newTripidUrl);
-				HttpGet getRequest = new HttpGet(URLEncoder.encode(newTripidUrl, "UTF-8"));
+				HttpGet getRequest = new HttpGet();
+				getRequest.setURI(new URI(correctURLEncoder(newTripidUrl)));
 				HttpResponse response = httpsClient.execute(getRequest);
 				Integer statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -128,7 +156,7 @@ public class UploadService extends Service {
 					//connection failed, abort
 					return null;
 				}
-				checkList[0] = true;
+				checkList[1] = true;
 				//XXX get new trip id done
 				
 				//to be reused later
@@ -139,15 +167,16 @@ public class UploadService extends Service {
 				HttpClient httpClient = new DefaultHttpClient();
 				
 				CachedPoints first = dh.getOnePoint(userid, newTripid, true);
-				String reGeoFirst = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + first.latitude + "," + first.longitude + "&sensor=true";
-				Log.e("reGeoFirst", reGeoFirst);
-				getRequest = new HttpGet(URLEncoder.encode(reGeoFirst, "UTF-8"));
-				response = httpClient.execute(getRequest);
-				statusCode = response.getStatusLine().getStatusCode();
+				
+				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+				List<Address> firstAddr = geocoder.getFromLocation(first.latitude, first.longitude, 1);
+				if(firstAddr != null && !firstAddr.isEmpty()){
+					
+				} else{
+					dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
+					return null;
+				}
 				if(statusCode == 200){
-					BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-					JSONObject result = new JSONObject(new JSONTokener(in.readLine()));
-					in.close();
 					if(result.getString("status").equals("OK")){
 						JSONArray addr = ((JSONObject)result.getJSONArray("result").get(0)).getJSONArray("address_components");
 						dh.insertStartaddr(
@@ -163,10 +192,8 @@ public class UploadService extends Service {
 						dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
 					}
 				} else{
-					dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
-					return null;
 				}
-				checkList[1] = true;
+				checkList[2] = true;
 				//XXX reverse-geocoding of starting address done
 				
 				//to be reused later
@@ -176,7 +203,8 @@ public class UploadService extends Service {
 				CachedPoints last = dh.getOnePoint(userid, newTripid, false);
 				String reGeoLast = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + last.latitude + "," + last.longitude + "&sensor=true";
 				Log.e("reGeoLast", reGeoLast);
-				getRequest = new HttpGet(URLEncoder.encode(reGeoLast, "UTF-8"));
+//				getRequest = new HttpGet(correctURLEncoder(reGeoLast));
+				getRequest = new HttpGet(reGeoLast);
 				response = httpClient.execute(getRequest);
 				statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -201,7 +229,7 @@ public class UploadService extends Service {
 					dh.insertEndaddr(userid, newTripid, "", "", "", "", "Address not available");
 					return null;
 				}
-				checkList[2] = true;
+				checkList[3] = true;
 				//XXX reverse-geocoding of ending address done
 				
 				//to be reused later
@@ -226,7 +254,7 @@ public class UploadService extends Service {
 				+ "&et_addr_prt3=" + tripinfo.getString("et_addr_prt3")
 				+ "&et_addr_prt4=" + tripinfo.getString("et_addr_prt4")
 				+ "&et_addr_prt5=" + tripinfo.getString("et_addr_prt5");
-				getRequest = new HttpGet(URLEncoder.encode(inputtripinfo, "UTF-8"));
+				getRequest = new HttpGet(correctURLEncoder(inputtripinfo));
 				response = httpsClient.execute(getRequest);
 				statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
@@ -234,7 +262,7 @@ public class UploadService extends Service {
 				} else{
 					return null;
 				}
-				checkList[3] = true;
+				checkList[4] = true;
 				//XXX input trip info done
 				
 				//release this
@@ -277,7 +305,7 @@ public class UploadService extends Service {
 					// connection error
 					Log.e("connection error", "status code= " + statusCode);
 				}
-				checkList[4] = true;
+				checkList[5] = true;
 				//XXX input trip data done
 				
 				// close the connection
@@ -285,6 +313,8 @@ public class UploadService extends Service {
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch(JSONException e){
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}
 			if(dh.DBIsOpen()){

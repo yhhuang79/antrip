@@ -490,6 +490,7 @@ public class ANTripActivity extends Activity {
 		
 		// TODO auto upload, no user interaction involved
 		public void uploadTrip(String id) {
+			Log.e("activity", "upload trip: " + id);
 			startService(new Intent(mContext, UploadService.class).setAction("ACTION_UPLOAD_TRIP").putExtra("id", id));
 		}
 		
@@ -524,6 +525,10 @@ public class ANTripActivity extends Activity {
 					+ "\", \"height\":\"" + usableArea.getHeight() + "\"}";
 			Log.e("screeninfo", s);
 			return new JSONObject(s).toString();
+		}
+		
+		public void reloadIndex(){
+			mWebView.loadUrl("file:///android_asset/index.html");
 		}
 	}
 	

@@ -38,15 +38,39 @@ public class DBHelper128 {
 	private SQLiteDatabase db;
 	
 	private static final String CREATE_TABLE_TRIP_POINT = "CREATE TABLE " + TRIP_POINT_TABLE
-			+ "(id INTEGER PRIMARY KEY, " + "latitude REAL, " + "longitude REAL, " + "timestamp TEXT, "
-			+ "altitude TEXT, " + "speed TEXT, " + "bearing TEXT, " + "accuracy TEXT, " + "userid TEXT, "
-			+ "tripid TEXT, " + "picture TEXT, " + "emotion TEXT, " + "note TEXT)";
+			+ "(id INTEGER PRIMARY KEY, " 
+			+ "latitude REAL, " 
+			+ "longitude REAL, " 
+			+ "timestamp TEXT, "
+			+ "altitude TEXT, " 
+			+ "speed TEXT, " 
+			+ "bearing TEXT, " 
+			+ "accuracy TEXT, " 
+			+ "userid TEXT, "
+			+ "tripid TEXT, " 
+			+ "picture TEXT, " 
+			+ "emotion TEXT, " 
+			+ "note TEXT)";
 	
 	private static final String CREATE_TABLE_TRIP_INFO = "CREATE TABLE " + TRIP_INFO_TABLE
-			+ "(id INTEGER PRIMARY KEY, " + "tripid TEXT, " + "userid TEXT, " + "name TEXT, " + "starttime TEXT, "
-			+ "endtime TEXT, " + "length REAL, " + "count INTEGER, " + "startaddrpt1 TEXT, " + "startaddrpt2 TEXT, "
-			+ "startaddrpt3 TEXT, " + "startaddrpt4 TEXT, " + "startaddrpt5 TEXT, " + "endaddrpt1 TEXT, "
-			+ "endaddrpt2 TEXT, " + "endaddrpt3 TEXT, " + "endaddrpt4 TEXT, " + "endaddrpt5 TEXT, "
+			+ "(id INTEGER PRIMARY KEY, " 
+			+ "tripid TEXT, " 
+			+ "userid TEXT, " 
+			+ "name TEXT, " 
+			+ "starttime TEXT, "
+			+ "endtime TEXT, " 
+			+ "length REAL, " 
+			+ "count INTEGER, " 
+			+ "startaddrpt1 TEXT, " 
+			+ "startaddrpt2 TEXT, "
+			+ "startaddrpt3 TEXT, " 
+			+ "startaddrpt4 TEXT, " 
+			+ "startaddrpt5 TEXT, " 
+			+ "endaddrpt1 TEXT, "
+			+ "endaddrpt2 TEXT, " 
+			+ "endaddrpt3 TEXT, " 
+			+ "endaddrpt4 TEXT, " 
+			+ "endaddrpt5 TEXT, "
 			+ "uploaded INTEGER)";
 	
 	/**
@@ -330,6 +354,28 @@ public class DBHelper128 {
 				return null;
 			}
 		} else {
+			return null;
+		}
+	}
+	
+	synchronized public String getTripid(String uniqueid){
+		if(db.isOpen()){
+			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid"}, "id=" + uniqueid, null, null, null, null);
+			if(mCursor != null){
+				if(mCursor.moveToFirst()){
+					String tripid = mCursor.getString(mCursor.getColumnIndexOrThrow("tripid"));
+					mCursor.close();
+					return tripid;
+				} else{
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
 			return null;
 		}
 	}
