@@ -4,8 +4,8 @@
 	var g_current_longitude;
 	var g_emotion_html=null;
 	var g_tripPointArray_2 = new Array(0);
-	var g_tripMarkerArray_2 = null;
-	var g_tripPointObjArray_2 = null;
+	var g_tripMarkerArray_2 = new Array(0);
+	var g_tripPointObjArray_2 = new Array(0);
 
 	var g_currentmarker = null;
 	var latlng_undefined_value=-999;
@@ -325,7 +325,10 @@
 			}
 		});
 		DrawLine();
-
+		if(g_markerCluster!=null){
+			g_markerCluster.clearMarkers();
+			g_markerCluster = null;
+		}
 		g_markerCluster = new MarkerClusterer(self, g_tripPointObjArray_2);
 
 		$('#map_canvas_2').gmap('refresh');
