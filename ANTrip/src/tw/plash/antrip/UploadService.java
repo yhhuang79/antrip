@@ -171,66 +171,52 @@ public class UploadService extends Service {
 				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> firstAddr = geocoder.getFromLocation(first.latitude, first.longitude, 1);
 				if(firstAddr != null && !firstAddr.isEmpty()){
-					
+					dh.insertStartaddr(
+							userid, 
+							newTripid, 
+							firstAddr.get(0).getCountryName(), 
+							firstAddr.get(0).getAdminArea(), 
+							firstAddr.get(0).getLocality(), 
+							firstAddr.get(0).getSubLocality(), 
+							firstAddr.get(0).getThoroughfare());
+					checkList[2] = true;
 				} else{
 					dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
-					return null;
+					checkList[2] = false;
+//					return null;
 				}
-				if(statusCode == 200){
-					if(result.getString("status").equals("OK")){
-						JSONArray addr = ((JSONObject)result.getJSONArray("result").get(0)).getJSONArray("address_components");
-						dh.insertStartaddr(
-								userid, 
-								newTripid, 
-								((JSONObject)addr.get(4)).getString("long_name"), 
-								((JSONObject)addr.get(3)).getString("long_name"), 
-								((JSONObject)addr.get(2)).getString("long_name"), 
-								((JSONObject)addr.get(1)).getString("long_name"), 
-								((JSONObject)addr.get(0)).getString("long_name"));
-					} else{
-						//error with google geocoding service, put something in DB first
-						dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
-					}
-				} else{
-				}
-				checkList[2] = true;
+				
 				//XXX reverse-geocoding of starting address done
 				
 				//to be reused later
+				geocoder = null;
 				getRequest = null;
 				response = null;
 				statusCode = null;
+				
 				CachedPoints last = dh.getOnePoint(userid, newTripid, false);
-				String reGeoLast = "http://maps.googleapis.com/maps/api/geocode/json?latlng=" + last.latitude + "," + last.longitude + "&sensor=true";
-				Log.e("reGeoLast", reGeoLast);
-//				getRequest = new HttpGet(correctURLEncoder(reGeoLast));
-				getRequest = new HttpGet(reGeoLast);
-				response = httpClient.execute(getRequest);
-				statusCode = response.getStatusLine().getStatusCode();
-				if(statusCode == 200){
-					BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-					JSONObject result = new JSONObject(new JSONTokener(in.readLine()));
-					in.close();
-					if(result.getString("status").equals("OK")){
-						JSONArray addr = ((JSONObject)result.getJSONArray("result").get(0)).getJSONArray("address_components");
-						dh.insertEndaddr(
-								userid, 
-								newTripid, 
-								((JSONObject)addr.get(4)).getString("long_name"), 
-								((JSONObject)addr.get(3)).getString("long_name"), 
-								((JSONObject)addr.get(2)).getString("long_name"), 
-								((JSONObject)addr.get(1)).getString("long_name"), 
-								((JSONObject)addr.get(0)).getString("long_name"));
-					} else{
-						//error with google geocoding service, put something in DB first
-						dh.insertEndaddr(userid, newTripid, "", "", "", "", "Address not available");
-					}
+				geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+				List<Address> lastAddr = geocoder.getFromLocation(last.latitude, last.longitude, 1);
+				if(lastAddr != null && !lastAddr.isEmpty()){
+					dh.insertStartaddr(
+							userid, 
+							newTripid, 
+							lastAddr.get(0).getCountryName(), 
+							lastAddr.get(0).getAdminArea(), 
+							lastAddr.get(0).getLocality(), 
+							lastAddr.get(0).getSubLocality(), 
+							lastAddr.get(0).getThoroughfare());
+					checkList[3] = true;
 				} else{
 					dh.insertEndaddr(userid, newTripid, "", "", "", "", "Address not available");
-					return null;
+					checkList[3] = false;
+//					return null;
 				}
-				checkList[3] = true;
+				
 				//XXX reverse-geocoding of ending address done
+				
+				//done with geocoder
+				geocoder = null;
 				
 				//to be reused later
 				getRequest = null;
@@ -238,6 +224,7 @@ public class UploadService extends Service {
 				statusCode = null;
 				//thirdly, upload trip info with eugene's component
 				JSONObject tripinfo = dh.getOneTripInfo(userid, newTripid);
+				
 				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?update_status=2&trip_name="
 				+ tripinfo.getString("trip_name")
 				+ "&trip_st=" + tripinfo.getString("trip_st")
