@@ -42,7 +42,7 @@
             </intent-filter>
         </activity>
         <service android:name="LocationService" android:process=":remote"></service>
-        <service android:name="LocationServiceGPS" android:process=":remote"></service>
+        <service android:name="UploadService" android:process=":remote"></service>
     </application>
 
 </manifest>
