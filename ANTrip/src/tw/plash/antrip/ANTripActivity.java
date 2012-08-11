@@ -60,6 +60,7 @@ public class ANTripActivity extends Activity {
 	private PriorityQueue<String> urlQueue;
 	private Handler mHandler;
 	private boolean canPostAgain;
+	private boolean canCallJavaScript = false;
 	
 	private BroadcastReceiver br = new BroadcastReceiver() {
 		@Override
@@ -96,7 +97,7 @@ public class ANTripActivity extends Activity {
 			Log.e("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
 		}
 		if (loadIndex) {
-			queuedLoadURL("file:///android_asset/index.html");
+			mWebView.loadUrl("file:///android_asset/index.html");
 			loadIndex = false;
 		}
 	};
@@ -144,7 +145,13 @@ public class ANTripActivity extends Activity {
 		mWebSettings.setJavaScriptEnabled(true);
 		// mWebSettings.setDomStorageEnabled(true);
 		
-		mWebView.setWebViewClient(new WebViewClient());
+		mWebView.setWebViewClient(new WebViewClient(){
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				Log.e("acvitivy", "page finished");
+				canCallJavaScript = true;
+			}
+		});
 		mWebView.setWebChromeClient(new WebChromeClient() {
 			/**
 			 * intercept and replace JavaScript alert dialog with native android
@@ -526,7 +533,7 @@ public class ANTripActivity extends Activity {
 	 * 
 	 * @param url
 	 */
-	private void queuedLoadURL(String url) {
+	private void queuedLoadURL(final String url) {
 		urlQueue.offer(url);
 		// if already running, don't post again
 		if (canPostAgain) {
@@ -535,18 +542,24 @@ public class ANTripActivity extends Activity {
 				public void run() {
 					// now we're running, don't accept any more post calls
 					canPostAgain = false;
-					// get a url from queue
-					String url = urlQueue.poll();
-					Log.d("queuedLoadURL", "url= " + url);
-					mWebView.loadUrl(url);
-					// check if the queue is empty or not
-					if (urlQueue.peek() != null) {
-						// queue not empty, post self with delay
-						mHandler.postDelayed(this, 400);
-					} else {
-						// queue empty, now accepting post calls
-						canPostAgain = true;
+					if(canCallJavaScript){
+						// get a url from queue
+						String url = urlQueue.poll();
+						Log.d("queuedLoadURL", "url= " + url);
+						mWebView.loadUrl(url);
+						// check if the queue is empty or not
+						if (urlQueue.peek() != null) {
+							// queue not empty, post self with delay
+							mHandler.postDelayed(this, 400);
+						} else {
+							// queue empty, now accepting post calls
+							canPostAgain = true;
+						}
+					} else{
+						//wait a bit and try again
+						mHandler.postDelayed(this, 300);
 					}
+					
 				}
 			});
 		}
