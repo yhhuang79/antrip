@@ -241,6 +241,7 @@
 
 	function syncPosition(result){
 		cleanGlobalArray();
+		ShowRecorderMap();
 		addPosition(result);
 	}
 
