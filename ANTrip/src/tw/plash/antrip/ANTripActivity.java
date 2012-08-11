@@ -70,7 +70,6 @@ public class ANTripActivity extends Activity {
 				Location loc = (Location) intent.getExtras().getParcelable("location");
 				String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + ","
 						+ loc.getLongitude() + ")";
-				;
 				// push this location update to html
 				queuedLoadURL(singleLocationUpdateURL);
 				// recording, syncing the whole position list
@@ -92,9 +91,9 @@ public class ANTripActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		usableArea = getWindow().findViewById(Window.ID_ANDROID_CONTENT);
 		if (hasFocus) {
-			Log.e("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " hasFocus la");
+			Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " hasFocus la");
 		} else {
-			Log.e("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
+			Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
 		}
 		if (loadIndex) {
 			mWebView.loadUrl("file:///android_asset/index.html");
@@ -148,7 +147,7 @@ public class ANTripActivity extends Activity {
 		mWebView.setWebViewClient(new WebViewClient(){
 			@Override
 			public void onPageFinished(WebView view, String url) {
-				Log.e("acvitivy", "page finished");
+				Log.w("acvitivy", "page finished");
 				canCallJavaScript = true;
 			}
 		});
@@ -207,14 +206,14 @@ public class ANTripActivity extends Activity {
 		
 		public void logout() {
 			// remove sid and stop stuffs
-			Log.e("logged", "out");
+			Log.w("logged", "out");
 			
 		}
 		
 		// need a function to provide detailed trip data(reviewing historic
 		// trip)
 		public String getLocalTripList() {
-			Log.e("activity", "getlocaltriplist called");
+			Log.w("activity", "getlocaltriplist called");
 			// Toast.makeText(mContext, "getLocalTripList",
 			// Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
@@ -224,16 +223,16 @@ public class ANTripActivity extends Activity {
 			// null means no local trip history, don't return null, return -1
 			// instead
 			if (result != null) {
-				Log.e("activity", "localtriplist=" + result.toString());
+				Log.w("activity", "localtriplist=" + result.toString());
 				return result.toString();
 			} else {
-				Log.e("activity", "localtriplist=-1");
+				Log.w("activity", "localtriplist=-1");
 				return "-1";
 			}
 		}
 		
 		public String getLocalTripData(String id) {
-			Log.e("activity", "getlocaltripdata called, id=" + id);
+			Log.w("activity", "getlocaltripdata called, id=" + id);
 			
 			JSONObject result = null;
 			
@@ -295,7 +294,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setMode(int mode) {
 			currentMode = mode;
-			Log.e("setMode", "mode= " + currentMode);
+			Log.w("setMode", "mode= " + currentMode);
 			String isrec = pref.getString("isRecording", null);
 			switch (currentMode) {
 			case 3:
@@ -325,7 +324,7 @@ public class ANTripActivity extends Activity {
 			default:
 				// stop location service if not recording
 				
-				Log.e("setMode", "isrec= " + isrec);
+				Log.w("setMode", "isrec= " + isrec);
 				if (isrec == null || !isrec.equals("true")) {
 					if (useSkyhook) {
 						stopService(new Intent(mContext, LocationService.class));
@@ -350,7 +349,7 @@ public class ANTripActivity extends Activity {
 			// complete file path for picture
 			imageUri = Uri.fromFile(new File(imagepath, imagename));
 			pref.edit().putString("imguri", imageUri.getPath()).commit();
-			Log.e("startcamera", "imageUri= " + imageUri.getPath());
+			Log.w("startcamera", "imageUri= " + imageUri.getPath());
 			// intent to launch Android camera app to take pictures
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			// input the desired filepath + filename
@@ -370,7 +369,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setEmotion(int id) {
 			if (cco != null) {
-				Log.e("activity", "setEmotion= " + id);
+				Log.w("activity", "setEmotion= " + id);
 				cco.setEmotionID(id);
 			}
 		}
@@ -391,7 +390,7 @@ public class ANTripActivity extends Activity {
 		 * also request a coordinate from location service
 		 */
 		public void startCheckin() {
-			Log.e("activity", "start checkin called");
+			Log.w("activity", "start checkin called");
 			cco = new CandidateCheckinObject();
 			// request a check-in location from service
 			if (useSkyhook) {
@@ -438,10 +437,10 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setCookie(String key, String value) {
 			pref.edit().putString(key, String.valueOf(value)).commit();
-			Log.e("setCookie", "key= " + key + ", value= " + String.valueOf(value));
+			Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 			// if the sid equals cszu's sid, export all info and data to file
 			if (key.equals("sid") && value.equals("206")) {
-				Log.e("SECRETLY", "EXPORT ALL");
+				Log.w("SECRETLY", "EXPORT ALL");
 				DBHelper128 ddd = new DBHelper128(mContext);
 				ddd.exportEverything();
 				ddd.closeDB();
@@ -455,7 +454,7 @@ public class ANTripActivity extends Activity {
 		 * @return the value paired with the key, or null if key does not exist
 		 */
 		public String getCookie(String key) {
-			Log.e("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
+			Log.w("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
 			return pref.getString(key, null);
 		}
 		
@@ -466,7 +465,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void removeCookie(String key) {
 			pref.edit().remove(key).commit();
-			Log.e("removeCookie", "key= " + key);
+			Log.w("removeCookie", "key= " + key);
 		}
 		
 		public String getLocale() {
@@ -489,9 +488,24 @@ public class ANTripActivity extends Activity {
 		}
 		
 		// TODO auto upload, no user interaction involved
+		/**
+		 * manual upload button
+		 * @param id unique id in the DB table
+		 */
 		public void uploadTrip(String id) {
-			Log.e("activity", "upload trip: " + id);
+			Log.w("activity", "upload trip: " + id);
 			startService(new Intent(mContext, UploadService.class).setAction("ACTION_UPLOAD_TRIP").putExtra("id", id));
+		}
+		
+		/**
+		 * Will delete both trip info and data of the given id
+		 * @param id unique id in DB table
+		 */
+		public void deleteTrip(String id){
+			Log.w("activity", "delete trip: " + id);
+			DBHelper128 dh = new DBHelper128(mContext);
+			Log.w("activity", "rows deleted=" + dh.deleteTrip(id));
+			queuedLoadURL("javascript:reloadTripList()");
 		}
 		
 		/**

@@ -32,7 +32,6 @@ import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -98,7 +97,16 @@ public class UploadService extends Service {
 
 	private class uploadThread extends AsyncTask<String, Integer, Void> {
 		
-		private boolean[] checkList = {false, false, false, false, false, false};
+		/**
+		 * 0. find tripid from id
+		 * 1. get new tripid
+		 * 2. reverse geocode start point
+		 * 3. reverse geocode end point
+		 * 4. upload trip info
+		 * 5. upload trip data
+		 * 6. upload pictures
+		 */
+		private boolean[] checkList = {false, false, false, false, false, false, false};
 		
 		private String correctURLEncoder(String inURL){
 			String inParameter = inURL.substring(inURL.lastIndexOf("?") + 1);
@@ -171,14 +179,15 @@ public class UploadService extends Service {
 				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> firstAddr = geocoder.getFromLocation(first.latitude, first.longitude, 1);
 				if(firstAddr != null && !firstAddr.isEmpty()){
+					Log.e("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
 					dh.insertStartaddr(
 							userid, 
 							newTripid, 
-							firstAddr.get(0).getCountryName(), 
-							firstAddr.get(0).getAdminArea(), 
-							firstAddr.get(0).getLocality(), 
-							firstAddr.get(0).getSubLocality(), 
-							firstAddr.get(0).getThoroughfare());
+							(firstAddr.get(0).getCountryName() != null?firstAddr.get(0).getCountryName():"NULL"), 
+							(firstAddr.get(0).getAdminArea() != null?firstAddr.get(0).getAdminArea():"NULL"), 
+							(firstAddr.get(0).getLocality() != null?firstAddr.get(0).getLocality():"NULL"), 
+							(firstAddr.get(0).getSubLocality() != null?firstAddr.get(0).getSubLocality():"NULL"), 
+							(firstAddr.get(0).getThoroughfare() != null?firstAddr.get(0).getThoroughfare():"NULL"));
 					checkList[2] = true;
 				} else{
 					dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
@@ -198,14 +207,15 @@ public class UploadService extends Service {
 				geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> lastAddr = geocoder.getFromLocation(last.latitude, last.longitude, 1);
 				if(lastAddr != null && !lastAddr.isEmpty()){
-					dh.insertStartaddr(
+					Log.e("upload service", "last address: \nadmin:" + lastAddr.get(0).getAdminArea() + "\ncountry code:" + lastAddr.get(0).getCountryCode() + "\ncountru name:" + lastAddr.get(0).getCountryName() + "\nfeature name:" + lastAddr.get(0).getFeatureName() + "\nlocale:" + lastAddr.get(0).getLocale() + "\nlocality:" + lastAddr.get(0).getLocality() + "\npostal code:" + lastAddr.get(0).getPostalCode() + "\npremises:" + lastAddr.get(0).getPremises() + "\nsubadmin:" + lastAddr.get(0).getSubAdminArea() + "\nsublocality:" + lastAddr.get(0).getSubLocality() + "\nsubthroughfare:" + lastAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + lastAddr.get(0).getThoroughfare());
+					dh.insertEndaddr(
 							userid, 
 							newTripid, 
-							lastAddr.get(0).getCountryName(), 
-							lastAddr.get(0).getAdminArea(), 
-							lastAddr.get(0).getLocality(), 
-							lastAddr.get(0).getSubLocality(), 
-							lastAddr.get(0).getThoroughfare());
+							(lastAddr.get(0).getCountryName() != null?lastAddr.get(0).getCountryName():"NULL"), 
+							(lastAddr.get(0).getAdminArea() != null?lastAddr.get(0).getAdminArea():"NULL"), 
+							(lastAddr.get(0).getLocality() != null?lastAddr.get(0).getLocality():"NULL"), 
+							(lastAddr.get(0).getSubLocality() != null?lastAddr.get(0).getSubLocality():"NULL"), 
+							(lastAddr.get(0).getThoroughfare() != null?lastAddr.get(0).getThoroughfare():"NULL"));
 					checkList[3] = true;
 				} else{
 					dh.insertEndaddr(userid, newTripid, "", "", "", "", "Address not available");
@@ -225,28 +235,36 @@ public class UploadService extends Service {
 				//thirdly, upload trip info with eugene's component
 				JSONObject tripinfo = dh.getOneTripInfo(userid, newTripid);
 				
-				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?update_status=2&trip_name="
+				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?update_status=" + ((checkList[2] && checkList[3])?"2":"1") + "&trip_name="
 				+ tripinfo.getString("trip_name")
 				+ "&trip_st=" + tripinfo.getString("trip_st")
 				+ "&trip_et=" + tripinfo.getString("trip_et")
-				+ "&trip_length=" + tripinfo.getString("trip_length")
-				+ "&num_of_pts=" + tripinfo.getString("num_of_pts")
-				+ "&st_addr_prt1=" + tripinfo.getString("st_addr_prt1")
+				+ "&trip_length=" + (int)Double.parseDouble(tripinfo.getString("trip_length"))
+				+ "&num_of_pts=" + tripinfo.getString("num_of_pts");
+				
+				//if reverse geociding failed, don't upload empty addresses
+				String stAddr = checkList[2]?
+				"&st_addr_prt1=" + tripinfo.getString("st_addr_prt1")
 				+ "&st_addr_prt2=" + tripinfo.getString("st_addr_prt2")
 				+ "&st_addr_prt3=" + tripinfo.getString("st_addr_prt3")
 				+ "&st_addr_prt4=" + tripinfo.getString("st_addr_prt4")
-				+ "&st_addr_prt5=" + tripinfo.getString("st_addr_prt5")
-				+ "&et_addr_prt1=" + tripinfo.getString("et_addr_prt1")
+				+ "&st_addr_prt5=" + tripinfo.getString("st_addr_prt5"):"";
+				
+				//if reverse geociding failed, don't upload empty addresses
+				String etAddr = checkList[3]?
+				"&et_addr_prt1=" + tripinfo.getString("et_addr_prt1")
 				+ "&et_addr_prt2=" + tripinfo.getString("et_addr_prt2")
 				+ "&et_addr_prt3=" + tripinfo.getString("et_addr_prt3")
 				+ "&et_addr_prt4=" + tripinfo.getString("et_addr_prt4")
-				+ "&et_addr_prt5=" + tripinfo.getString("et_addr_prt5");
-				getRequest = new HttpGet(correctURLEncoder(inputtripinfo));
+				+ "&et_addr_prt5=" + tripinfo.getString("et_addr_prt5"):"";
+				
+				getRequest = new HttpGet(correctURLEncoder(inputtripinfo + stAddr + etAddr));
 				response = httpsClient.execute(getRequest);
 				statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
 					//not sure what will be returned
 				} else{
+					
 					return null;
 				}
 				checkList[4] = true;
@@ -295,6 +313,10 @@ public class UploadService extends Service {
 				checkList[5] = true;
 				//XXX input trip data done
 				
+				
+				
+				
+				
 				// close the connection
 				httpClient.getConnectionManager().shutdown();
 			} catch (IOException e) {
@@ -313,8 +335,10 @@ public class UploadService extends Service {
 		@Override
 		protected void onPostExecute(Void result) {
 			super.onPostExecute(result);
+			int i = 0;
 			for(boolean item : checkList){
-				Log.e("checkList", item?"good":"no good");
+				Log.e("checkList", "part " + i + ": " + (item?"good":"no good"));
+				i++;
 			}
 		}
 	}

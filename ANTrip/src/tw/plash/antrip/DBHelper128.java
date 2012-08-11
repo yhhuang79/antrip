@@ -276,6 +276,7 @@ public class DBHelper128 {
 			cv.put("startaddrpt3", startaddrpt3);
 			cv.put("startaddrpt4", startaddrpt4);
 			cv.put("startaddrpt5", startaddrpt5);
+			Log.e("dbhelper", "insert start address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -319,6 +320,7 @@ public class DBHelper128 {
 			cv.put("endaddrpt3", endaddrpt3);
 			cv.put("endaddrpt4", endaddrpt4);
 			cv.put("endaddrpt5", endaddrpt5);
+			Log.e("dbhelper", "insert end address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -539,16 +541,11 @@ public class DBHelper128 {
 								if (forUpload) {
 									// this call is for uploading, put in only
 									// the filename
-									checkin.put(
-											"picture_uri",
-											mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).substring(
-													mCursor.getString(mCursor.getColumnIndexOrThrow("picture"))
-															.lastIndexOf("/")));
+									checkin.put("picture_uri",mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).substring(mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).lastIndexOf("/")+1));
 								} else {
 									// return complete path, this call is for
 									// drawing purpose
-									checkin.put("picture_uri",
-											mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
+									checkin.put("picture_uri",mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
 								}
 							} else if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
 								// emotion exists! put it in
@@ -755,6 +752,22 @@ public class DBHelper128 {
 			return null;
 		}
 	}
+	
+	synchronized public long deleteTrip(String id){
+		if(db.isOpen()){
+			String tripid = getTripid(id);
+			if(tripid != null){
+				long rows = db.delete(TRIP_INFO_TABLE, "tripid=" + tripid, null);
+				rows += db.delete(TRIP_POINT_TABLE, "tripid=" + tripid, null);
+				return rows;
+			} else{
+				return -1;
+			}
+		} else{
+			return -2;
+		}
+	}
+	
 	/**
 	 * used to delete all the uploaded trip points from local cache when not
 	 * recording
@@ -762,13 +775,13 @@ public class DBHelper128 {
 	 * @return the number of rows deleted, or negative numbers when things go
 	 *         wrong
 	 */
-	synchronized public long deleteCompletedPoints() {
-		if (db.isOpen()) {
-			return db.delete(TRIP_POINT_TABLE, "uploaded=1", null);
-		} else {
-			return -2;
-		}
-	}
+//	synchronized public long deleteCompletedPoints() {
+//		if (db.isOpen()) {
+//			return db.delete(TRIP_POINT_TABLE, "uploaded=1", null);
+//		} else {
+//			return -2;
+//		}
+//	}
 	
 	/**
 	 * check if DB is opened
