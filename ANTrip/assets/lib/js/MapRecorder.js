@@ -53,7 +53,7 @@
 					});
 					var infowindow = new google.maps.InfoWindow(
 					{ 
-						'content': marker.timestamp
+						'content': g_current_latitude+", "+g_current_longitude
 					});
 					google.maps.event.addListener(marker, 'click', function() {
 						if (infowindow.getMap()==null){
@@ -63,13 +63,19 @@
 							infowindow.close();
 						}
 					});
+					alert("marker");
 					marker.setMap(self);
+					g_tripPointObjArray_2.push(marker);
 			}
 			$('#map_canvas_2').gmap('refresh');
 		});
 	}
 
 	function cleanGlobalArray(){
+		if(g_markerCluster!=null){
+			g_markerCluster.clearMarkers();
+			g_markerCluster = null;
+		}
 		if(g_tripMarkerArray_2!=null){
 			for(i=0;i<g_tripMarkerArray_2.length;i++){
 				//if(g_tripMarkerArray_2[i]!=null){
@@ -94,13 +100,41 @@
 			g_mapPath.setMap(null);
 			g_mapPath = null;
 		}
-		if(g_markerCluster!=null){
-			g_markerCluster.setMap(null);
-			g_markerCluster = null;
-		}
 
 		g_emotion_html=null;
 		g_bounds = new google.maps.LatLngBounds();
+	}
+
+	// map page for pc web version
+	var tripRecorder;
+	function getLocation(){
+		if (navigator.geolocation){
+			navigator.geolocation.getCurrentPosition(uploadPosition);
+		} else {
+			alert("Geolocation is not supported by this browser.");
+		}
+	}
+	function uploadPosition(position){
+		Date.prototype.Timestamp = function() {
+			var yyyy = this.getFullYear().toString();
+			var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+			var dd  = this.getDate().toString();
+			var h = this.getHours().toString();
+			var m = this.getMinutes().toString();
+			var s = this.getSeconds().toString();
+			var ms = this.getUTCMilliseconds().toString();
+			return yyyy+"-"+(mm[1]?mm:"0"+mm[0])+"-"+(dd[1]?dd:"0"+dd[0])+"%20"+(h[1]?h:"0"+h[0])+":"+(m[1]?m:"0"+m[0])+":"+(s[1]?s:"0"+s[0])+"."+ms; // padding
+		};
+		var sid = $.cookie("sid"); 
+		var trip_id = $.cookie("trip_id");
+		var d = new Date();				
+		var timestamp = d.Timestamp();
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/Input.php',
+			data:{userid: sid, trip_id: trip_id, lat: position.coords.latitude, lng: position.coords.longitude, timestamp: timestamp},							 
+			type: 'GET', dataType: 'json', cache: false,
+			success:function(result){
+			}
+		});
 	}
 
 	function startRecordTrip(){
@@ -113,17 +147,28 @@
 			var sid = null;
 			sid = $.cookie("sid");
 			$.cookie("isRecording", true);
-			//cleanGlobalArray();
+			ShowRecorderMap();
 			if(window.antrip){
 				isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
 				window.antrip.setCookie("trip_id", window.antrip.startRecording().toString());
 			}
 			else{
-				alert("ANTrip APP Exception!");
+				alert("ANTrip APP Exception! call GetNewTripId.php");
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetNewTripId.php',
+						data:{userid: sid},							 
+						type: 'GET', dataType: 'jsonp', cache: false,
+						success:function(result){
+							alert("success to get id!");
+							$.cookie("trip_id",result.newTripId);
+							tripRecorder = setInterval(function(){getLocation()},5000);
+							addPoint();
+							//$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
+							//alert("Start Recording Trip");
+						}
+				});
 			}
 			changeIconToRecoding();
-			ShowRecorderMap();
 		} else {
 			$("#dialog-tripname").dialog('open');
 			stopRotateInterval($('#img_add_note'));
@@ -215,6 +260,7 @@
 				g_tripPointArray_2.push(latlng);
 				g_bounds.extend(latlng);
 				if (typeof point.CheckIn != 'undefined'){
+					//alert("checkin");
 					var checkinmarker =  new google.maps.Marker({ 
 						'position': latlng, 
 						'bounds': true,
@@ -268,6 +314,10 @@
 
 					marker.setMap(self);
 					g_tripPointObjArray_2.push(marker);
+				/*	if(g_markerCluster!=null){
+						g_markerCluster.setMap(null);
+						g_markerCluster = null;
+					}*/
 				}
 				if( $('#markplacewindow').is(":visible") == false) {
 					$("#overlay").css("display","none");
@@ -276,10 +326,6 @@
 		});
 		DrawLine();
 
-		if(g_markerCluster!=null){
-			g_markerCluster.setMap(null);
-			g_markerCluster = null;
-		}
 		g_markerCluster = new MarkerClusterer(self, g_tripPointObjArray_2);
 
 		$('#map_canvas_2').gmap('refresh');
