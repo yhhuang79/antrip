@@ -524,13 +524,20 @@
 						height:200,
 						modal: true,
 						open: function (event, ui) {
-							//	$("#sym_edit_bt_list").css("position","static");
+								$("#sym_edit_bt_list").css("display","none");
 							//	$('#map_canvas_2').css('margin-top','-696px');
+							//$(".ui-widget-overlay").css("z-index", "1012");
 								//$(this).focus();
 								$("#sym_topbtnGroup").removeClass("topbtnTripClass");
 								$('.ui-dialog-buttonpane').css({
 									'background-image':url+im+"typenotearea.png)",
 									'background-position':"center center",
+								});
+								$('.ui-dialog .ui-dialog-content').css({
+									'background': '#ffffff',
+									'background-image':url+im+"typenotearea.png)",
+									'background-position':"center center",
+									'background-repeat': 'no-repeat',
 								});
 								$("button").css({
 									color: "#000000",
@@ -539,7 +546,7 @@
 						buttons: {
 							"Yes": function() {
 								$( this ).dialog( "close" );
-								//$("#sym_edit_bt_list").css("position","fixed");
+								//$("#sym_edit_bt_list").css("display","block");
 								$('#map_canvas_2').css('margin-top','0px');
 								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								startRecordTrip();
@@ -548,7 +555,7 @@
 							},
 							"No": function() {
 								$( this ).dialog( "close" );
-								//$("#sym_edit_bt_list").css("position","fixed");
+								$("#sym_edit_bt_list").css("display","block");
 								$('#map_canvas_2').css('margin-top','0px');
 								$("#sym_topbtnGroup").addClass("topbtnTripClass");
 								return;
@@ -847,6 +854,11 @@
 				}
 			},{scope: 'email, publish_stream'});
 	   }
+
+
+	function reloadTripList(){
+		ShowTripList(g_page);
+	}
 	
 	// trip list
 	function ShowTripList(page){
@@ -967,6 +979,7 @@
 					var index=0;
 					$("#overlay").css("display","block");
 					$("#overlay").html(g_str_loading);
+					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 					$.each(localtripdata.CheckInDataList, function(i, point) {
 						//alert(point.lat);
 						if(index>localtripdata.CheckInDataList.length){

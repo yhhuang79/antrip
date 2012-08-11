@@ -423,7 +423,7 @@
 		width:480px;
 		height:101px;
 		resize:none;
-		background:url('images/s/typenotearea.png') no-repeat
+		background-repeat: no-repeat
 	}
 
 	#Symbol_ub_home{
