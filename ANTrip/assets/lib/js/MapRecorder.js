@@ -133,7 +133,7 @@
 		var trip_id = $.cookie("trip_id");
 		var d = new Date();				
 		var timestamp = d.Timestamp();
-		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/Input.php',
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/Input.php',
 			data:{userid: sid, trip_id: trip_id, lat: position.coords.latitude, lng: position.coords.longitude, timestamp: timestamp},							 
 			type: 'GET', dataType: 'json', cache: false,
 			success:function(result){
@@ -188,7 +188,7 @@
 			}
 			else{
 				//alert("ANTrip APP Exception!");
-				$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetNewTripId.php',
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetNewTripId.php',
 						data:{userid: sid},							 
 						type: 'GET', dataType: 'jsonp', cache: false,
 						success:function(result){
@@ -440,12 +440,16 @@
 		$("#overlay").css("padding-bottom", "50%");
 		$("#overlay").css("line-height", "100%");
 		$("#overlay").html("");
-		$('#sym_edit_bt_list').show();
+		$('#sym_edit_bt_list').fadeIn('slow', function() {
+				$('#sym_edit_bt_list').show();
+		});
 	}
 
 	function ShowRecorderMap(){
 		$('#map_canvas').hide();
-		$('#map_canvas_2').show();
+		$('#map_canvas_2').fadeIn('slow', function() {
+				$('#map_canvas_2').show();
+		});
 	//	var self =  $('#map_canvas_2').gmap('get','map');
 	//	$('#map_canvas_2').addControl('control', google.maps.ControlPosition.LEFT_TOP);
 		$("#overlay").css("height", "100px");
@@ -502,7 +506,9 @@
 		if( $('#markplacewindow').is(":visible") ) {
 			$("#sym_topbtnGroup").hide();
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$("#sym_topbtnGroup").show();
+			$("#sym_topbtnGroup").fadeIn('slow', function() {
+				$("#sym_topbtnGroup").show();
+			});
 			$('#edit_display_area :input').removeAttr('disabled');
 			$('#sym_topbtnGroup :input').removeAttr('disabled');
 			$('#markplacewindow :input').removeAttr('disabled');
@@ -513,7 +519,9 @@
 		}else{
 			$("#sym_topbtnGroup").hide();
 			$("#sym_topbtnGroup").removeClass("topbtnTripClass");
-			$("#sym_topbtnGroup").show();
+			$("#sym_topbtnGroup").fadeIn('slow', function() {
+				$("#sym_topbtnGroup").show();
+			});
 			$('#edit_display_area').attr('disabled', true);
 			$('#sym_topbtnGroup').attr('disabled', true);
 			$("#overlay").css("z-index","1012");
@@ -522,7 +530,9 @@
 			$('#emotion-sel').html("");
 			$("#placemarktext").attr("value","");
 			g_emotion_html=null;
-			$('#markplacewindow').show();
+			$('#markplacewindow').fadeIn('slow', function() {
+				$('#markplacewindow').show();
+			});
 			$('#emotion_compass').hide();
 			if(window.antrip){
 				window.antrip.startCheckin();
@@ -597,7 +607,9 @@
 
 	function showEmtionCompass(){
 		$('#markplacewindow :input').attr('disabled', true);
-		$('#emotion_compass').show();
+		$('#emotion_compass').fadeIn('slow', function() {
+				$('#emotion_compass').show();
+		});
 		$("#overlay").css("z-index","1020");
 	}
 

@@ -32,7 +32,10 @@
 	$('#tip_ub_home').html(g_str_logout);
 
 	$('#b_add_note').find('.tip').html(g_str_startrecording);
-	$('#sym_logingroup').css("background-image", url+backlogo_img+")");
+	$('#sym_logingroup').fadeIn('slow', function() {
+			$('#sym_logingroup').css("background-image", url+backlogo_img+")");
+	});
+
 
 	$('#logoutwhenrecord').html(g_str_logoutwhenrecord);
 	$('#typetripname').html(g_str_typetripname);

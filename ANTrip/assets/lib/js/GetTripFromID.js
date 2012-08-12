@@ -14,7 +14,7 @@
 			g_tripPointArray = new Array(0);
 			g_tripMarkerArray = new Array(0);
 			self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
-			$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetCheckInData.php',
+			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php',
 			data:{userid: sid, trip_id: trip_id},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){

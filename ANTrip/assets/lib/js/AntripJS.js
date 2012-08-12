@@ -304,7 +304,9 @@
 		if(window.antrip){
 			sid = window.antrip.getCookie("sid");
 		}
-		$('#sym_login').show();
+		$('#sym_login').fadeIn('slow', function() {
+			$('#sym_login').show();
+		});
 		$('#sym_topbtnGroup').hide();
 		if(sid!=null){
 			$("#sym_loginarea").hide();
@@ -315,16 +317,22 @@
 			Logout();
 		}
 		else{
-			$('#sym_loginarea').show();
+			$('#sym_loginarea').fadeIn('slow', function() {
+				$('#sym_loginarea').show();
+			});
 			$('.class_login_bt').show();
 			//$(".class_fblogin_bt").show();
 			$('.class_logout_bt').hide();
 		}
-		$("#end_Text").show();
+		$("#end_Text").fadeIn('slow', function() {
+				$("#end_Text").show();
+		});
 	}
 
 	function show_edit_div(){
-		$('#sym_editpage').show();
+		$('#sym_editpage').fadeIn('slow', function() {
+			$('#sym_editpage').show();
+		});
 	}
 
 	function initScrollTopBtn(){
@@ -366,7 +374,7 @@
 		$("#Symbol_trip_history").hide();
 		$("#Symbol_ub_trip_m").hide();
 		$("#Symbol_friend").hide();
-		$("#Symbol_download").show();
+		$("#Symbol_download").show("slow");
 	}
 
 	function OnlyShowADiv(object){
@@ -399,8 +407,10 @@
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
-			$('#sym_topbtnGroup').show();
-			$("#sym_triplist").show();
+			$('#sym_topbtnGroup').show("slow");
+			$("#sym_triplist").fadeIn('slow', function() {
+				$("#sym_triplist").show();
+			});
 			$("#sym_editpage").hide();
 			$('#markplacewindow').hide();
 
@@ -437,14 +447,16 @@
 				$(this).hide();
 			});
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$('#sym_topbtnGroup').show();
+			$('#sym_topbtnGroup').show("slow");
 			g_page=1;
 			ShowTripList(g_page);
 			if(g_enableDebugMode==true)
 			{
 				alert("ShowTripList");
 			}
-			$("#sym_triplist").show();
+			$("#sym_triplist").fadeIn('slow', function() {
+				$("#sym_triplist").show();
+			});
 			$("#sym_editpage").hide();
 			$('.class_prepage_bt').show();
 			$('.class_nextpage_bt').show();
@@ -461,7 +473,7 @@
 			});
 			$("#body").css("overflow","hidden");
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$('#sym_topbtnGroup').show();
+			$('#sym_topbtnGroup').show("slow");
 			$('#sym_edit_bt_list').hide();
 			show_edit_div();
 			g_mode ="eTripDisplay";
@@ -479,7 +491,7 @@
 				$(this).hide();
 			});
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$('#sym_topbtnGroup').show();
+			$('#sym_topbtnGroup').show("slow");
 			showfriendList();
 
 			g_mode ="eFriendList";
@@ -744,7 +756,7 @@
 		if(username==""&&org_password==""){
 			alert(g_str_lostinsertdata);
 		}
-		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/login.php',
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/login.php',
 				data:{username: username, password: password},							 
 				type: 'GET', dataType: 'jsonp', cache: false,
 		success:function(result){
@@ -821,7 +833,7 @@
 						if(window.antrip){
 							window.antrip.setCookie("facebookid", facebookid.toString());
 						}
-						$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookLogin.php',
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php',
 							data:{email: email, facebookid: facebookid},							 
 							type: 'GET', dataType: 'jsonp', cache: false,
 							success:function(result){
@@ -832,7 +844,7 @@
 									}
 									ChangeToUsedIcon($('#ub_trip_management'));
 								} else { 
-									$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookRegister.php',
+									$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/FacebookRegister.php',
 										data:{username: username, email: email, facebookid: facebookid},							 
 										type: 'GET', dataType: 'json', cache: false,
 										success:function(result){
@@ -875,7 +887,7 @@
 
 		$("#overlay").css("display","block");
 		$("#overlay").html(g_str_loading);
-		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetTripInfoComponent.php',
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php',
 			data:{userid: sid},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
@@ -949,7 +961,7 @@
 		}
 		var localtripdata;
 		
-		$('#map_canvas').show();
+		$('#map_canvas').show("slow");
 		$('#map_canvas_2').hide();
 
 		$("#tripname").html(g_tripname.toString());
@@ -1184,7 +1196,7 @@
 		$("#overlay").css("display","block");
 		$("#overlay").html(g_str_loading);	
 		//$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
-		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/GetFriendList.php',
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendList.php',
 			data:{sid : sid},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
@@ -1205,14 +1217,14 @@
 				$("#overlay").html("");
 			}
 		});
-		$("#sym_friends").show();
+		$("#sym_friends").show("slow");
 	}
 
 	var g_showtripmap = false;
 
 	function ShowTripMapfromID(userid, trip_id){
 		g_showtripmap = true;
-		$('#map_canvas').show();
+		$('#map_canvas').show("slow");
 		$('#map_canvas_2').hide();
 		$("#tripname").html(g_tripname.toString());
 		GetTripPointfromID(userid, trip_id);
