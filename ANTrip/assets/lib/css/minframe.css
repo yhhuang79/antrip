@@ -452,3 +452,16 @@
 		height:72px;
 		font-size: 24px;
 	}
+
+	.des_close_class{
+		float:right;
+		position: relative;
+		font-size:12px;
+		border:0px;
+		text-align:right;
+		margin-right:-320px;
+		margin-top:-15px;
+		width: 80px; 
+		height:40px;
+		cursor: pointer;
+	}
