@@ -31,6 +31,7 @@ import com.skyhookwireless.wps.WPSReturnCode;
 import com.skyhookwireless.wps.XPS;
 
 public class LocationService extends Service {
+	//test
 	/**
 	 * check-in related stuff
 	 */
