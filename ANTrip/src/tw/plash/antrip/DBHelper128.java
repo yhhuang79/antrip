@@ -715,12 +715,12 @@ public class DBHelper128 {
 	
 	synchronized public HashMap<String, Integer> getAllUnfinishedUploads(String sid){
 		if(db.isOpen()){
-			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid", "uploadstatus"}, "userid=" + sid + " AND uploadstatus!=0", null, null, null, null);
+			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid", "uploadstage"}, "userid=" + sid + " AND uploadstage!=0", null, null, null, null);
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					HashMap<String, Integer> result = new HashMap<String, Integer>();
 					do{
-						result.put(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")), mCursor.getInt(mCursor.getColumnIndexOrThrow("uploadstatus")));
+						result.put(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")), mCursor.getInt(mCursor.getColumnIndexOrThrow("uploadstage")));
 					} while(mCursor.moveToNext());
 					mCursor.close();
 					return result;
