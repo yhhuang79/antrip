@@ -391,11 +391,13 @@
 			g_mode = "eAbout";
 		}
 		else if(object.attr('name')==$("#ub_download").attr('name')){
-			$("#body").css("overflow","hidden");
+			$("#body").css("overflow","scroll");
 			$('div[class*=class_fun_div]').each(function() {
 				$(this).hide();
 			});
-			$('#sym_topbtnGroup').show("slow");
+			$('#sym_topbtnGroup').fadeIn('slow', function() {
+				$('#sym_topbtnGroup').show("slow");
+			});
 			$("#sym_triplist").fadeIn('slow', function() {
 				$("#sym_triplist").show();
 			});
@@ -425,6 +427,8 @@
 			});
 			show_login_div();
 			
+
+			$("#overlay").css("display","none");
 			g_mode = "eHome";
 			if(window.antrip){
 				window.antrip.setMode(g_eMode[g_mode]);
@@ -435,7 +439,9 @@
 				$(this).hide();
 			});
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$('#sym_topbtnGroup').show("slow");
+			$('#sym_topbtnGroup').fadeIn('slow', function() {
+				$('#sym_topbtnGroup').show("slow");
+			});
 			g_page=1;
 			ShowTripList(g_page);
 			if(g_enableDebugMode==true)
@@ -461,7 +467,9 @@
 			});
 			$("#body").css("overflow","hidden");
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$('#sym_topbtnGroup').show("slow");
+			$('#sym_topbtnGroup').fadeIn('slow', function() {
+				$('#sym_topbtnGroup').show("slow");
+			});
 			$('#sym_edit_bt_list').hide();
 			show_edit_div();
 			g_mode ="eTripDisplay";
@@ -479,7 +487,9 @@
 				$(this).hide();
 			});
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$('#sym_topbtnGroup').show("slow");
+			$('#sym_topbtnGroup').fadeIn('slow', function() {
+				$('#sym_topbtnGroup').show("slow");
+			});
 			showfriendList();
 
 			g_mode ="eFriendList";
