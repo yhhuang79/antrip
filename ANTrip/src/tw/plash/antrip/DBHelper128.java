@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,16 +30,16 @@ import android.util.Log;
 public class DBHelper128 {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
-	private static final int DATABASE_VERSION = 1; // required by SQLite tool
+	private static final int DATABASE_VERSION = 3; // required by SQLite tool
 	
-	private static final String TRIP_POINT_TABLE = "trippointtable";
+	private static final String TRIP_DATA_TABLE = "tripdatatable";
 	private static final String TRIP_INFO_TABLE = "tripinfotable";
 	
 	private Context mContext;
 	
 	private SQLiteDatabase db;
 	
-	private static final String CREATE_TABLE_TRIP_POINT = "CREATE TABLE " + TRIP_POINT_TABLE
+	private static final String CREATE_TABLE_TRIP_DATA = "CREATE TABLE " + TRIP_DATA_TABLE
 			+ "(id INTEGER PRIMARY KEY, " 
 			+ "latitude REAL, " 
 			+ "longitude REAL, " 
@@ -48,9 +50,10 @@ public class DBHelper128 {
 			+ "accuracy TEXT, " 
 			+ "userid TEXT, "
 			+ "tripid TEXT, " 
-			+ "picture TEXT, " 
-			+ "emotion TEXT, " 
-			+ "note TEXT)";
+			+ "picture TEXT default NULL, " 
+			+ "emotion TEXT default NULL, "
+			+ "note TEXT default NULL, " 
+			+ "uploadstatus INTEGER default 0)";
 	
 	private static final String CREATE_TABLE_TRIP_INFO = "CREATE TABLE " + TRIP_INFO_TABLE
 			+ "(id INTEGER PRIMARY KEY, " 
@@ -71,7 +74,7 @@ public class DBHelper128 {
 			+ "endaddrpt3 TEXT, " 
 			+ "endaddrpt4 TEXT, " 
 			+ "endaddrpt5 TEXT, "
-			+ "uploaded INTEGER)";
+			+ "uploadstage INTEGER default 0)";
 	
 	/**
 	 * Extends SQLiteOpenHelper, this subclass is only good for creating a
@@ -92,7 +95,7 @@ public class DBHelper128 {
 		// only run on the first time the DB is created
 		public void onCreate(SQLiteDatabase db) {
 			try { // create a table with given name and columns
-				db.execSQL(CREATE_TABLE_TRIP_POINT);
+				db.execSQL(CREATE_TABLE_TRIP_DATA);
 				db.execSQL(CREATE_TABLE_TRIP_INFO);
 			} catch (SQLException e) {
 			} // invalid SQL statement
@@ -102,7 +105,7 @@ public class DBHelper128 {
 		// for upgrading table schema only, not useful at the moment
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			try { // drop the old version and create a updated one
-				db.execSQL("DROP TABLE IF EXIST " + DATABASE_NAME + "." + TRIP_POINT_TABLE);
+				db.execSQL("DROP TABLE IF EXIST " + DATABASE_NAME + "." + TRIP_DATA_TABLE);
 				db.execSQL("DROP TABLE IF EXIST " + DATABASE_NAME + "." + TRIP_INFO_TABLE);
 			} catch (SQLException e) {
 			} // invalid SQL statement
@@ -200,7 +203,7 @@ public class DBHelper128 {
 			cv.put("accuracy", l2s.getAccuracy());
 			cv.put("userID", userid);
 			cv.put("tripID", tripid);
-			return db.insert(TRIP_POINT_TABLE, null, cv);
+			return db.insert(TRIP_DATA_TABLE, null, cv);
 		} else {
 			return -2;
 		}
@@ -223,7 +226,7 @@ public class DBHelper128 {
 			cv.put("picture", cco.getPicturePath());
 			cv.put("emotion", String.valueOf(cco.getEmotionID()));
 			cv.put("note", cco.getCheckinText());
-			return db.insert(TRIP_POINT_TABLE, null, cv);
+			return db.insert(TRIP_DATA_TABLE, null, cv);
 		} else {
 			return -2;
 		}
@@ -234,7 +237,6 @@ public class DBHelper128 {
 			ContentValues cv = new ContentValues();
 			cv.put("tripid", tripid);
 			cv.put("userid", userid);
-			cv.put("uploaded", 0);
 			cv.put("starttime", starttime);
 			return db.insert(TRIP_INFO_TABLE, null, cv);
 		} else {
@@ -334,31 +336,31 @@ public class DBHelper128 {
 	 * @param tripid
 	 * @return
 	 */
-	synchronized public JSONObject getSyncPositionList(String userid, String tripid) {
-		if (db.isOpen()) {
-			Cursor mCursor = db.query(TRIP_POINT_TABLE, new String[] { "" }, "something=something", null, null, null,
-					"timestamp ASC");
-			if (mCursor != null) {
-				if (mCursor.moveToFirst()) {
-					JSONObject result = new JSONObject();
-					
-					if (!mCursor.isClosed()) {
-						mCursor.close();
-					}
-					return result;
-				} else {
-					if (!mCursor.isClosed()) {
-						mCursor.close();
-					}
-					return null;
-				}
-			} else {
-				return null;
-			}
-		} else {
-			return null;
-		}
-	}
+//	synchronized public JSONObject getSyncPositionList(String userid, String tripid) {
+//		if (db.isOpen()) {
+//			Cursor mCursor = db.query(TRIP_DATA_TABLE, new String[] { "" }, "something=something", null, null, null,
+//					"timestamp ASC");
+//			if (mCursor != null) {
+//				if (mCursor.moveToFirst()) {
+//					JSONObject result = new JSONObject();
+//					
+//					if (!mCursor.isClosed()) {
+//						mCursor.close();
+//					}
+//					return result;
+//				} else {
+//					if (!mCursor.isClosed()) {
+//						mCursor.close();
+//					}
+//					return null;
+//				}
+//			} else {
+//				return null;
+//			}
+//		} else {
+//			return null;
+//		}
+//	}
 	
 	synchronized public String getTripid(String uniqueid){
 		if(db.isOpen()){
@@ -395,32 +397,50 @@ public class DBHelper128 {
 			ContentValues cv = new ContentValues();
 			cv.put("tripid", newTripid);
 			int info = db.update(TRIP_INFO_TABLE, cv, "tripid=" + oldTripid, null);
-			return info + db.update(TRIP_POINT_TABLE, cv, "tripid=" + oldTripid, null);
+			return info + db.update(TRIP_DATA_TABLE, cv, "tripid=" + oldTripid, null);
 		} else {
 			return -1;
 		}
 	}
 	
 	/**
-	 * mark the successfully uploaded trip
-	 * 
+	 * to mark the upload status of a certain record or an entire trip, depending on the input
+	 * @param userid
 	 * @param actualTripid
-	 *            , the tripid synced with server, not the random generated
-	 *            number
-	 * @return
+	 * @param table, 0: trip info, 1: trip data
+	 * @param code, 
+	 * upload stage, 
+	 * tripinfo: 0 -> not uploaded, 1~7 -> stages; 
+	 * upload status, 
+	 * tripdata: 0 -> not uploaded, 1 -> data uploaded, not pic, 2 -> data and pic all uploaded, 3->some pics not uploaded
+	 * @param imagepath, the image to mark uploaded, null if no image was uploaded
+	 * @return number of rows updated, or -2 if any error occurs
 	 */
-	synchronized public int markUploaded(String actualTripid) {
+	synchronized public int markUploaded(String userid, String actualTripid, int table, int code, String imagepath) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
-			cv.put("uploaded", 1);
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + actualTripid, null);
+			switch(table){
+			case 0:
+				cv.put("uploadstage", code);
+				return db.update(TRIP_INFO_TABLE, cv, "userid=" + userid + " AND tripid=" + actualTripid, null);
+			case 1:
+				cv.put("uploadstatus", code);
+				if(imagepath != null){
+					return db.update(TRIP_DATA_TABLE, cv, "userid=" + userid + " AND tripid=" + actualTripid + " AND picture LIKE '%" + imagepath.substring(imagepath.lastIndexOf("/") + 1) + "'", null);
+				} else{
+					return db.update(TRIP_DATA_TABLE, cv, "userid=" + userid + " AND tripid=" + actualTripid, null);
+				}
+			default:
+				return -3;
+			}
 		} else {
+			//db is not opened
 			return -2;
 		}
 	}
 	
 	synchronized public long getNumberofPoints(String userid, String tripid) {
-		String sql = "SELECT COUNT(id) FROM " + TRIP_POINT_TABLE + " WHERE userid=" + userid + " AND tripid=" + tripid;
+		String sql = "SELECT COUNT(id) FROM " + TRIP_DATA_TABLE + " WHERE userid=" + userid + " AND tripid=" + tripid;
 		if (db.isOpen()) {
 			SQLiteStatement statement = db.compileStatement(sql);
 			long result = statement.simpleQueryForLong();
@@ -433,8 +453,8 @@ public class DBHelper128 {
 	
 	synchronized public CachedPoints getOnePoint(String userid, String tripid, boolean wantFirst) {
 		if (db.isOpen()) {
-			Cursor mCursor = db.query(TRIP_POINT_TABLE, new String[] { "latitude", "longitude" }, "tripid=" + tripid
-					+ " AND userid=" + userid, null, null, null, wantFirst ? "id ASC" : "id DESC", "1");
+			Cursor mCursor = db.query(TRIP_DATA_TABLE, new String[] { "latitude", "longitude" }, "tripid=" + tripid
+					+ " AND userid=" + userid + " AND latitude!=-999", null, null, null, wantFirst ? "id ASC" : "id DESC", "1");
 			if (mCursor != null) {
 				if (mCursor.moveToFirst()) {
 					CachedPoints cp = new CachedPoints(mCursor.getDouble(mCursor.getColumnIndex("latitude")),
@@ -501,6 +521,31 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public ArrayList<String> getOneTripPicturePaths(String userid, String tripid){
+		if(db.isOpen()){
+			Cursor mCursor = db.query(TRIP_DATA_TABLE, new String[]{"picture"}, "userid=" + userid + " AND tripid=" + tripid + " AND picture!='NULL'", null, null, null, null);
+			if(mCursor != null){
+				if(mCursor.moveToFirst()){
+					ArrayList<String> result = new ArrayList<String>();
+					do{
+						result.add(mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
+					} while(mCursor.moveToNext());
+					mCursor.close();
+					return result;
+				} else{
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
+			return null;
+		}
+	}
+	
 	/**
 	 * get a complete trip data wrapped in CheckInDataList styled JSONObject
 	 * format
@@ -513,7 +558,7 @@ public class DBHelper128 {
 		Log.e("getOneTripData", "userid=" + userid + ", tripid=" + tripid
 				+ (forUpload ? ", forUpload true" : ", forUpload false"));
 		if (db.isOpen()) {
-			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
+			Cursor mCursor = db.query(TRIP_DATA_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
 					null, "id ASC");
 			
 			if (mCursor != null) {
@@ -598,7 +643,7 @@ public class DBHelper128 {
 			String tripid = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("tripid"))
 					: "-1";
 			
-			Cursor mCursor = db.query(TRIP_POINT_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
+			Cursor mCursor = db.query(TRIP_DATA_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
 					null, "id ASC");
 			if (mCursor != null) {
 				if (mCursor.moveToFirst()) {
@@ -758,7 +803,7 @@ public class DBHelper128 {
 			String tripid = getTripid(id);
 			if(tripid != null){
 				long rows = db.delete(TRIP_INFO_TABLE, "tripid=" + tripid, null);
-				rows += db.delete(TRIP_POINT_TABLE, "tripid=" + tripid, null);
+				rows += db.delete(TRIP_DATA_TABLE, "tripid=" + tripid, null);
 				return rows;
 			} else{
 				return -1;
@@ -871,7 +916,7 @@ public class DBHelper128 {
 					return;
 				}
 				mCursor = null;
-				mCursor = db.query(TRIP_POINT_TABLE, null, null, null, null, null, null);
+				mCursor = db.query(TRIP_DATA_TABLE, null, null, null, null, null, null);
 				if (mCursor != null) {
 					if (mCursor.moveToFirst()) {
 						JSONObject result = new JSONObject();

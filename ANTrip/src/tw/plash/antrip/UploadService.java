@@ -1,6 +1,9 @@
 package tw.plash.antrip;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
@@ -9,12 +12,14 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -24,6 +29,10 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicNameValuePair;
@@ -36,6 +45,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -52,6 +63,12 @@ import android.util.Log;
 public class UploadService extends Service {
 	
 	private SharedPreferences pref;
+//	private NotificationManager nm;
+	private Notification nnn;
+	private final int notification_tag = 1338;
+	
+	// for keeping track of every thread's status
+	private HashMap<Long, Integer> threadStatus;
 	
 	@Override
 	public void onCreate() {
@@ -62,7 +79,15 @@ public class UploadService extends Service {
 			Log.e("uploadService", "internet not available");
 			stopSelf();
 		} else{
+			threadStatus = new HashMap<Long, Integer>();
+			
 			pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+//			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_NO_CREATE);
+			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, null, PendingIntent.FLAG_NO_CREATE);
+			nnn = new Notification(R.drawable.ant_24, " upload has started~", System.currentTimeMillis());
+			nnn.flags = Notification.FLAG_ONGOING_EVENT;
+			nnn.setLatestEventInfo(getApplicationContext(), "antrip", "upload in progress...", pIntent);
+			startForeground(notification_tag, nnn);
 		}
 	}
 
@@ -78,7 +103,9 @@ public class UploadService extends Service {
 			Log.e("uploadService", "old tripid= " + id);
 			//give the task a dh to handle its own business with DB
 			if(id != null && sid != null){
-				new uploadThread().execute(id, sid);
+				Long tag = System.currentTimeMillis();
+				updateThreadStatus(tag, 0);
+				new uploadThread(tag).execute(id, sid);
 			} else{
 				Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
 				stopSelf();
@@ -92,22 +119,45 @@ public class UploadService extends Service {
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
-
+		stopForeground(true);
 	}
-
-	private class uploadThread extends AsyncTask<String, Integer, Void> {
+	
+	synchronized private void updateThreadStatus(Long tag, int status){
+		threadStatus.put(tag, status);
+		
+		boolean allDone = true;
+		for(Integer item : threadStatus.values()){
+			//init status for a thread is 0
+			//if there's any thread with init status we need to keep running
+			if(item < 1){
+				allDone = false;
+			}
+		}
+		//if all thread is done, terminate upload service
+		if(allDone){
+			stopSelf();
+		}
+	}
+	
+	/**
+	 * 
+	 * @author CSZU
+	 *
+	 */
+	private class uploadThread extends AsyncTask<String, Integer, boolean[]> {
+		
+		private Long threadTag;
+//		private PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_NO_CREATE);;
+		
+		public uploadThread(Long tag) {
+			threadTag = tag;
+		}
 		
 		/**
-		 * 0. find tripid from id
-		 * 1. get new tripid
-		 * 2. reverse geocode start point
-		 * 3. reverse geocode end point
-		 * 4. upload trip info
-		 * 5. upload trip data
-		 * 6. upload pictures
+		 * encode only the parameter part after ? mark, not the ENTIRE url...
+		 * @param inURL, the url to be encoded
+		 * @return url, complete and correctly encoded
 		 */
-		private boolean[] checkList = {false, false, false, false, false, false, false};
-		
 		private String correctURLEncoder(String inURL){
 			String inParameter = inURL.substring(inURL.lastIndexOf("?") + 1);
 			Log.e("correct url encoder", "inParam=" + inParameter);
@@ -123,127 +173,209 @@ public class UploadService extends Service {
 			return result;
 		}
 		
+//		@Override
+//		protected void onPreExecute() {
+//			nnn.setLatestEventInfo(getApplicationContext(), "title", "text", pIntent);
+//			startForeground(notification_tag, nnn);
+//		}
+		
+//		@Override
+//		protected void onProgressUpdate(Integer... values) {
+//			int part = values[0];
+//			int total = values[1];
+//			nnn.setLatestEventInfo(getApplicationContext(), "title", "uploading part " + part + " of " + total + " ...", pIntent);
+//			startForeground(threadTag, nnn);
+//		}
+		
 		@Override
-		protected Void doInBackground(String... params) {
+		protected boolean[] doInBackground(String... params) {
+			boolean[] checkList = { false, false, false, false, false, false, false};
+			
 			String uniqueid = params[0];
-			String oldTripid = null;
-			String newTripid = null;
 			String userid = params[1];
+			
 			DBHelper128 dh = new DBHelper128(getApplicationContext());
-			try {
-				//first we get the old tripid using the unique id value
-				oldTripid = dh.getTripid(uniqueid);
-				if(oldTripid != null){
-					checkList[0] = true;
-				} else{
-					return null;
-				}
-				
+			
+			// XXX step 1: get the old tripid using the unique id value
+			String oldTripid = dh.getTripid(uniqueid);
+			if (oldTripid != null) {
+				checkList[0] = true;
+			} else {
+				dh.closeDB();
+				return checkList;
+			}
+			
+			// XXX step 2: get new trip id from server
+			String newTripid = getnewtripid(oldTripid, userid, dh);
+			if (newTripid != null) {
+				checkList[1] = true;
+				dh.markUploaded(userid, newTripid, 0, 2, null);
+			} else {
+				dh.closeDB();
+				return checkList;
+			}
+			
+			// XXX step 3: reverse geocode start point
+			if (getstartaddress(userid, newTripid, dh)) {
+				checkList[2] = true;
+				dh.markUploaded(userid, newTripid, 0, 3, null);
+			}
+			// it's okay if we can't do reverse geocoding, let our server handle it
+			
+			// XXX step 4: reverse geocode end point
+			if (getendaddress(userid, newTripid, dh)) {
+				checkList[3] = true;
+				dh.markUploaded(userid, newTripid, 0, 4, null);
+			}
+			// it's okay if we can't do reverse geocoding, let our server handle it
+			
+			// XXX step 5: upload trip info
+			if (uploadtripinfo(userid, newTripid, dh, checkList)) {
+				checkList[4] = true;
+				dh.markUploaded(userid, newTripid, 0, 5, null);
+			} else {
+				// it's okay to fail here, just try again later
+			}
+			
+			// XXX step 6: upload trip data
+			if (uploadtripdata(userid, newTripid, dh)) {
+				checkList[5] = true;
+				dh.markUploaded(userid, newTripid, 0, 6, null);
+			} else {
+				// it's okay to fail here, just try again later
+			}
+			
+			// XXX step 7: upload pictures(if present)
+			if(uploadpictures(userid, newTripid, dh)){
+				checkList[6] = true;
+				dh.markUploaded(userid, newTripid, 0, 7, null);
+			} else{
+				// it's okay to fail here, just try again later
+			}
+			
+			if (dh.DBIsOpen()) {
+				dh.closeDB();
+			}
+			return checkList;
+		}
+		
+		private String getnewtripid(String oldtripid, String userid, DBHelper128 dh){
+			try{
 				// the client to handle sending/receiving requests
 				HttpClient httpsClient = getHttpClient();
 				//first, update trip info and data with the correct tripid
 				String newTripidUrl = "https://plash.iis.sinica.edu.tw:8080/GetNewTripId?userid=" + userid;
-				Log.e("newTripidUrl", newTripidUrl);
+				Log.w("newTripidUrl", newTripidUrl);
 				HttpGet getRequest = new HttpGet();
 				getRequest.setURI(new URI(correctURLEncoder(newTripidUrl)));
 				HttpResponse response = httpsClient.execute(getRequest);
+				
 				Integer statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
 					BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 					JSONObject result = new JSONObject(new JSONTokener(in.readLine()));
 					in.close();
-					newTripid = result.getString("newTripId");
+					String newTripid = result.getString("newTripId");
 					if(newTripid != null){
-						int num = dh.updateTripid(oldTripid, newTripid);
-						Log.e("update tripid", "rows= " + num);
+						int num = dh.updateTripid(oldtripid, newTripid);
+						Log.w("update tripid", "rows= " + num);
+						httpsClient.getConnectionManager().shutdown();
+						return newTripid;
 					} else{
 						//did not received a new tripid, abort
+						Log.e("upload service", "getnewrtipid error: new trip id = null");
+						httpsClient.getConnectionManager().shutdown();
 						return null;
 					}
 				} else{
 					//connection failed, abort
+					Log.e("upload service", "getnewrtipid error: status code=" + statusCode);
+					httpsClient.getConnectionManager().shutdown();
 					return null;
 				}
-				checkList[1] = true;
-				//XXX get new trip id done
-				
-				//to be reused later
-				getRequest = null;
-				response = null;
-				statusCode = null;
-				//second, fetch start and end address from google
-				HttpClient httpClient = new DefaultHttpClient();
-				
-				CachedPoints first = dh.getOnePoint(userid, newTripid, true);
-				
+			} catch(IOException e){
+				e.printStackTrace();
+			} catch(URISyntaxException e){
+				e.printStackTrace();
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			Log.e("upload service", "getnewrtipid error: exception");
+			return null;
+		}
+		
+		private boolean getstartaddress(String uid, String tid, DBHelper128 dh){
+			try{
+				CachedPoints first = dh.getOnePoint(uid, tid, true);
 				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> firstAddr = geocoder.getFromLocation(first.latitude, first.longitude, 1);
 				if(firstAddr != null && !firstAddr.isEmpty()){
-					Log.e("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
+					Log.w("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
 					dh.insertStartaddr(
-							userid, 
-							newTripid, 
+							uid, 
+							tid, 
 							(firstAddr.get(0).getCountryName() != null?firstAddr.get(0).getCountryName():"NULL"), 
 							(firstAddr.get(0).getAdminArea() != null?firstAddr.get(0).getAdminArea():"NULL"), 
 							(firstAddr.get(0).getLocality() != null?firstAddr.get(0).getLocality():"NULL"), 
 							(firstAddr.get(0).getSubLocality() != null?firstAddr.get(0).getSubLocality():"NULL"), 
 							(firstAddr.get(0).getThoroughfare() != null?firstAddr.get(0).getThoroughfare():"NULL"));
-					checkList[2] = true;
+					Log.w("upload service", "getstartaddress result: good");
+					return true;
 				} else{
-					dh.insertStartaddr(userid, newTripid, "", "", "", "", "Address not available");
-					checkList[2] = false;
-//					return null;
+					dh.insertStartaddr(uid, tid, "", "", "", "", "Address not available");
+					Log.e("upload service", "getstartaddress error: reverse geocode failed");
+					return false;
 				}
-				
-				//XXX reverse-geocoding of starting address done
-				
-				//to be reused later
-				geocoder = null;
-				getRequest = null;
-				response = null;
-				statusCode = null;
-				
-				CachedPoints last = dh.getOnePoint(userid, newTripid, false);
-				geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+			} catch (IOException e) {
+				Log.e("upload service", "getstartaddress error: exception");
+				e.printStackTrace();
+			}
+			return false;
+		}
+		
+		private boolean getendaddress(String uid, String tid, DBHelper128 dh){
+			try{	
+				CachedPoints last = dh.getOnePoint(uid, tid, false);
+				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> lastAddr = geocoder.getFromLocation(last.latitude, last.longitude, 1);
 				if(lastAddr != null && !lastAddr.isEmpty()){
-					Log.e("upload service", "last address: \nadmin:" + lastAddr.get(0).getAdminArea() + "\ncountry code:" + lastAddr.get(0).getCountryCode() + "\ncountru name:" + lastAddr.get(0).getCountryName() + "\nfeature name:" + lastAddr.get(0).getFeatureName() + "\nlocale:" + lastAddr.get(0).getLocale() + "\nlocality:" + lastAddr.get(0).getLocality() + "\npostal code:" + lastAddr.get(0).getPostalCode() + "\npremises:" + lastAddr.get(0).getPremises() + "\nsubadmin:" + lastAddr.get(0).getSubAdminArea() + "\nsublocality:" + lastAddr.get(0).getSubLocality() + "\nsubthroughfare:" + lastAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + lastAddr.get(0).getThoroughfare());
+					Log.w("upload service", "last address: \nadmin:" + lastAddr.get(0).getAdminArea() + "\ncountry code:" + lastAddr.get(0).getCountryCode() + "\ncountru name:" + lastAddr.get(0).getCountryName() + "\nfeature name:" + lastAddr.get(0).getFeatureName() + "\nlocale:" + lastAddr.get(0).getLocale() + "\nlocality:" + lastAddr.get(0).getLocality() + "\npostal code:" + lastAddr.get(0).getPostalCode() + "\npremises:" + lastAddr.get(0).getPremises() + "\nsubadmin:" + lastAddr.get(0).getSubAdminArea() + "\nsublocality:" + lastAddr.get(0).getSubLocality() + "\nsubthroughfare:" + lastAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + lastAddr.get(0).getThoroughfare());
 					dh.insertEndaddr(
-							userid, 
-							newTripid, 
+							uid, 
+							tid, 
 							(lastAddr.get(0).getCountryName() != null?lastAddr.get(0).getCountryName():"NULL"), 
 							(lastAddr.get(0).getAdminArea() != null?lastAddr.get(0).getAdminArea():"NULL"), 
 							(lastAddr.get(0).getLocality() != null?lastAddr.get(0).getLocality():"NULL"), 
 							(lastAddr.get(0).getSubLocality() != null?lastAddr.get(0).getSubLocality():"NULL"), 
 							(lastAddr.get(0).getThoroughfare() != null?lastAddr.get(0).getThoroughfare():"NULL"));
-					checkList[3] = true;
+					Log.w("upload service", "getendaddress result: good");
+					return true;
 				} else{
-					dh.insertEndaddr(userid, newTripid, "", "", "", "", "Address not available");
-					checkList[3] = false;
-//					return null;
+					dh.insertEndaddr(uid, tid, "", "", "", "", "Address not available");
+					Log.e("upload service", "getendaddress error: reverse geocode failed");
+					return false;
 				}
+			} catch(IOException e){
+				e.printStackTrace();
+			}
+			Log.e("upload service", "getendaddress error: exception");
+			return false;
+		}
+		
+		private boolean uploadtripinfo(String uid, String tid, DBHelper128 dh, boolean[] check){
+			try{
+				JSONObject tripinfo = dh.getOneTripInfo(uid, tid);
 				
-				//XXX reverse-geocoding of ending address done
-				
-				//done with geocoder
-				geocoder = null;
-				
-				//to be reused later
-				getRequest = null;
-				response = null;
-				statusCode = null;
-				//thirdly, upload trip info with eugene's component
-				JSONObject tripinfo = dh.getOneTripInfo(userid, newTripid);
-				
-				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?update_status=" + ((checkList[2] && checkList[3])?"2":"1") + "&trip_name="
+				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?update_status=" + ((check[2] && check[3])?"2":"1") + "&trip_name="
 				+ tripinfo.getString("trip_name")
 				+ "&trip_st=" + tripinfo.getString("trip_st")
 				+ "&trip_et=" + tripinfo.getString("trip_et")
+				//convert length from double to integer, cuz eugene likes integer...
 				+ "&trip_length=" + (int)Double.parseDouble(tripinfo.getString("trip_length"))
 				+ "&num_of_pts=" + tripinfo.getString("num_of_pts");
 				
 				//if reverse geociding failed, don't upload empty addresses
-				String stAddr = checkList[2]?
+				String stAddr = check[2]?
 				"&st_addr_prt1=" + tripinfo.getString("st_addr_prt1")
 				+ "&st_addr_prt2=" + tripinfo.getString("st_addr_prt2")
 				+ "&st_addr_prt3=" + tripinfo.getString("st_addr_prt3")
@@ -251,95 +383,167 @@ public class UploadService extends Service {
 				+ "&st_addr_prt5=" + tripinfo.getString("st_addr_prt5"):"";
 				
 				//if reverse geociding failed, don't upload empty addresses
-				String etAddr = checkList[3]?
+				String etAddr = check[3]?
 				"&et_addr_prt1=" + tripinfo.getString("et_addr_prt1")
 				+ "&et_addr_prt2=" + tripinfo.getString("et_addr_prt2")
 				+ "&et_addr_prt3=" + tripinfo.getString("et_addr_prt3")
 				+ "&et_addr_prt4=" + tripinfo.getString("et_addr_prt4")
 				+ "&et_addr_prt5=" + tripinfo.getString("et_addr_prt5"):"";
 				
-				getRequest = new HttpGet(correctURLEncoder(inputtripinfo + stAddr + etAddr));
-				response = httpsClient.execute(getRequest);
-				statusCode = response.getStatusLine().getStatusCode();
+				HttpClient httpsClient = getHttpClient();
+				HttpGet getRequest = new HttpGet(correctURLEncoder(inputtripinfo + stAddr + etAddr));
+				HttpResponse response = httpsClient.execute(getRequest);
+				
+				Integer statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
 					//not sure what will be returned
+					Log.w("upload service", "uploadtripinfo result: good");
+					httpsClient.getConnectionManager().shutdown();
+					return true;
 				} else{
-					
-					return null;
+					Log.e("upload service", "uploadtripinfo error: connection failed, status code=" + statusCode);
+					httpsClient.getConnectionManager().shutdown();
+					return false;
 				}
-				checkList[4] = true;
-				//XXX input trip info done
-				
-				//release this
-				httpsClient = null;
-				//to be reused later
-				getRequest = null;
-				response = null;
-				statusCode = null;
-				//finally upload the updated trip data to yu-hsiang's php component
+			} catch(JSONException e){
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			Log.e("upload service", "uploadtripinfo error: exception");
+			return false;
+		}
+		
+		private boolean uploadtripdata(String uid, String tid, DBHelper128 dh){
+			try{
 				String uploadUrl = "http://plash2.iis.sinica.edu.tw/api/UploadTrip.php";
-				Log.e("uploadUrl", uploadUrl);
-//				HttpClient client = getHttpClient();
+				Log.w("uploadUrl", uploadUrl);
 				// the method to be used, with url
 				HttpPost postRequest = new HttpPost(uploadUrl);
 				//GET DATA FROM DB
-				JSONObject data = dh.getOneTripData(userid, newTripid, true);
+				JSONObject data = dh.getOneTripData(uid, tid, true);
 				// pair our data with corresponding name
 				List<NameValuePair> param = new ArrayList<NameValuePair>();
 				param.add(new BasicNameValuePair("trip", data.toString()));
 				// encode our data with UTF8
-				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(param,
-						HTTP.UTF_8);
+				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(param, HTTP.UTF_8);
 				// put our data in the method object
 				postRequest.setEntity(entity);
+				HttpClient httpClient = new DefaultHttpClient();
 				// execute the request and catch the response
-				response = httpClient.execute(postRequest);
+				HttpResponse response = httpClient.execute(postRequest);
+				
 				// if received 200 ok status
-				statusCode = response.getStatusLine().getStatusCode();
+				Integer statusCode = response.getStatusLine().getStatusCode();
 				if (statusCode == 200) {
 					// extrace the return message
-					BufferedReader in = new BufferedReader(
-							new InputStreamReader(response.getEntity()
-									.getContent()));
-					String line;
-					while ((line = in.readLine()) != null) {
-						Log.e("IT RETURNS:", line);
-					}
+					BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+					String msg = in.readLine();
 					in.close();
+					if(msg.contains("Ok")){
+						Log.w("upload service", "uplaodtripdata result: good");
+						dh.markUploaded(uid, tid, 1, 1, null);
+						httpClient.getConnectionManager().shutdown();
+						return true;
+					} else{
+						Log.e("upload service", "uplaodtripdata error: upload failed, messsage=" + msg);
+						httpClient.getConnectionManager().shutdown();
+						return false;
+					}
 				} else {
 					// connection error
-					Log.e("connection error", "status code= " + statusCode);
+					Log.e("upload service", "uplaodtripdata error: connection failed, status code=" + statusCode);
+					httpClient.getConnectionManager().shutdown();
+					return false;
 				}
-				checkList[5] = true;
-				//XXX input trip data done
-				
-				
-				
-				
-				
-				// close the connection
-				httpClient.getConnectionManager().shutdown();
+			} catch(IOException e){
+				e.printStackTrace();
+			}
+			Log.e("upload service", "uplaodtripdata error: exception");
+			return false;
+		}
+		private boolean uploadpictures(String uid, String tid, DBHelper128 dh){
+			try{
+				String uploadPicUrl = "http://plash2.iis.sinica.edu.tw/picture/UploadPicture.php";
+				HttpPost postRequest = new HttpPost(uploadPicUrl);
+				//get a list of all picture paths in the given tripid
+				ArrayList<String> picPaths = dh.getOneTripPicturePaths(uid, tid);
+				if(picPaths != null){
+					//go through the list and upload every picture
+					for(int i = 0; i < picPaths.size(); i++){
+						//get the picture path
+						String path = picPaths.get(i);
+						Log.w("upload service", "image path=" + path);
+						BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(path)));
+						byte[] ba = new byte[bis.available()];
+						bis.read(ba);
+						bis.close();
+						ByteArrayBody bab = new ByteArrayBody(ba, path.substring(path.lastIndexOf("/") + 1));
+						ba = null;
+						MultipartEntity mentity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+						mentity.addPart("file", bab);
+						mentity.addPart("userid", new StringBody(uid));
+						mentity.addPart("trip_id", new StringBody(tid));
+						
+						postRequest.setEntity(mentity);
+						
+						HttpClient httpClient = new DefaultHttpClient();
+						HttpResponse response = httpClient.execute(postRequest);
+						Integer statusCode = response.getStatusLine().getStatusCode();
+						if (statusCode == 200) {
+							BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity()
+									.getContent()));
+							String msg = in.readLine();
+							in.close();
+							if (msg.contains("OK")) {
+								Log.w("upload service", i + ") upload picture result: good");
+								dh.markUploaded(uid, tid, 1, 2, path);
+							} else {
+								Log.e("upload service", i + ") upload pictures error: upload failed, messsage=" + msg);
+							}
+						} else {
+							Log.e("upload service", i + ") upload picture error: connection error, status code="
+									+ statusCode);
+							dh.markUploaded(uid, tid, 1, 3, path);
+						}
+						httpClient.getConnectionManager().shutdown();
+					}
+					return true;
+				} else{
+					//no picture la
+					Log.e("upload service", "null image path, no pictures, no need to upload");
+					return true;
+				}
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (ClientProtocolException e) {
+				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
-			} catch(JSONException e){
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
 			}
-			if(dh.DBIsOpen()){
-				dh.closeDB();
-			}
-			return null;
+			Log.e("upload service", "upload picture error: exception");
+			return false;
 		}
-
+		
 		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
-			int i = 0;
-			for(boolean item : checkList){
-				Log.e("checkList", "part " + i + ": " + (item?"good":"no good"));
-				i++;
+		protected void onPostExecute(boolean[] result) {
+			boolean allgood = true;
+			for(boolean item : result){
+				if(!item){
+					allgood = false;
+				}
 			}
+			updateThreadStatus(threadTag, allgood?2:1);
+			Log.e("upload service", "upload result:\n" 
+			+ "get local tripid: " + (result[0]?"good":"bad")
+			+ "\nget new trip id: " + (result[1]?"good":"bad")
+			+ "\nget start address: " + (result[2]?"good":"bad")
+			+ "\nget end address: " + (result[3]?"good":"bad")
+			+ "\nupload trip info: " + (result[4]?"good":"bad")
+			+ "\nupload trip data: " + (result[5]?"good":"bad")
+			+ "\nupload pictures: " + (result[6]?"good":"bad"));
 		}
 	}
 
