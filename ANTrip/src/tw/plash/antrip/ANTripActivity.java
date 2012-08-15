@@ -118,6 +118,10 @@ public class ANTripActivity extends Activity {
 		setContentView(R.layout.main);
 		
 		mContext = this;
+		// perform a self check, upload any unfinished jobs
+		// if there are unfinished jobs, it will be uploaded SECRETLY
+		// if there are no unfinished jobs, service will stop it self
+		startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
 		
 		mWebView = (WebView) findViewById(R.id.webview);
 		
@@ -438,14 +442,18 @@ public class ANTripActivity extends Activity {
 		public void setCookie(String key, String value) {
 			pref.edit().putString(key, String.valueOf(value)).commit();
 			Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
-			// if the sid equals cszu's sid, export all info and data to file
-			if (key.equals("sid") && value.equals("206")) {
-				Log.w("SECRETLY", "EXPORT ALL");
-				DBHelper128 ddd = new DBHelper128(mContext);
-				ddd.exportEverything();
-				ddd.closeDB();
-				ddd = null;
+			//if 
+			if(key.equals("sid")){
+				startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
 			}
+			// if the sid equals cszu's sid, export all info and data to file
+//			if (key.equals("sid") && value.equals("206")) {
+//				Log.w("SECRETLY", "EXPORT ALL");
+//				DBHelper128 ddd = new DBHelper128(mContext);
+//				ddd.exportEverything();
+//				ddd.closeDB();
+//				ddd = null;
+//			}
 		}
 		
 		/**

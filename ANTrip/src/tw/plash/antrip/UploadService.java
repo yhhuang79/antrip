@@ -67,6 +67,8 @@ public class UploadService extends Service {
 	private Notification nnn;
 	private final int notification_tag = 1338;
 	
+	private boolean selfCheckAndUploadIsRunning;
+	
 	// for keeping track of every thread's status
 	private HashMap<Long, Integer> threadStatus;
 	
@@ -81,13 +83,9 @@ public class UploadService extends Service {
 		} else{
 			threadStatus = new HashMap<Long, Integer>();
 			
+			selfCheckAndUploadIsRunning = false;
+			
 			pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-//			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_NO_CREATE);
-			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, null, PendingIntent.FLAG_NO_CREATE);
-			nnn = new Notification(R.drawable.ant_24, " upload has started~", System.currentTimeMillis());
-			nnn.flags = Notification.FLAG_ONGOING_EVENT;
-			nnn.setLatestEventInfo(getApplicationContext(), "antrip", "upload in progress...", pIntent);
-			startForeground(notification_tag, nnn);
 		}
 	}
 
@@ -97,25 +95,66 @@ public class UploadService extends Service {
 		if (action == null) {
 			stopSelf();
 		} else if (action.equals("ACTION_UPLOAD_TRIP")) {
-			//get unique id
+			// get unique id
 			String id = intent.getExtras().getString("id");
 			String sid = pref.getString("sid", null);
 			Log.e("uploadService", "old tripid= " + id);
-			//give the task a dh to handle its own business with DB
-			if(id != null && sid != null){
+			// give the task a dh to handle its own business with DB
+			if (id != null && sid != null) {
 				Long tag = System.currentTimeMillis();
 				updateThreadStatus(tag, 0);
-				new uploadThread(tag).execute(id, sid);
-			} else{
+				new uploadThread(tag, sid, id).execute();
+				startNotification(0);
+			} else {
 				Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
-				stopSelf();
+				//don't stop the entire service, there might be other threads working
+				//stopSelf();
+			}
+		} else if (action.equals("ACTION_SELF_CHECK_AND_UPLOAD")) {
+			//if self check is in progress, don't start again
+			if(!selfCheckAndUploadIsRunning){
+				selfCheckAndUploadIsRunning = true;
+				String sid = pref.getString("sid", null);
+				if(sid != null){
+					DBHelper128 dh = new DBHelper128(getApplicationContext());
+					HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(sid);
+					dh.closeDB();
+					if(tmp != null){
+						startNotification(1);
+						for(String key : tmp.keySet()){
+							Long tag = System.currentTimeMillis();
+							updateThreadStatus(tag, 0);
+							new uploadThread(tag, sid).execute(key, tmp.get(key).toString());
+						}
+					}
+				} else{
+					//not logged in yet, does not know whose records to look for in the DB
+					stopSelf();
+				}
 			}
 		} else {
 			stopSelf();
 		}
 		return super.onStartCommand(intent, flags, startId);
 	}
-
+	
+	private void startNotification(int which){
+		switch(which){
+		case 0:
+//			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_NO_CREATE);
+			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, null, PendingIntent.FLAG_NO_CREATE);
+			nnn = new Notification(R.drawable.ant_24, " upload has started~", System.currentTimeMillis());
+			nnn.flags = Notification.FLAG_ONGOING_EVENT;
+			nnn.setLatestEventInfo(getApplicationContext(), "antrip", "upload in progress...", pIntent);
+			startForeground(notification_tag, nnn);
+			break;
+		case 1:
+			nnn = new Notification();
+			startForeground(notification_tag, nnn);
+			break;
+		}
+	}
+	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
@@ -144,13 +183,22 @@ public class UploadService extends Service {
 	 * @author CSZU
 	 *
 	 */
-	private class uploadThread extends AsyncTask<String, Integer, boolean[]> {
+	private class uploadThread extends AsyncTask<String, Void, boolean[]> {
 		
-		private Long threadTag;
+		private Long threadTag = null;
+		private String userid = null;
+		private String uniqueid = null;
 //		private PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_NO_CREATE);;
 		
-		public uploadThread(Long tag) {
+		public uploadThread(Long tag, String sid) {
 			threadTag = tag;
+			userid = sid;
+		}
+		
+		public uploadThread(Long tag, String sid, String id) {
+			threadTag = tag;
+			userid = sid;
+			uniqueid = id;
 		}
 		
 		/**
@@ -173,84 +221,88 @@ public class UploadService extends Service {
 			return result;
 		}
 		
-//		@Override
-//		protected void onPreExecute() {
-//			nnn.setLatestEventInfo(getApplicationContext(), "title", "text", pIntent);
-//			startForeground(notification_tag, nnn);
-//		}
-		
-//		@Override
-//		protected void onProgressUpdate(Integer... values) {
-//			int part = values[0];
-//			int total = values[1];
-//			nnn.setLatestEventInfo(getApplicationContext(), "title", "uploading part " + part + " of " + total + " ...", pIntent);
-//			startForeground(threadTag, nnn);
-//		}
-		
 		@Override
 		protected boolean[] doInBackground(String... params) {
 			boolean[] checkList = { false, false, false, false, false, false, false};
 			
-			String uniqueid = params[0];
-			String userid = params[1];
-			
 			DBHelper128 dh = new DBHelper128(getApplicationContext());
 			
-			// XXX step 1: get the old tripid using the unique id value
-			String oldTripid = dh.getTripid(uniqueid);
-			if (oldTripid != null) {
-				checkList[0] = true;
-			} else {
-				dh.closeDB();
-				return checkList;
+			String newTripid = null;
+			int job = -1;
+			
+			if(uniqueid != null){
+				//this is a manually selected trip to be uploaded
+				job = 0;
+			} else if(params.length > 0){
+				job = Integer.parseInt(params[0]);
+				newTripid = params[1];
 			}
 			
-			// XXX step 2: get new trip id from server
-			String newTripid = getnewtripid(oldTripid, userid, dh);
-			if (newTripid != null) {
-				checkList[1] = true;
-				dh.markUploaded(userid, newTripid, 0, 2, null);
-			} else {
-				dh.closeDB();
-				return checkList;
-			}
-			
-			// XXX step 3: reverse geocode start point
-			if (getstartaddress(userid, newTripid, dh)) {
-				checkList[2] = true;
-				dh.markUploaded(userid, newTripid, 0, 3, null);
-			}
-			// it's okay if we can't do reverse geocoding, let our server handle it
-			
-			// XXX step 4: reverse geocode end point
-			if (getendaddress(userid, newTripid, dh)) {
-				checkList[3] = true;
-				dh.markUploaded(userid, newTripid, 0, 4, null);
-			}
-			// it's okay if we can't do reverse geocoding, let our server handle it
-			
-			// XXX step 5: upload trip info
-			if (uploadtripinfo(userid, newTripid, dh, checkList)) {
-				checkList[4] = true;
-				dh.markUploaded(userid, newTripid, 0, 5, null);
-			} else {
-				// it's okay to fail here, just try again later
-			}
-			
-			// XXX step 6: upload trip data
-			if (uploadtripdata(userid, newTripid, dh)) {
-				checkList[5] = true;
-				dh.markUploaded(userid, newTripid, 0, 6, null);
-			} else {
-				// it's okay to fail here, just try again later
-			}
-			
-			// XXX step 7: upload pictures(if present)
-			if(uploadpictures(userid, newTripid, dh)){
-				checkList[6] = true;
-				dh.markUploaded(userid, newTripid, 0, 7, null);
-			} else{
-				// it's okay to fail here, just try again later
+			switch(job){
+			case 0:
+				
+				// XXX step 1: get the old tripid using the unique id value
+				String oldTripid = dh.getTripid(uniqueid);
+				if (oldTripid != null) {
+					checkList[0] = true;
+				} else {
+					dh.closeDB();
+					return checkList;
+				}
+				
+				// XXX step 2: get new trip id from server
+				newTripid = getnewtripid(oldTripid, userid, dh);
+				if (newTripid != null) {
+					checkList[1] = true;
+					dh.markUploaded(userid, newTripid, 0, 2, null);
+				} else {
+					dh.closeDB();
+					return checkList;
+				}
+			case 1:
+			case 2:
+			case 3:
+				// XXX step 3: reverse geocode start point
+				if (getstartaddress(userid, newTripid, dh)) {
+					checkList[2] = true;
+					dh.markUploaded(userid, newTripid, 0, 3, null);
+				} else{
+					// it's okay if we can't do reverse geocoding, let our server handle it
+				}
+			case 4:
+				// XXX step 4: reverse geocode end point
+				if (getendaddress(userid, newTripid, dh)) {
+					checkList[3] = true;
+					dh.markUploaded(userid, newTripid, 0, 4, null);
+				} else{
+					// it's okay if we can't do reverse geocoding, let our server handle it
+				}
+			case 5:
+				// XXX step 5: upload trip info
+				if (uploadtripinfo(userid, newTripid, dh, checkList)) {
+					checkList[4] = true;
+					dh.markUploaded(userid, newTripid, 0, 5, null);
+				} else {
+					// it's okay to fail here, just try again later
+				}
+			case 6:
+				// XXX step 6: upload trip data
+				if (uploadtripdata(userid, newTripid, dh)) {
+					checkList[5] = true;
+					dh.markUploaded(userid, newTripid, 0, 6, null);
+				} else {
+					// it's okay to fail here, just try again later
+				}
+			case 7:
+				// XXX step 7: upload pictures(if present)
+				if(uploadpictures(userid, newTripid, dh)){
+					checkList[6] = true;
+					dh.markUploaded(userid, newTripid, 0, 7, null);
+				} else{
+					// it's okay to fail here, just try again later
+				}
+			default:
+				break;
 			}
 			
 			if (dh.DBIsOpen()) {

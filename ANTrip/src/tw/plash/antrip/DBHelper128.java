@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -712,9 +713,38 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public HashMap<String, Integer> getAllUnfinishedUploads(String sid){
+		if(db.isOpen()){
+			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid", "uploadstatus"}, "userid=" + sid + " AND uploadstatus!=0", null, null, null, null);
+			if(mCursor != null){
+				if(mCursor.moveToFirst()){
+					HashMap<String, Integer> result = new HashMap<String, Integer>();
+					do{
+						result.put(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")), mCursor.getInt(mCursor.getColumnIndexOrThrow("uploadstatus")));
+					} while(mCursor.moveToNext());
+					mCursor.close();
+					return result;
+				} else{
+					if(!mCursor.isClosed()){
+						mCursor.close();
+					}
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
+			return null;
+		}
+	}
+	
 	/**
 	 * Get all trip info formatted to yu-hsiang's php component with the given
 	 * userid
+	 * 
+	 * does not show ongoing trip is there is any
+	 * 
+	 * does not show any partially uploaded trip(upload stage > 0)
 	 * 
 	 * @param userid
 	 * @return JSONObject format trip info
@@ -723,12 +753,14 @@ public class DBHelper128 {
 		if (db.isOpen()) {
 			Cursor mCursor = null;
 			if (currentTripid != null) {
+				//there is a on going trip, don't show it in the trip list
 				Log.e("getalltripinfoforhtml", "tripid!=null");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid, null,
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid + " AND uploadstage=0", null,
 						null, null, "starttime DESC");
 			} else {
+				//there is no on going trip, show everything
 				Log.e("getalltripinfoforhtml", "tripid=null");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
 			}
 			
 			if (mCursor != null) {
