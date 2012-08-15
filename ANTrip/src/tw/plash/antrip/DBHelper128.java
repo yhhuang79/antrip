@@ -1,5 +1,6 @@
 package tw.plash.antrip;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,6 +8,7 @@ import java.io.OutputStreamWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -522,9 +524,14 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public ArrayList<String> getOneTripPicturePaths(String userid, String tripid){
+	synchronized public ArrayList<String> getOneTripPicturePaths(String userid, String tripid, boolean needall){
 		if(db.isOpen()){
-			Cursor mCursor = db.query(TRIP_DATA_TABLE, new String[]{"picture"}, "userid=" + userid + " AND tripid=" + tripid + " AND picture!='NULL'", null, null, null, null);
+			Cursor mCursor;
+			if(needall){
+				mCursor = db.query(TRIP_DATA_TABLE, new String[]{"picture"}, "userid=" + userid + " AND tripid=" + tripid + " AND picture!='NULL'", null, null, null, null);
+			} else{
+				mCursor = db.query(TRIP_DATA_TABLE, new String[]{"picture"}, "userid=" + userid + " AND tripid=" + tripid + " AND picture!='NULL' AND uploadstatus<2", null, null, null, null);
+			}
 			if(mCursor != null){
 				if(mCursor.moveToFirst()){
 					ArrayList<String> result = new ArrayList<String>();
@@ -830,16 +837,23 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long deleteTrip(String id){
+	synchronized public long deleteTrip(String sid, String tid){
 		if(db.isOpen()){
-			String tripid = getTripid(id);
-			if(tripid != null){
-				long rows = db.delete(TRIP_INFO_TABLE, "tripid=" + tripid, null);
-				rows += db.delete(TRIP_DATA_TABLE, "tripid=" + tripid, null);
-				return rows;
-			} else{
-				return -1;
+			long rows = db.delete(TRIP_INFO_TABLE, "userid=" + sid + " AND tripid=" + tid, null);
+			//also need to delete all pictures
+			ArrayList<String> tmp = getOneTripPicturePaths(sid, tid, true);
+			if(tmp != null){
+				if(tmp.size() > 0){
+					Iterator<String> it = tmp.iterator();
+					while(it.hasNext()){
+						File f = new File(it.next());
+						f.delete();
+					}
+				}
 			}
+			rows += db.delete(TRIP_DATA_TABLE, "userid=" + sid + " AND tripid=" + tid, null);
+			
+			return rows;
 		} else{
 			return -2;
 		}

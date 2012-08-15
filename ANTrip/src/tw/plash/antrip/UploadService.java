@@ -305,6 +305,16 @@ public class UploadService extends Service {
 				break;
 			}
 			
+			boolean allgood = true;
+			for(boolean item : checkList){
+				if(!item){
+					allgood = false;
+				}
+			}
+			if(allgood){
+				dh.deleteTrip(userid, newTripid);
+			}
+			
 			if (dh.DBIsOpen()) {
 				dh.closeDB();
 			}
@@ -521,7 +531,7 @@ public class UploadService extends Service {
 				String uploadPicUrl = "http://plash2.iis.sinica.edu.tw/picture/UploadPicture.php";
 				HttpPost postRequest = new HttpPost(uploadPicUrl);
 				//get a list of all picture paths in the given tripid
-				ArrayList<String> picPaths = dh.getOneTripPicturePaths(uid, tid);
+				ArrayList<String> picPaths = dh.getOneTripPicturePaths(uid, tid, false);
 				if(picPaths != null){
 					//go through the list and upload every picture
 					for(int i = 0; i < picPaths.size(); i++){
@@ -558,7 +568,7 @@ public class UploadService extends Service {
 						} else {
 							Log.e("upload service", i + ") upload picture error: connection error, status code="
 									+ statusCode);
-							dh.markUploaded(uid, tid, 1, 3, path);
+							dh.markUploaded(uid, tid, 1, 1, path);
 						}
 						httpClient.getConnectionManager().shutdown();
 					}
