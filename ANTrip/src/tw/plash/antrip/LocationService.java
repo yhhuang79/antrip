@@ -34,7 +34,6 @@ public class LocationService extends Service {
 	/**
 	 * check-in related stuff
 	 */
-	private Location checkinLocationBuffer = null;
 	private CandidateCheckinObject cco;
 	private boolean duringCheckin;
 	/**
@@ -43,6 +42,7 @@ public class LocationService extends Service {
 	private boolean isRecording;
 	private boolean startNewTrip = false;
 	private Location recorderLocationBuffer = null;
+	private Location lastNonNullLocation = null;
 	private Location nullLocation;
 	private DBHelper128 dh;
 	private Timer mTimer;
@@ -183,9 +183,12 @@ public class LocationService extends Service {
 			
 		} else if (action.equals("ACTION_SAVE_CCO")) {
 			Log.e("LocationService", "save cco");
-			Location location = checkinLocationBuffer;
+			Location location = recorderLocationBuffer;
 			if (location == null) {
-				location = recorderLocationBuffer;
+				//update the time
+				lastNonNullLocation.setTime(System.currentTimeMillis());
+				//this will guarantee that location will not be null
+				location = lastNonNullLocation;
 			}
 			// save check-in data to DB
 			cco = (CandidateCheckinObject) intent.getExtras().getSerializable("cco");
@@ -236,7 +239,7 @@ public class LocationService extends Service {
 		} else if (action.equals("ACTION_CANCEL_CHECKIN")) {
 			Log.e("LocationService", "cancel check-in");
 			// clear temp check-in location object
-			checkinLocationBuffer = null;
+//			checkinLocationBuffer = null;
 			cco = null;
 			duringCheckin = false;
 		} else if (action.equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")) {
@@ -456,6 +459,7 @@ public class LocationService extends Service {
 		
 		public WPSContinuation handleWPSPeriodicLocation(final WPSLocation wpslocation) {
 			recorderLocationBuffer = WPS2Location(wpslocation);
+			lastNonNullLocation = recorderLocationBuffer;
 			
 			if (!isRecording) {
 				// Broadcasts when not recording
