@@ -82,7 +82,9 @@ public class ANTripActivity extends Activity {
 				String syncpos = intent.getExtras().getString("location");
 				String syncPositionUrl = "javascript:syncPosition(" + syncpos + ")";
 				queuedLoadURL(syncPositionUrl);
-			} else {
+			} else if(intent.getAction().equals("ACTION_RELOAD_TRIPLIST")){
+				queuedLoadURL("javascript:reloadTripList()");
+			}else{
 				// huh?
 			}
 		}

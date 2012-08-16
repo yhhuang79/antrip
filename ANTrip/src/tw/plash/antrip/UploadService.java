@@ -260,6 +260,7 @@ public class UploadService extends Service {
 					return checkList;
 				}
 			case 1:
+				sendBroadcast(new Intent(getApplicationContext(), ANTripActivity.class).setAction("ACTION_RELOAD_TRIPLIST"));
 			case 2:
 			case 3:
 				// XXX step 3: reverse geocode start point
