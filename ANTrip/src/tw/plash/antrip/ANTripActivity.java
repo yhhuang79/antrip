@@ -186,7 +186,7 @@ public class ANTripActivity extends Activity {
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
 				//Log.e("consolemsg", consoleMessage.message() + " @line: " + consoleMessage.lineNumber() + " from: "
-						+ consoleMessage.sourceId());
+//						+ consoleMessage.sourceId());
 				return true;
 			}
 		});

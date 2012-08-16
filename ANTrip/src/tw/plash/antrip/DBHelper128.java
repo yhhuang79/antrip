@@ -564,7 +564,7 @@ public class DBHelper128 {
 	 */
 	synchronized public JSONObject getOneTripData(String userid, String tripid, boolean forUpload) {
 		//Log.e("getOneTripData", "userid=" + userid + ", tripid=" + tripid
-				+ (forUpload ? ", forUpload true" : ", forUpload false"));
+//				+ (forUpload ? ", forUpload true" : ", forUpload false"));
 		if (db.isOpen()) {
 			Cursor mCursor = db.query(TRIP_DATA_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
 					null, "id ASC");
