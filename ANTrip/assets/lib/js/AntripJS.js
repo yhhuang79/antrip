@@ -1033,13 +1033,13 @@
 									'icon': im+"placemarker.png",
 								}).click(function(){
 									var CheckInInfo="";
-									if(point.CheckIn.picture_uri!=null || typeof point.CheckIn.picture_uri!='undefined'){
+									if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
 										CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='300' /></p>";
 									}
-									if(point.CheckIn.emotion!=null || typeof point.CheckIn.emotion!='undefined'){
+									if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
 										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion.toString()]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion.toString()]]+"</img></p>";
 									}
-									if(point.CheckIn.message!=null || typeof point.CheckIn.message!='undefined'){
+									if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
 										CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
 									}
 
@@ -1223,7 +1223,7 @@
 						'background-position':"center center",
 						'background-repeat': 'no-repeat',
 					});
-					$('#logoutwhenrecord').html('Are you sure delete the trip?');
+					$('#logoutwhenrecord').html(g_str_delete);
 					$("button").css({
 						color: "#000000",
 					});

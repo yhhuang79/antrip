@@ -42,6 +42,7 @@
 							if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
 								CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
 							}
+							CheckInInfo +="<p>"+lat+", "+lng+"</p>";
 							self.openInfoWindow({'content': CheckInInfo}, this);
 						});
 						g_tripMarkerArray.push(placemarker);
