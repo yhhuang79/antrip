@@ -37,7 +37,7 @@
 								CheckInInfo +="<p><img src=" + title + " height='300' /></p>";
 							}
 							if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
-								CheckInInfo +="<p><img width='72px' src='"+im+"s/"+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
+								CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
 							}
 							if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
 								CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
