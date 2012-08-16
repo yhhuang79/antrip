@@ -78,7 +78,7 @@ public class UploadService extends Service {
 		// check the internet status
 		if (!isNetworkAvailable()) {
 			// no internet, don't proceed
-			Log.e("uploadService", "internet not available");
+			//Log.e("uploadService", "internet not available");
 			stopSelf();
 		} else{
 			threadStatus = new HashMap<Long, Integer>();
@@ -98,7 +98,7 @@ public class UploadService extends Service {
 			// get unique id
 			String id = intent.getExtras().getString("id");
 			String sid = pref.getString("sid", null);
-			Log.e("uploadService", "old tripid= " + id);
+			//Log.e("uploadService", "old tripid= " + id);
 			// give the task a dh to handle its own business with DB
 			if (id != null && sid != null) {
 				Long tag = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public class UploadService extends Service {
 				new uploadThread(tag, sid, id).execute();
 				startNotification(0);
 			} else {
-				Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
+				//Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
 				//don't stop the entire service, there might be other threads working
 				//stopSelf();
 			}
@@ -208,16 +208,16 @@ public class UploadService extends Service {
 		 */
 		private String correctURLEncoder(String inURL){
 			String inParameter = inURL.substring(inURL.lastIndexOf("?") + 1);
-			Log.e("correct url encoder", "inParam=" + inParameter);
+			//Log.e("correct url encoder", "inParam=" + inParameter);
 			String outParameter= null;
 			try {
 				outParameter = URLEncoder.encode(inParameter, "UTF-8");
-				Log.e("correct url encoder", "outParam=" + outParameter);
+				//Log.e("correct url encoder", "outParam=" + outParameter);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 			String result = inURL.replace(inParameter, outParameter);
-			Log.e("correct url encoder", "result=" + result);
+			//Log.e("correct url encoder", "result=" + result);
 			return result;
 		}
 		
@@ -328,7 +328,7 @@ public class UploadService extends Service {
 				HttpClient httpsClient = getHttpClient();
 				//first, update trip info and data with the correct tripid
 				String newTripidUrl = "https://plash.iis.sinica.edu.tw:8080/GetNewTripId?userid=" + userid;
-				Log.w("newTripidUrl", newTripidUrl);
+				//Log.w("newTripidUrl", newTripidUrl);
 				HttpGet getRequest = new HttpGet();
 				getRequest.setURI(new URI(correctURLEncoder(newTripidUrl)));
 				HttpResponse response = httpsClient.execute(getRequest);
@@ -341,18 +341,18 @@ public class UploadService extends Service {
 					String newTripid = result.getString("newTripId");
 					if(newTripid != null){
 						int num = dh.updateTripid(oldtripid, newTripid);
-						Log.w("update tripid", "rows= " + num);
+						//Log.w("update tripid", "rows= " + num);
 						httpsClient.getConnectionManager().shutdown();
 						return newTripid;
 					} else{
 						//did not received a new tripid, abort
-						Log.e("upload service", "getnewrtipid error: new trip id = null");
+						//Log.e("upload service", "getnewrtipid error: new trip id = null");
 						httpsClient.getConnectionManager().shutdown();
 						return null;
 					}
 				} else{
 					//connection failed, abort
-					Log.e("upload service", "getnewrtipid error: status code=" + statusCode);
+					//Log.e("upload service", "getnewrtipid error: status code=" + statusCode);
 					httpsClient.getConnectionManager().shutdown();
 					return null;
 				}
@@ -363,7 +363,7 @@ public class UploadService extends Service {
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
-			Log.e("upload service", "getnewrtipid error: exception");
+			//Log.e("upload service", "getnewrtipid error: exception");
 			return null;
 		}
 		
@@ -373,7 +373,7 @@ public class UploadService extends Service {
 				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> firstAddr = geocoder.getFromLocation(first.latitude, first.longitude, 1);
 				if(firstAddr != null && !firstAddr.isEmpty()){
-					Log.w("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
+					//Log.w("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
 					dh.insertStartaddr(
 							uid, 
 							tid, 
@@ -382,15 +382,15 @@ public class UploadService extends Service {
 							(firstAddr.get(0).getLocality() != null?firstAddr.get(0).getLocality():"NULL"), 
 							(firstAddr.get(0).getSubLocality() != null?firstAddr.get(0).getSubLocality():"NULL"), 
 							(firstAddr.get(0).getThoroughfare() != null?firstAddr.get(0).getThoroughfare():"NULL"));
-					Log.w("upload service", "getstartaddress result: good");
+					//Log.w("upload service", "getstartaddress result: good");
 					return true;
 				} else{
 					dh.insertStartaddr(uid, tid, "", "", "", "", "Address not available");
-					Log.e("upload service", "getstartaddress error: reverse geocode failed");
+					//Log.e("upload service", "getstartaddress error: reverse geocode failed");
 					return false;
 				}
 			} catch (IOException e) {
-				Log.e("upload service", "getstartaddress error: exception");
+				//Log.e("upload service", "getstartaddress error: exception");
 				e.printStackTrace();
 			}
 			return false;
@@ -402,7 +402,7 @@ public class UploadService extends Service {
 				Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 				List<Address> lastAddr = geocoder.getFromLocation(last.latitude, last.longitude, 1);
 				if(lastAddr != null && !lastAddr.isEmpty()){
-					Log.w("upload service", "last address: \nadmin:" + lastAddr.get(0).getAdminArea() + "\ncountry code:" + lastAddr.get(0).getCountryCode() + "\ncountru name:" + lastAddr.get(0).getCountryName() + "\nfeature name:" + lastAddr.get(0).getFeatureName() + "\nlocale:" + lastAddr.get(0).getLocale() + "\nlocality:" + lastAddr.get(0).getLocality() + "\npostal code:" + lastAddr.get(0).getPostalCode() + "\npremises:" + lastAddr.get(0).getPremises() + "\nsubadmin:" + lastAddr.get(0).getSubAdminArea() + "\nsublocality:" + lastAddr.get(0).getSubLocality() + "\nsubthroughfare:" + lastAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + lastAddr.get(0).getThoroughfare());
+					//Log.w("upload service", "last address: \nadmin:" + lastAddr.get(0).getAdminArea() + "\ncountry code:" + lastAddr.get(0).getCountryCode() + "\ncountru name:" + lastAddr.get(0).getCountryName() + "\nfeature name:" + lastAddr.get(0).getFeatureName() + "\nlocale:" + lastAddr.get(0).getLocale() + "\nlocality:" + lastAddr.get(0).getLocality() + "\npostal code:" + lastAddr.get(0).getPostalCode() + "\npremises:" + lastAddr.get(0).getPremises() + "\nsubadmin:" + lastAddr.get(0).getSubAdminArea() + "\nsublocality:" + lastAddr.get(0).getSubLocality() + "\nsubthroughfare:" + lastAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + lastAddr.get(0).getThoroughfare());
 					dh.insertEndaddr(
 							uid, 
 							tid, 
@@ -411,17 +411,17 @@ public class UploadService extends Service {
 							(lastAddr.get(0).getLocality() != null?lastAddr.get(0).getLocality():"NULL"), 
 							(lastAddr.get(0).getSubLocality() != null?lastAddr.get(0).getSubLocality():"NULL"), 
 							(lastAddr.get(0).getThoroughfare() != null?lastAddr.get(0).getThoroughfare():"NULL"));
-					Log.w("upload service", "getendaddress result: good");
+					//Log.w("upload service", "getendaddress result: good");
 					return true;
 				} else{
 					dh.insertEndaddr(uid, tid, "", "", "", "", "Address not available");
-					Log.e("upload service", "getendaddress error: reverse geocode failed");
+					//Log.e("upload service", "getendaddress error: reverse geocode failed");
 					return false;
 				}
 			} catch(IOException e){
 				e.printStackTrace();
 			}
-			Log.e("upload service", "getendaddress error: exception");
+			//Log.e("upload service", "getendaddress error: exception");
 			return false;
 		}
 		
@@ -460,11 +460,11 @@ public class UploadService extends Service {
 				Integer statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
 					//not sure what will be returned
-					Log.w("upload service", "uploadtripinfo result: good");
+					//Log.w("upload service", "uploadtripinfo result: good");
 					httpsClient.getConnectionManager().shutdown();
 					return true;
 				} else{
-					Log.e("upload service", "uploadtripinfo error: connection failed, status code=" + statusCode);
+					//Log.e("upload service", "uploadtripinfo error: connection failed, status code=" + statusCode);
 					httpsClient.getConnectionManager().shutdown();
 					return false;
 				}
@@ -475,14 +475,14 @@ public class UploadService extends Service {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			Log.e("upload service", "uploadtripinfo error: exception");
+			//Log.e("upload service", "uploadtripinfo error: exception");
 			return false;
 		}
 		
 		private boolean uploadtripdata(String uid, String tid, DBHelper128 dh){
 			try{
 				String uploadUrl = "http://plash2.iis.sinica.edu.tw/api/UploadTrip.php";
-				Log.w("uploadUrl", uploadUrl);
+				//Log.w("uploadUrl", uploadUrl);
 				// the method to be used, with url
 				HttpPost postRequest = new HttpPost(uploadUrl);
 				//GET DATA FROM DB
@@ -506,25 +506,25 @@ public class UploadService extends Service {
 					String msg = in.readLine();
 					in.close();
 					if(msg.contains("Ok")){
-						Log.w("upload service", "uplaodtripdata result: good");
+						//Log.w("upload service", "uplaodtripdata result: good");
 						dh.markUploaded(uid, tid, 1, 1, null);
 						httpClient.getConnectionManager().shutdown();
 						return true;
 					} else{
-						Log.e("upload service", "uplaodtripdata error: upload failed, messsage=" + msg);
+						//Log.e("upload service", "uplaodtripdata error: upload failed, messsage=" + msg);
 						httpClient.getConnectionManager().shutdown();
 						return false;
 					}
 				} else {
 					// connection error
-					Log.e("upload service", "uplaodtripdata error: connection failed, status code=" + statusCode);
+					//Log.e("upload service", "uplaodtripdata error: connection failed, status code=" + statusCode);
 					httpClient.getConnectionManager().shutdown();
 					return false;
 				}
 			} catch(IOException e){
 				e.printStackTrace();
 			}
-			Log.e("upload service", "uplaodtripdata error: exception");
+			//Log.e("upload service", "uplaodtripdata error: exception");
 			return false;
 		}
 		private boolean uploadpictures(String uid, String tid, DBHelper128 dh){
@@ -538,7 +538,7 @@ public class UploadService extends Service {
 					for(int i = 0; i < picPaths.size(); i++){
 						//get the picture path
 						String path = picPaths.get(i);
-						Log.w("upload service", "image path=" + path);
+						//Log.w("upload service", "image path=" + path);
 						BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(path)));
 						byte[] ba = new byte[bis.available()];
 						bis.read(ba);
@@ -561,13 +561,13 @@ public class UploadService extends Service {
 							String msg = in.readLine();
 							in.close();
 							if (msg.contains("OK")) {
-								Log.w("upload service", i + ") upload picture result: good");
+								//Log.w("upload service", i + ") upload picture result: good");
 								dh.markUploaded(uid, tid, 1, 2, path);
 							} else {
-								Log.e("upload service", i + ") upload pictures error: upload failed, messsage=" + msg);
+								//Log.e("upload service", i + ") upload pictures error: upload failed, messsage=" + msg);
 							}
 						} else {
-							Log.e("upload service", i + ") upload picture error: connection error, status code="
+							//Log.e("upload service", i + ") upload picture error: connection error, status code="
 									+ statusCode);
 							dh.markUploaded(uid, tid, 1, 1, path);
 						}
@@ -576,7 +576,7 @@ public class UploadService extends Service {
 					return true;
 				} else{
 					//no picture la
-					Log.e("upload service", "null image path, no pictures, no need to upload");
+					//Log.e("upload service", "null image path, no pictures, no need to upload");
 					return true;
 				}
 			} catch (UnsupportedEncodingException e) {
@@ -586,7 +586,7 @@ public class UploadService extends Service {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			Log.e("upload service", "upload picture error: exception");
+			//Log.e("upload service", "upload picture error: exception");
 			return false;
 		}
 		
@@ -599,7 +599,7 @@ public class UploadService extends Service {
 				}
 			}
 			updateThreadStatus(threadTag, allgood?2:1);
-			Log.e("upload service", "upload result:\n" 
+			//Log.e("upload service", "upload result:\n" 
 			+ "get local tripid: " + (result[0]?"good":"bad")
 			+ "\nget new trip id: " + (result[1]?"good":"bad")
 			+ "\nget start address: " + (result[2]?"good":"bad")

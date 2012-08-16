@@ -281,7 +281,7 @@ public class DBHelper128 {
 			cv.put("startaddrpt3", startaddrpt3);
 			cv.put("startaddrpt4", startaddrpt4);
 			cv.put("startaddrpt5", startaddrpt5);
-			Log.e("dbhelper", "insert start address: " + cv.toString());
+			//Log.e("dbhelper", "insert start address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -309,7 +309,7 @@ public class DBHelper128 {
 			int count = (int) getNumberofPoints(userid, tripid);
 			cv.put("count", count);
 			
-			Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
+			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -325,7 +325,7 @@ public class DBHelper128 {
 			cv.put("endaddrpt3", endaddrpt3);
 			cv.put("endaddrpt4", endaddrpt4);
 			cv.put("endaddrpt5", endaddrpt5);
-			Log.e("dbhelper", "insert end address: " + cv.toString());
+			//Log.e("dbhelper", "insert end address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -563,7 +563,7 @@ public class DBHelper128 {
 	 * @return CheckInDataList styled trip data JSONObject
 	 */
 	synchronized public JSONObject getOneTripData(String userid, String tripid, boolean forUpload) {
-		Log.e("getOneTripData", "userid=" + userid + ", tripid=" + tripid
+		//Log.e("getOneTripData", "userid=" + userid + ", tripid=" + tripid
 				+ (forUpload ? ", forUpload true" : ", forUpload false"));
 		if (db.isOpen()) {
 			Cursor mCursor = db.query(TRIP_DATA_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
@@ -645,7 +645,7 @@ public class DBHelper128 {
 	}
 	
 	synchronized public JSONObject getOneTripData(String userid, Integer id) {
-		Log.e("getOneTripData", "userid=" + userid + ", id=" + id);
+		//Log.e("getOneTripData", "userid=" + userid + ", id=" + id);
 		if (db.isOpen()) {
 			Cursor tmpCursor = db.query(TRIP_INFO_TABLE, null, "id=" + id, null, null, null, null);
 			String tripid = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("tripid"))
@@ -761,12 +761,12 @@ public class DBHelper128 {
 			Cursor mCursor = null;
 			if (currentTripid != null) {
 				//there is a on going trip, don't show it in the trip list
-				Log.e("getalltripinfoforhtml", "tripid!=null");
+				//Log.e("getalltripinfoforhtml", "tripid!=null");
 				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid + " AND uploadstage=0", null,
 						null, null, "starttime DESC");
 			} else {
 				//there is no on going trip, show everything
-				Log.e("getalltripinfoforhtml", "tripid=null");
+				//Log.e("getalltripinfoforhtml", "tripid=null");
 				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
 			}
 			

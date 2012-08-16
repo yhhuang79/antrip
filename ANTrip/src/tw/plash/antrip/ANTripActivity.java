@@ -93,9 +93,9 @@ public class ANTripActivity extends Activity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		usableArea = getWindow().findViewById(Window.ID_ANDROID_CONTENT);
 		if (hasFocus) {
-			Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " hasFocus la");
+			//Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " hasFocus la");
 		} else {
-			Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
+			//Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
 		}
 		if (loadIndex) {
 			mWebView.loadUrl("file:///android_asset/index.html");
@@ -153,7 +153,7 @@ public class ANTripActivity extends Activity {
 		mWebView.setWebViewClient(new WebViewClient(){
 			@Override
 			public void onPageFinished(WebView view, String url) {
-				Log.w("acvitivy", "page finished");
+				//Log.w("acvitivy", "page finished");
 				canCallJavaScript = true;
 			}
 		});
@@ -185,7 +185,7 @@ public class ANTripActivity extends Activity {
 			 */
 			@Override
 			public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-				Log.e("consolemsg", consoleMessage.message() + " @line: " + consoleMessage.lineNumber() + " from: "
+				//Log.e("consolemsg", consoleMessage.message() + " @line: " + consoleMessage.lineNumber() + " from: "
 						+ consoleMessage.sourceId());
 				return true;
 			}
@@ -212,14 +212,14 @@ public class ANTripActivity extends Activity {
 		
 		public void logout() {
 			// remove sid and stop stuffs
-			Log.w("logged", "out");
+			//Log.w("logged", "out");
 			
 		}
 		
 		// need a function to provide detailed trip data(reviewing historic
 		// trip)
 		public String getLocalTripList() {
-			Log.w("activity", "getlocaltriplist called");
+			//Log.w("activity", "getlocaltriplist called");
 			// Toast.makeText(mContext, "getLocalTripList",
 			// Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
@@ -229,23 +229,23 @@ public class ANTripActivity extends Activity {
 			// null means no local trip history, don't return null, return -1
 			// instead
 			if (result != null) {
-				Log.w("activity", "localtriplist=" + result.toString());
+				//Log.w("activity", "localtriplist=" + result.toString());
 				return result.toString();
 			} else {
-				Log.w("activity", "localtriplist=-1");
+				//Log.w("activity", "localtriplist=-1");
 				return "-1";
 			}
 		}
 		
 		public String getLocalTripData(String id) {
-			Log.w("activity", "getlocaltripdata called, id=" + id);
+			//Log.w("activity", "getlocaltripdata called, id=" + id);
 			
 			JSONObject result = null;
 			
 			result = new GetLocalTrip(mContext).Data(Integer.valueOf(id));
 			
 			if (result != null) {
-				Log.e("activity", "getlocaltripdata=" + result.toString());
+				//Log.e("activity", "getlocaltripdata=" + result.toString());
 				return result.toString();
 			} else {
 				return "-1";
@@ -300,7 +300,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setMode(int mode) {
 			currentMode = mode;
-			Log.w("setMode", "mode= " + currentMode);
+			//Log.w("setMode", "mode= " + currentMode);
 			String isrec = pref.getString("isRecording", null);
 			switch (currentMode) {
 			case 3:
@@ -330,7 +330,7 @@ public class ANTripActivity extends Activity {
 			default:
 				// stop location service if not recording
 				
-				Log.w("setMode", "isrec= " + isrec);
+				//Log.w("setMode", "isrec= " + isrec);
 				if (isrec == null || !isrec.equals("true")) {
 					if (useSkyhook) {
 						stopService(new Intent(mContext, LocationService.class));
@@ -355,7 +355,7 @@ public class ANTripActivity extends Activity {
 			// complete file path for picture
 			imageUri = Uri.fromFile(new File(imagepath, imagename));
 			pref.edit().putString("imguri", imageUri.getPath()).commit();
-			Log.w("startcamera", "imageUri= " + imageUri.getPath());
+			//Log.w("startcamera", "imageUri= " + imageUri.getPath());
 			// intent to launch Android camera app to take pictures
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			// input the desired filepath + filename
@@ -375,7 +375,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setEmotion(int id) {
 			if (cco != null) {
-				Log.w("activity", "setEmotion= " + id);
+				//Log.w("activity", "setEmotion= " + id);
 				cco.setEmotionID(id);
 			}
 		}
@@ -386,7 +386,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setText(String text) {
 			if (cco != null) {
-				Log.e("activity", "setText= " + text);
+				//Log.e("activity", "setText= " + text);
 				cco.setCheckinText(text);
 			}
 		}
@@ -396,7 +396,7 @@ public class ANTripActivity extends Activity {
 		 * also request a coordinate from location service
 		 */
 		public void startCheckin() {
-			Log.w("activity", "start checkin called");
+			//Log.w("activity", "start checkin called");
 			cco = new CandidateCheckinObject();
 			// request a check-in location from service
 			if (useSkyhook) {
@@ -443,14 +443,14 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setCookie(String key, String value) {
 			pref.edit().putString(key, String.valueOf(value)).commit();
-			Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
+			//Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 			//if 
 			if(key.equals("sid")){
 				startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
 			}
 			// if the sid equals cszu's sid, export all info and data to file
 //			if (key.equals("sid") && value.equals("206")) {
-//				Log.w("SECRETLY", "EXPORT ALL");
+//				//Log.w("SECRETLY", "EXPORT ALL");
 //				DBHelper128 ddd = new DBHelper128(mContext);
 //				ddd.exportEverything();
 //				ddd.closeDB();
@@ -464,7 +464,7 @@ public class ANTripActivity extends Activity {
 		 * @return the value paired with the key, or null if key does not exist
 		 */
 		public String getCookie(String key) {
-			Log.w("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
+			//Log.w("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
 			return pref.getString(key, null);
 		}
 		
@@ -475,25 +475,25 @@ public class ANTripActivity extends Activity {
 		 */
 		public void removeCookie(String key) {
 			pref.edit().remove(key).commit();
-			Log.w("removeCookie", "key= " + key);
+			//Log.w("removeCookie", "key= " + key);
 		}
 		
 		public String getLocale() {
-			// Log.e("locale/getDisplayLanguage",
+			// //Log.e("locale/getDisplayLanguage",
 			// Locale.getDefault().getDisplayLanguage());
-			// Log.e("locale/getCountry", Locale.getDefault().getCountry());
-			// Log.e("locale/getDisplayCountry",
+			// //Log.e("locale/getCountry", Locale.getDefault().getCountry());
+			// //Log.e("locale/getDisplayCountry",
 			// Locale.getDefault().getDisplayCountry());
-			// Log.e("locale/getDisplayName",
+			// //Log.e("locale/getDisplayName",
 			// Locale.getDefault().getDisplayName());
-			// Log.e("locale/getDisplayVariant",
+			// //Log.e("locale/getDisplayVariant",
 			// Locale.getDefault().getDisplayVariant());
-			// Log.e("locale/getISO3Country",
+			// //Log.e("locale/getISO3Country",
 			// Locale.getDefault().getISO3Country());
-			// Log.e("locale/getISO3Language",
+			// //Log.e("locale/getISO3Language",
 			// Locale.getDefault().getISO3Language());
-			// Log.e("locale/getLanguage", Locale.getDefault().getLanguage());
-			// Log.e("locale/getVariant", Locale.getDefault().getVariant());
+			// //Log.e("locale/getLanguage", Locale.getDefault().getLanguage());
+			// //Log.e("locale/getVariant", Locale.getDefault().getVariant());
 			return Locale.getDefault().getLanguage();
 		}
 		
@@ -503,7 +503,7 @@ public class ANTripActivity extends Activity {
 		 * @param id unique id in the DB table
 		 */
 		public void uploadTrip(String id) {
-			Log.w("activity", "upload trip: " + id);
+			//Log.w("activity", "upload trip: " + id);
 			startService(new Intent(mContext, UploadService.class).setAction("ACTION_UPLOAD_TRIP").putExtra("id", id));
 		}
 		
@@ -512,9 +512,9 @@ public class ANTripActivity extends Activity {
 		 * @param id unique id in DB table
 		 */
 		public void deleteTrip(String id){
-			Log.w("activity", "delete trip: " + id);
+			//Log.w("activity", "delete trip: " + id);
 			DBHelper128 dh = new DBHelper128(mContext);
-			Log.w("activity", "rows deleted=" + dh.deleteTrip(id));
+			//Log.w("activity", "rows deleted=" + dh.deleteTrip(id));
 			queuedLoadURL("javascript:reloadTripList()");
 		}
 		
@@ -547,7 +547,7 @@ public class ANTripActivity extends Activity {
 					+ "\", \"ydpi\":\"" + dm.ydpi 
 					+ "\", \"width\":\""+ usableArea.getWidth() 
 					+ "\", \"height\":\"" + usableArea.getHeight() + "\"}";
-			Log.e("screeninfo", s);
+			//Log.e("screeninfo", s);
 			return new JSONObject(s).toString();
 		}
 		
@@ -679,7 +679,7 @@ public class ANTripActivity extends Activity {
 				
 				// mWebView.loadUrl(imageURL);
 				queuedLoadURL(imageURL);
-				Log.e("onActivityResult", "imageURL= " + imageURL);
+				//Log.e("onActivityResult", "imageURL= " + imageURL);
 				if (cco != null) {
 					cco.setPicturePath(imageuri);
 				}

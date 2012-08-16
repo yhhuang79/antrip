@@ -113,17 +113,17 @@ public class LocationServiceGPS extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.e("LocationService", "onStartCommand called");
+		//Log.e("LocationService", "onStartCommand called");
 		
 		// period will have value after this line
 		oldPeriodSEC = periodSEC;
 		periodSEC = Integer.valueOf(pref.getString("timeInterval", "10"));
 		periodMS = (long) (periodSEC * 1000);
-		Log.e("locationService", "period= " + periodSEC + " seconds");
-		Log.e("locationService", "period= " + periodMS + " milliseconds");
+		//Log.e("locationService", "period= " + periodSEC + " seconds");
+		//Log.e("locationService", "period= " + periodMS + " milliseconds");
 		
 		String action = intent.getAction();
-		Log.e("location service", "action= " + action);
+		//Log.e("location service", "action= " + action);
 		if (action == null) {
 			// does not accept startService call without any given ACTION
 			errorStopService(error_no_action);
@@ -132,13 +132,13 @@ public class LocationServiceGPS extends Service {
 			// if equal, that means two consecutive call to startService without
 			// interval change
 			if (periodSEC != oldPeriodSEC) {
-				Log.e("getXPSLocation", "period= " + periodSEC);
+				//Log.e("getXPSLocation", "period= " + periodSEC);
 				lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, listener);
 				lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, listener);
 //				_xps.getXPSLocation(auth, periodSEC, XPS.EXACT_ACCURACY, recorderCallback);
 				// if recording, update the timer
 				if (isRecording) {
-					Log.e("location service", "should not see this");
+					//Log.e("location service", "should not see this");
 					stopTimer();
 					setTimer();
 				}
@@ -162,7 +162,7 @@ public class LocationServiceGPS extends Service {
 			// the insert action is already done by html using setcookie
 			// pref.edit().putLong("tid", tid).commit();
 			// save the unique key to preference so mapview can access it
-			Log.e("LocationService", "start recording, tid= " + currentTid);
+			//Log.e("LocationService", "start recording, tid= " + currentTid);
 			// start a runnable in handler to fetch location every interval and
 			// save it to DB
 			startNewTrip = true;
@@ -176,11 +176,11 @@ public class LocationServiceGPS extends Service {
 			
 			isRecording = false;
 			
-			Log.e("LocationService", "stop recording");
+			//Log.e("LocationService", "stop recording");
 			
 			// finalize trip stats and save to DB
 			String name = intent.getExtras().getString("tripname");
-			Log.e("locationService", "tripname= " + name);
+			//Log.e("locationService", "tripname= " + name);
 			dh.insertEndInfo(currentSid, currentTid, name, new Timestamp(new Date().getTime()).toString(),
 					stats.getLength());
 			
@@ -196,11 +196,11 @@ public class LocationServiceGPS extends Service {
 			stopForeground(true);
 			
 		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
-			Log.e("LocationService", "get check-in location");
+			//Log.e("LocationService", "get check-in location");
 			checkinLocationBuffer = recorderLocationBuffer;
 			
 		} else if (action.equals("ACTION_SAVE_CCO")) {
-			Log.e("LocationService", "save cco");
+			//Log.e("LocationService", "save cco");
 			// save check-in data to DB
 			cco = (CandidateCheckinObject) intent.getExtras().getSerializable("cco");
 			// only save check-in to DB when lcheckinlocationbuffer is not null
@@ -245,12 +245,12 @@ public class LocationServiceGPS extends Service {
 			}
 			
 		} else if (action.equals("ACTION_CANCEL_CHECKIN")) {
-			Log.e("LocationService", "cancel check-in");
+			//Log.e("LocationService", "cancel check-in");
 			// clear temp check-in location object
 			checkinLocationBuffer = null;
 			cco = null;
 		} else if (action.equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")) {
-			Log.e("location service", "sync position");
+			//Log.e("location service", "sync position");
 			if (dh != null && dh.DBIsOpen()) {
 				JSONObject syncPos = dh.getOneTripData(currentSid, currentTid, false);
 				Intent syncIntent = new Intent("ACTION_LOCATION_SERVICE_SYNC_POSITION");
@@ -353,7 +353,7 @@ public class LocationServiceGPS extends Service {
 					}
 					stats.addOnePoint(recorderLocationBuffer);
 					dh.insert(recorderLocationBuffer, currentSid, currentTid);
-					Log.e("locationService", "actual DB insert2");
+					//Log.e("locationService", "actual DB insert2");
 					/**
 					 * if activity is running in foreground broadcast location
 					 * from recorderLocationBuffer
@@ -385,7 +385,7 @@ public class LocationServiceGPS extends Service {
 	
 	void errorStopService(String errorEvent) {
 		// more actions can be done here, e.g. show a pop up with error message
-		Log.e("LocationSerice128", "ERROR: " + errorEvent);
+		//Log.e("LocationSerice128", "ERROR: " + errorEvent);
 		stopSelf();
 	}
 	
@@ -393,7 +393,7 @@ public class LocationServiceGPS extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		
-		Log.e("locationService", "onDestroy called");
+		//Log.e("locationService", "onDestroy called");
 		
 		lm.removeUpdates(listener);
 		
