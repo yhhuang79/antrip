@@ -429,7 +429,7 @@ public class UploadService extends Service {
 			try{
 				JSONObject tripinfo = dh.getOneTripInfo(uid, tid);
 				
-				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?update_status=" + ((check[2] && check[3])?"2":"1") + "&trip_name="
+				String inputtripinfo = "https://plash.iis.sinica.edu.tw:8080/InputTripInfoComponent?userid=" + uid + "&trip_id=" + tid + "&update_status=" + ((check[2] && check[3])?"2":"1") + "&trip_name="
 				+ tripinfo.getString("trip_name")
 				+ "&trip_st=" + tripinfo.getString("trip_st")
 				+ "&trip_et=" + tripinfo.getString("trip_et")
