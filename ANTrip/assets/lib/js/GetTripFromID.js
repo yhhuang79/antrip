@@ -59,7 +59,7 @@
 					'strokeWeight': 4, 
 					'path': g_tripPointArray
 				});
-				self.set('MarkerClusterer', new MarkerClusterer(map, self.get('markers')));
+			//	self.set('MarkerClusterer', new MarkerClusterer(map, self.get('markers')));
 				$('#map_canvas').gmap('refresh');
 				$("#overlay").css("display","none");
 				$("#overlay").html("");
