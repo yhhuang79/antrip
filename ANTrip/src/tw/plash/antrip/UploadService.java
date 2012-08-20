@@ -91,49 +91,57 @@ public class UploadService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		String action = intent.getAction();
-		if (action == null) {
-			stopSelf();
-		} else if (action.equals("ACTION_UPLOAD_TRIP")) {
-			// get unique id
-			String id = intent.getExtras().getString("id");
-			String sid = pref.getString("sid", null);
-			//Log.e("uploadService", "old tripid= " + id);
-			// give the task a dh to handle its own business with DB
-			if (id != null && sid != null) {
-				Long tag = System.currentTimeMillis();
-				updateThreadStatus(tag, 0);
-				new uploadThread(tag, sid, id).execute();
-				startNotification(0);
-			} else {
-				//Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
-				//don't stop the entire service, there might be other threads working
-				//stopSelf();
-			}
-		} else if (action.equals("ACTION_SELF_CHECK_AND_UPLOAD")) {
-			//if self check is in progress, don't start again
-			if(!selfCheckAndUploadIsRunning){
-				selfCheckAndUploadIsRunning = true;
+		if(intent != null){
+			String action = intent.getAction();
+			if (action == null) {
+				stopSelf();
+			} else if (action.equals("ACTION_UPLOAD_TRIP")) {
+				// get unique id
+				String id = intent.getExtras().getString("id");
 				String sid = pref.getString("sid", null);
-				if(sid != null){
-					DBHelper128 dh = new DBHelper128(getApplicationContext());
-					HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(sid);
-					dh.closeDB();
-					if(tmp != null){
-						startNotification(1);
-						for(String key : tmp.keySet()){
-							Long tag = System.currentTimeMillis();
-							updateThreadStatus(tag, 0);
-							new uploadThread(tag, sid).execute(key, tmp.get(key).toString());
-						}
-					}
-				} else{
-					//not logged in yet, does not know whose records to look for in the DB
-					stopSelf();
+				//Log.e("uploadService", "old tripid= " + id);
+				// give the task a dh to handle its own business with DB
+				if (id != null && sid != null) {
+					Long tag = System.currentTimeMillis();
+					updateThreadStatus(tag, 0);
+					new uploadThread(tag, sid, id).execute();
+					startNotification(0);
+				} else {
+					//Log.e("upload service", "null id error: id= " + id + ", sid= " + sid);
+					//don't stop the entire service, there might be other threads working
+					//stopSelf();
 				}
+			} else if (action.equals("ACTION_SELF_CHECK_AND_UPLOAD")) {
+				//if self check is in progress, don't start again
+				if(!selfCheckAndUploadIsRunning){
+					selfCheckAndUploadIsRunning = true;
+					String sid = pref.getString("sid", null);
+					if(sid != null){
+						DBHelper128 dh = new DBHelper128(getApplicationContext());
+						HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(sid);
+						dh.closeDB();
+						if(tmp != null){
+							Log.e("upload service", tmp.toString());
+							startNotification(1);
+							for(String key : tmp.keySet()){
+								Long tag = System.currentTimeMillis();
+								updateThreadStatus(tag, 0);
+								new uploadThread(tag, sid).execute(key, tmp.get(key).toString());
+							}
+						} else{
+							//no unfinished upload
+							stopSelf();
+						}
+					} else{
+						//not logged in yet, does not know whose records to look for in the DB
+						stopSelf();
+					}
+				}
+			} else {
+				stopSelf();
 			}
-		} else {
-			stopSelf();
+		} else{
+			Log.e("upload service", "intent == null");
 		}
 		return super.onStartCommand(intent, flags, startId);
 	}
@@ -150,6 +158,7 @@ public class UploadService extends Service {
 			break;
 		case 1:
 			nnn = new Notification();
+			nnn.flags = Notification.FLAG_ONGOING_EVENT;
 			startForeground(notification_tag, nnn);
 			break;
 		}
