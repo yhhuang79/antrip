@@ -587,6 +587,7 @@ public class DBHelper128 {
 							tmp.put("accu", mCursor.getString(mCursor.getColumnIndexOrThrow("accuracy")));
 							// empty jsonobject to put in check-in info
 							JSONObject checkin = new JSONObject();
+							//if picture exists, put it in the checkin object
 							if (mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null) {
 								// picture exists! put it in
 								// XXX cannot pass the complete path, need to
@@ -600,20 +601,19 @@ public class DBHelper128 {
 									// drawing purpose
 									checkin.put("picture_uri",mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
 								}
-							} else if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
+							}
+							//if emotion value exists, put it in the checkin object
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
 								// emotion exists! put it in
 								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
-							} else if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
+							}
+							//if check-in text exists, put it in the checkin object
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
 								// message exists! put it in
 								checkin.put("message", mCursor.getString(mCursor.getColumnIndexOrThrow("note")));
-							} else {
-								// no check-in info exists, set jsonobject to
-								// null
-								checkin = null;
 							}
-							if (checkin != null) {
-								// only put in the check-in objecty if it is not
-								// null
+							// upload if at least one key/value pair in checkin object
+							if(checkin.length() > 0){
 								tmp.put("CheckIn", checkin);
 							}
 							cidl.put(tmp);
@@ -676,20 +676,16 @@ public class DBHelper128 {
 								// XXX cannot pass the complete path, need to
 								// strip it till only filename is left
 								checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
-							} else if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
+							}
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
 								// emotion exists! put it in
 								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
-							} else if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
+							}
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
 								// message exists! put it in
 								checkin.put("message", mCursor.getString(mCursor.getColumnIndexOrThrow("note")));
-							} else {
-								// no check-in info exists, set jsonobject to
-								// null
-								checkin = null;
 							}
-							if (checkin != null) {
-								// only put in the check-in objecty if it is not
-								// null
+							if (checkin.length() > 0) {
 								tmp.put("CheckIn", checkin);
 							}
 							cidl.put(tmp);
