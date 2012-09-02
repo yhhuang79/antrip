@@ -8,6 +8,7 @@
 			var self = this;
 			g_tripPointArray = new Array(0);
 			g_tripMarkerArray = new Array(0);
+			tripPointMarkerArray = new Array(0);
 			self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php',
 			data:{userid: sid, trip_id: trip_id},
@@ -19,12 +20,18 @@
 				else{
 					g_showtripmap = false;
 				}
+				var firstlatlng=null;
+				var lastlatlng=null;
 				$.each(result.CheckInDataList, function(i, point) {
 					var lat = point.lat.valueOf() / 1000000;
 					var lng = point.lng.valueOf() / 1000000;
 					var latlng = new google.maps.LatLng(lat, lng);
 					if(lat != latlng_undefined_value && lng !=latlng_undefined_value){
+						if(firstlatlng==null){
+							firstlatlng = latlng; 
+						}
 						g_tripPointArray.push(latlng);
+						lastlatlng = latlng;
 						if (typeof point.CheckIn != 'undefined'){
 							var placemarker = self.addMarker({ 
 								'position': latlng, 
@@ -48,12 +55,25 @@
 							});
 							g_tripMarkerArray.push(placemarker);
 						} else{
-							self.addMarker({ 
+							var pointmarker = new google.maps.Marker({
+								'id':'client',
 								'position': latlng, 
-								'bounds': true
-							}).click(function(){
-								self.openInfoWindow({'content': point.timestamp}, this);
+								'bounds': true,
 							});
+							var infowindow = new google.maps.InfoWindow(
+								  { 
+									content: point.timestamp+"<br/>"+latlng
+							});
+							google.maps.event.addListener(pointmarker, 'click', function() {
+									if (infowindow.getMap()==null){
+										infowindow.open(map,pointmarker);
+									}
+									else{
+										infowindow.close();
+									}
+							});
+							pointmarker.setMap(map);
+							tripPointMarkerArray.push(pointmarker);
 						}
 					}
 				});
@@ -63,6 +83,17 @@
 					'strokeWeight': 4, 
 					'path': g_tripPointArray
 				});
+				if(firstlatlng!=null&&lastlatlng!=null){
+					var bounds  = null;
+					if(firstlatlng.lng()>lastlatlng.lng()){
+						bounds = new google.maps.LatLngBounds(lastlatlng, firstlatlng);
+					}
+					else{
+						bounds = new google.maps.LatLngBounds(firstlatlng, lastlatlng);
+					}
+					map.fitBounds(bounds);
+				}
+				self.set('MarkerClusterer', new MarkerClusterer(map, tripPointMarkerArray));
 			//	self.set('MarkerClusterer', new MarkerClusterer(map, self.get('markers')));
 				$('#map_canvas').gmap('refresh');
 				$("#overlay").css("display","none");

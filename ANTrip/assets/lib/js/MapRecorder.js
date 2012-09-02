@@ -559,6 +559,10 @@
 		else{
 			var self =  $('#map_canvas_2').gmap('get','map');
 			var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+			if(g_current_latitude == latlng_undefined_value || g_current_longitude ==latlng_undefined_value){
+				alert(g_str_positionerror);
+				return;
+			}
 			g_tripPointArray_2.push(latlng);
 			g_bounds.extend(latlng);
 			var checkinmarker =  new google.maps.Marker({ 
