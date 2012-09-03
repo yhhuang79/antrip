@@ -187,7 +187,8 @@ public class LocationService extends Service {
 			Location location = recorderLocationBuffer;
 			if (location == null) {
 				//update the time
-				lastNonNullLocation.setTime(System.currentTimeMillis());
+//				lastNonNullLocation.setTime(System.currentTimeMillis());
+				lastNonNullLocation.setTime(new Date().getTime());
 				//this will guarantee that location will not be null
 				location = lastNonNullLocation;
 			}
@@ -211,7 +212,8 @@ public class LocationService extends Service {
 				JSONObject tmp = new JSONObject();
 				tmp.put("lat", location.getLatitude());
 				tmp.put("lng", location.getLongitude());
-				tmp.put("timestamp", new Timestamp(location.getTime()).toString());
+//				tmp.put("timestamp", new Timestamp(location.getTime()).toString());
+				tmp.put("timestamp", new Timestamp(new Date().getTime()).toString());
 				// the object within one entry of data
 				JSONObject checkin = new JSONObject();
 				if (cco.getPicturePath() != null) {
@@ -379,7 +381,8 @@ public class LocationService extends Service {
 							JSONObject tmp = new JSONObject();
 							tmp.put("lat", location.getLatitude());
 							tmp.put("lng", location.getLongitude());
-							tmp.put("timestamp", new Timestamp(location.getTime()).toString());
+//							tmp.put("timestamp", new Timestamp(location.getTime()).toString());
+							tmp.put("timestamp", new Timestamp(new Date().getTime()).toString());
 							//put the entry in the queue
 							pauseQ.offer(tmp);
 						} catch (JSONException e) {
@@ -436,7 +439,8 @@ public class LocationService extends Service {
 	}
 	
 	private Location getCurrentNullLocation() {
-		nullLocation.setTime(System.currentTimeMillis());
+//		nullLocation.setTime(System.currentTimeMillis());
+		nullLocation.setTime(new Date().getTime());
 		return nullLocation;
 	}
 	
@@ -480,7 +484,11 @@ public class LocationService extends Service {
 		Location location = new Location("skyhook");
 		location.setLatitude(l.getLatitude());
 		location.setLongitude(l.getLongitude());
-		location.setTime(l.getTime());
+		/**
+		 * replace GPS time with cell phone time, for consistency purpose
+		 */
+//		location.setTime(l.getTime());
+		location.setTime(new Date().getTime());
 		location.setAltitude(l.getAltitude());
 		location.setSpeed((float) l.getSpeed());
 		location.setBearing((float) l.getBearing());

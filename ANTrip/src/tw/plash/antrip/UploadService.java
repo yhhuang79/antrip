@@ -59,6 +59,7 @@ import android.os.AsyncTask;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 public class UploadService extends Service {
 	
@@ -183,6 +184,7 @@ public class UploadService extends Service {
 		}
 		//if all thread is done, terminate upload service
 		if(allDone){
+			Toast.makeText(getApplicationContext(), "Antrip:\nall uploads complete", Toast.LENGTH_LONG).show();
 			stopSelf();
 		}
 	}
@@ -217,16 +219,16 @@ public class UploadService extends Service {
 		 */
 		private String correctURLEncoder(String inURL){
 			String inParameter = inURL.substring(inURL.lastIndexOf("?") + 1);
-			//Log.e("correct url encoder", "inParam=" + inParameter);
+//			Log.e("correct url encoder", "inParam=" + inParameter);
 			String outParameter= null;
 			try {
 				outParameter = URLEncoder.encode(inParameter, "UTF-8");
-				//Log.e("correct url encoder", "outParam=" + outParameter);
+//				Log.e("correct url encoder", "outParam=" + outParameter);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			}
 			String result = inURL.replace(inParameter, outParameter);
-			//Log.e("correct url encoder", "result=" + result);
+//			Log.e("correct url encoder", "result=" + result);
 			return result;
 		}
 		
@@ -469,11 +471,11 @@ public class UploadService extends Service {
 				Integer statusCode = response.getStatusLine().getStatusCode();
 				if(statusCode == 200){
 					//not sure what will be returned
-					//Log.w("upload service", "uploadtripinfo result: good");
+//					Log.w("upload service", "uploadtripinfo result: good");
 					httpsClient.getConnectionManager().shutdown();
 					return true;
 				} else{
-					//Log.e("upload service", "uploadtripinfo error: connection failed, status code=" + statusCode);
+//					Log.e("upload service", "uploadtripinfo error: connection failed, status code=" + statusCode);
 					httpsClient.getConnectionManager().shutdown();
 					return false;
 				}
@@ -484,7 +486,7 @@ public class UploadService extends Service {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			//Log.e("upload service", "uploadtripinfo error: exception");
+//			Log.e("upload service", "uploadtripinfo error: exception");
 			return false;
 		}
 		

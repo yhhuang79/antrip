@@ -673,6 +673,10 @@ public class ANTripActivity extends Activity {
 				// need to grab the generated filename plus filepath and return
 				// it to html for display purpose
 				String imageuri = pref.getString("imguri", null);
+				
+				//resize
+//				SafeBitmapResizer.resize1080p(imageuri);
+				
 				String imageURL = null;
 				if (imageuri != null) {
 					imageURL = "javascript:showPicture('" + imageuri + "')";

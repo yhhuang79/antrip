@@ -281,7 +281,7 @@ public class DBHelper128 {
 			cv.put("startaddrpt3", startaddrpt3);
 			cv.put("startaddrpt4", startaddrpt4);
 			cv.put("startaddrpt5", startaddrpt5);
-			//Log.e("dbhelper", "insert start address: " + cv.toString());
+//			Log.e("dbhelper", "insert start address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -325,7 +325,7 @@ public class DBHelper128 {
 			cv.put("endaddrpt3", endaddrpt3);
 			cv.put("endaddrpt4", endaddrpt4);
 			cv.put("endaddrpt5", endaddrpt5);
-			//Log.e("dbhelper", "insert end address: " + cv.toString());
+//			Log.e("dbhelper", "insert end address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
