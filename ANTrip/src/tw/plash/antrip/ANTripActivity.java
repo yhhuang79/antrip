@@ -675,7 +675,7 @@ public class ANTripActivity extends Activity {
 				String imageuri = pref.getString("imguri", null);
 				
 				//resize
-//				SafeBitmapResizer.resize1080p(imageuri);
+				SafeBitmapResizer.resize(imageuri);
 				
 				String imageURL = null;
 				if (imageuri != null) {

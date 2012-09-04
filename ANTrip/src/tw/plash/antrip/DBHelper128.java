@@ -227,7 +227,8 @@ public class DBHelper128 {
 			cv.put("tripID", tripid);
 			// cco fields
 			cv.put("picture", cco.getPicturePath());
-			cv.put("emotion", String.valueOf(cco.getEmotionID()));
+			//because it will put "null" string if emotion id is null..., have to prevent this stupid thing
+			cv.put("emotion", cco.getEmotionID()!=null?String.valueOf(cco.getEmotionID()):null);
 			cv.put("note", cco.getCheckinText());
 			return db.insert(TRIP_DATA_TABLE, null, cv);
 		} else {
