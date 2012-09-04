@@ -122,7 +122,7 @@ public class UploadService extends Service {
 						HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(sid);
 						dh.closeDB();
 						if(tmp != null){
-							Log.e("upload service", tmp.toString());
+							Log.e("upload service", "keys: " + tmp.keySet().toString() + ";values: " + tmp.values().toString());
 							startNotification(1);
 							for(String key : tmp.keySet()){
 								Long tag = System.currentTimeMillis();
@@ -184,7 +184,7 @@ public class UploadService extends Service {
 		}
 		//if all thread is done, terminate upload service
 		if(allDone){
-			Toast.makeText(getApplicationContext(), "Antrip:\nall uploads complete", Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(), R.string.toast_upload_done, Toast.LENGTH_LONG).show();
 			stopSelf();
 		}
 	}
@@ -245,8 +245,10 @@ public class UploadService extends Service {
 				//this is a manually selected trip to be uploaded
 				job = 0;
 			} else if(params.length > 0){
-				job = Integer.parseInt(params[0]);
-				newTripid = params[1];
+				newTripid = params[0];
+//Log.e("upload service", "newtripid: " + newTripid);
+				job = Integer.parseInt(params[1]);
+//Log.e("upload service", "job: " + job);
 			}
 			
 			switch(job){

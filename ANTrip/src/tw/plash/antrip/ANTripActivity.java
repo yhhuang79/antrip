@@ -167,15 +167,15 @@ public class ANTripActivity extends Activity {
 				new AlertDialog.Builder(mContext)
 						.setCancelable(false)
 						.setMessage(message)
-						.setNeutralButton((Locale.getDefault().getLanguage().equals("zh")) ? "¦nªº" : "Okay",
-								new OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialog, int which) {
-										// inform javascript the alert dialog is
-										// dismissed
-										result.confirm();
-									}
-								}).show();
+						.setNeutralButton(R.string.okay,
+							new OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// inform javascript the alert dialog is
+									// dismissed
+									result.confirm();
+								}
+							}).show();
 				return true;
 			}
 			

@@ -126,13 +126,8 @@ public class LocationService extends Service {
 			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, noIntent,
 					PendingIntent.FLAG_UPDATE_CURRENT);
 			Notification noti;
-			if (Locale.getDefault().getLanguage().contains("zh")) {
-				noti = new Notification(R.drawable.ant_24, "一個新的旅程開始了", System.currentTimeMillis());
-				noti.setLatestEventInfo(getApplicationContext(), "雲水途誌", "正在紀錄一個旅程...", pIntent);
-			} else {
-				noti = new Notification(R.drawable.ant_24, "A NEW RECORDING HAS BEGUN", System.currentTimeMillis());
-				noti.setLatestEventInfo(getApplicationContext(), "Antrip", "is recording a trip...", pIntent);
-			}
+			noti = new Notification(R.drawable.ant_24, getResources().getString(R.string.notification_new_trip_started), System.currentTimeMillis());
+			noti.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name), getResources().getString(R.string.notification_is_recording_a_trip), pIntent);
 			noti.flags = Notification.FLAG_ONGOING_EVENT;
 			startForeground(1337, noti);
 			// start saving location updates into DB
