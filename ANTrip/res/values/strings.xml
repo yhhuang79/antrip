@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello">Hello World, ANTripActivity!</string>
     <string name="app_name">ANTrip</string>
-
+    <string name="okay">okay</string>
+    
+    <string name="notification_new_trip_started">A NEW RECORDING HAS BEGUN</string>
+    <string name="notification_is_recording_a_trip">is recording your trip...</string>
+    <string name="toast_upload_done">ANTrip:\nall uploads complete</string>
 </resources>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">雲水途誌</string>
+    <string name="okay">好的</string>
+    
+	<string name="notification_new_trip_started">一個新的旅程開始了</string>
+    <string name="notification_is_recording_a_trip">正在紀錄你的旅程...</string>
+    <string name="toast_upload_done">雲水途誌:\n旅程上傳完成</string>
+</resources>
