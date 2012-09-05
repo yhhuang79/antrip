@@ -7,4 +7,6 @@
     <string name="notification_new_trip_started">A NEW RECORDING HAS BEGUN</string>
     <string name="notification_is_recording_a_trip">is recording your trip...</string>
     <string name="toast_upload_done">ANTrip:\nall uploads complete</string>
+    <string name="notification_upload_in_progress">upload in progress...</string>
+    <string name="notification_starting_upload">start uploading trip(s)</string>
 </resources>
