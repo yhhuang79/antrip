@@ -152,9 +152,9 @@ public class UploadService extends Service {
 		case 0:
 			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(), PendingIntent.FLAG_NO_CREATE);
 //			PendingIntent pIntent = PendingIntent.getActivity(getApplicationContext(), 0, null, PendingIntent.FLAG_NO_CREATE);
-			nnn = new Notification(R.drawable.ant_24, " upload has started~", System.currentTimeMillis());
+			nnn = new Notification(R.drawable.ant_24, getResources().getString(R.string.notification_starting_upload), System.currentTimeMillis());
 			nnn.flags = Notification.FLAG_ONGOING_EVENT;
-			nnn.setLatestEventInfo(getApplicationContext(), "antrip", "upload in progress...", pIntent);
+			nnn.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name), getResources().getString(R.string.notification_upload_in_progress), pIntent);
 			startForeground(notification_tag, nnn);
 			break;
 		case 1:
