@@ -450,7 +450,7 @@ public class UploadService extends Service {
 				+ "&trip_length=" + (int)Double.parseDouble(tripinfo.getString("trip_length"))
 				+ "&num_of_pts=" + tripinfo.getString("num_of_pts");
 				
-				//if reverse geociding failed, don't upload empty addresses
+				//if reverse geocoding failed, don't upload empty addresses
 				String stAddr = check[2]?
 				"&st_addr_prt1=" + tripinfo.getString("st_addr_prt1")
 				+ "&st_addr_prt2=" + tripinfo.getString("st_addr_prt2")
@@ -458,7 +458,7 @@ public class UploadService extends Service {
 				+ "&st_addr_prt4=" + tripinfo.getString("st_addr_prt4")
 				+ "&st_addr_prt5=" + tripinfo.getString("st_addr_prt5"):"";
 				
-				//if reverse geociding failed, don't upload empty addresses
+				//if reverse geocoding failed, don't upload empty addresses
 				String etAddr = check[3]?
 				"&et_addr_prt1=" + tripinfo.getString("et_addr_prt1")
 				+ "&et_addr_prt2=" + tripinfo.getString("et_addr_prt2")

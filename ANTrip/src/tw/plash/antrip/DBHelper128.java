@@ -764,7 +764,8 @@ public class DBHelper128 {
 			} else {
 				//there is no on going trip, show everything
 				//Log.e("getalltripinfoforhtml", "tripid=null");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
+//				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
 			}
 			
 			if (mCursor != null) {
