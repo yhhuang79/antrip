@@ -603,11 +603,13 @@ public class DBHelper128 {
 									checkin.put("picture_uri",mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
 								}
 							}
+							
 							//if emotion value exists, put it in the checkin object
-							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")).equalsIgnoreCase("null")) {
 								// emotion exists! put it in
 								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
 							}
+							
 							//if check-in text exists, put it in the checkin object
 							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
 								// message exists! put it in
