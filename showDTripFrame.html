@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta property="og:type" content="site" /> 
+	<meta property="og:image" content="http://plash2.iis.sinica.edu.tw/antrip/images/banner_logo.png" />
+	<title>ANTrip雲水途誌</title>
+	<!--Adobe Edge Runtime-->
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="lib/js/getURLVar.js"></script>
+	<script type="text/javascript" src="lib/js/basicFunction.js"></script>
+	<script language="javascript">
+	<!--  
+	// <![CDATA[
+		var meta = document.createElement('meta');
+		meta.setAttribute("property", "og:title");
+		meta.setAttribute("content", location.href);
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(meta);
+
+		meta.setAttribute("property", "og:url");
+		meta.setAttribute("content", location.href);
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(meta);    
+	// ]]>
+	//	$('head meta[name=ogURL]').attr('content', location.href);
+		$(document).ready(function(){
+			$("#c-c-iframe").css('visibility','hidden');
+			var userid = $.getUrlVar('userid');
+			var trip_id = $.getUrlVar('trip_id');
+			var g_lang = $.getUrlVar('g_lang');
+			var g_calUnit = $.getUrlVar('g_calUnit');
+			var strShowDLink = getRootPath()+"/showDTripPage.html?userid="+userid+"&trip_id="+trip_id+"&g_lang="+g_lang+"&g_calUnit="+g_calUnit;
+			$("#c-c-iframe").attr('src',strShowDLink);  
+			 $("#c-c-iframe").load(function(){
+				var frameheight = $("#c-c-iframe").contents().height();
+				$("#c-c-iframe").height(frameheight); 
+				$("#c-c-iframe").width('100%');  
+				//alert(sheight);
+				var sheight = $.getUrlVar('height');
+				if(sheight==null){
+					sheight = frameheight;
+				}
+				var scale = sheight / frameheight;
+				//alert(scale);
+				$('iframe').css('-webkit-transform', 'scale('+scale+')');
+				$('iframe').css('-moz-transform', 'scale('+scale+')');
+				$('iframe').css('-ms-transform', 'scale('+scale+')');
+				$('iframe').css('-o-transform', 'scale('+scale+')');
+				$('iframe').css('transform', 'scale('+scale+')');
+				$("#c-c-iframe").css('visibility','visible');
+			}); 
+		});
+	-->
+	</script>
+	<!--Adobe Edge Runtime End-->
+</head>
+<body id="body">
+<iframe width="0" style="visibility:hidden"  scrolling="no"  src="" frameborder="0" id="c-c-iframe"></iframe>
+</body>
+</html>

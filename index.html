@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=480, initial-scale=0.75, maximum-scale=0.75">
+	<title>ANTrip雲水途誌</title>
+<!--Adobe Edge Runtime-->
+	<script type="text/javascript">
+			if(/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ // for explore
+					alert("This web site is not supported by IE!");
+					window.location="error.html";
+			 }
+	</script>
+	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery-1.7.2.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js"></script>
+	<script type="text/JavaScript" src="lib/jq_includes/jquery.curvycorners.source.js"></script>
+	<script type="text/JavaScript" src="lib/jq_includes/jquery-ui-1.8.21.custom.min.js"></script>
+	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.js"></script>
+	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.extensions.js"></script>
+	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.overlays.js"></script>
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery.mobile-1.1.0.min.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/queryLoader.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui-1.8.21.custom.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/minframe.css" />
+	<link rel="shortcut icon" href="images/favicon.ico" />
+	<link rel="Bookmark" href="images/favicon.ico" type="image/x-icon" />
+	<script type="text/javascript" src="./lib/js/sendMail.js"></script>
+	<script type="text/javascript" src="lib/js/GDouglasPeuker.js"></script>
+	<script type="text/javascript" src="lib/js/binaryajax.js"></script>
+	<script type="text/javascript" src="lib/js/jquery.exif.js"></script>
+	<script type="text/javascript" src="lib/js/imageinfo.js"></script>
+	<script type="text/javascript" src="lib/js/exif.js"></script>
+	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load('visualization', '1', {packages: ['corechart']});
+    </script>
+	<script type="text/javascript" src="lib/js/tripUnit.js"></script>
+	<script type="text/javascript" src="lib/js/showCal.js"></script>
+	<script type="text/javascript" src="lib/js/loadScript.js"></script>
+	<script type="text/javascript" src="lib/js/basicFunction.js"></script>
+	<script type="text/javascript" src="lib/js/AntripJS.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.cookie.js"></script>
+	<script type="text/javascript" src="lib/js/markerclusterer.js"></script>
+	<script type="text/javascript" src="./lib/js/md5.js"></script>
+<!--Adobe Edge Runtime End-->
+</head>
+<body id="body">
+	<div  align="center"  id="Stage">
+		<div id="sym_topbtnGroup">
+				<div id="banner_logo">	
+					<img src="" id="img_banner_logo" onMouseOver="scaleAnimation($(this),1.05)" onMouseOut="scaleRestore($(this))"></img><div id="banner_text" class="content_Text"></div></div>
+				   <div id="div_langOption"><span id="span_langtitle"></span><select id="langOption"></select></div>
+				<div id="Symbol_ub_home" class="class_top_bt" >	
+					<img src="" class="class_top_bt" name="ub_home" id="ub_home" onClick="ChangeToUsedIcon($(this))" onMouseOver="scaleAnimation($(this))" onMouseOut="scaleRestore($(this))"></img>				
+				</div>
+				<div id="Symbol_trip_history" class="class_top_bt" >	
+					<img src="" class="class_top_bt" name="ub_trip_history" id="ub_trip_history" onClick="ChangeToUsedIcon($(this))" onMouseOver="scaleAnimation($(this))" onMouseOut="scaleRestore($(this))"></img>				
+				</div>
+				<div id="Symbol_ub_trip_m" class="class_top_bt">	
+					<img src="" class="class_top_bt" name="ub_trip_management"  id="ub_trip_management" onClick="ChangeToUsedIcon($(this))" onMouseOver="scaleAnimation($(this))" onMouseOut="scaleRestore($(this))"></img>				</div>
+				<div id="Symbol_friend" class="class_top_bt" >	
+					<img src="" class="class_top_bt" name="ub_friend" id="ub_friend" onClick="ChangeToUsedIcon($(this))" onMouseOver="scaleAnimation($(this))" onMouseOut="scaleRestore($(this))"></img>				
+				</div>
+				<div id="Symbol_download" class="class_top_bt">	
+					<img src="" class="class_top_bt" name="ub_download" id="ub_download" onClick="ChangeToUsedIcon($(this))" onMouseOver="scaleAnimation($(this))" onMouseOut="scaleRestore($(this))"></img>				
+				</div>
+				<div id="Symbol_about" class="class_top_bt">	
+					<img src="" class="class_top_bt" name="ub_about" id="ub_about" onClick="ChangeToUsedIcon($(this))" onMouseOver="scaleAnimation($(this))" onMouseOut="scaleRestore($(this))"></img>				
+				</div>
+				
+		</div>
+	<div id="sym_logingroup">
+	  <!--Symbol_ub_home-->
+	  <div id="sym_login" class="class_fun_div">
+		<div align='left' class='class_sologan'></div>
+	  	<div id="sym_logintext" class="content_Text">
+	    </div>
+		<div id="sym_loginarea">
+			<div data-role='fieldcontain'><fieldset data-role='controlgroup'><label for='textinput1'></label><input id='username' placeholder='ID' value='' type='text' /></fieldset></div><div data-role='fieldcontain'><fieldset data-role='controlgroup'><label for='textinput2'></label><input id='password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
+		</div>
+		<div class="class_login_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#login' class="login_bt_link">Login</a></div>
+		<div class="class_logout_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#logout' class="logout_bt_link">Logout</a></div>
+		<div class="class_fblogin_bt"><a data-role="button" data-transition="fade" data-theme="b" data-icon="star" href="" onClick="window.open('http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php','Facebook Login','toolbar=no,resizable=no,scrollbars=auto');return false" class="fblogin_bt_link">Login with Facebook</a></div>
+	  </div>
+	  <div id="sym_video" class="class_fun_div">
+		<iframe width="560" height="315" src="http://www.youtube.com/embed/OHzpMNYTGds?rel=0" frameborder="0" allowfullscreen></iframe>
+	  </div>
+	  <!-- Symbol_trip_history - trip list start -->
+      <div id="sym_triplist" class="class_fun_div">
+	  <div class="class_prepage_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#prepage' class="pre_page_link">&nbsp;</a></div>
+		<div class="class_nextpage_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#nextpage' class="next_page_link">&nbsp;</a></div>
+		<div id="tripsum"></div>
+			<div id="unit_radio_trip">
+						<table id="atable" border="0" cellspacing="0" cellpadding="0">
+							<tr>
+								<td  id="id_orderby"  class="aradio_trip" style="width:100px;">
+									Order&nbsp;By:
+								</td>
+								<td class="aradio_trip">
+									<input type="radio" id="radio_trip_id" name="radio_triplist" value="trip_id"/><label for="radio_trip_id" id="radio_trip_id_label"></label>
+								</td>
+								 <td class="aradio_trip">
+									<input type="radio" id="radio_trip_st" name="radio_triplist" checked="checked" value="trip_st"/><label for="radio_trip_st" id="radio_trip_st_label"></label>
+								</td>
+								 <td class="aradio_trip">
+									<input type="radio" id="radio_trip_length" name="radio_triplist" value="trip_length"/><label for="radio_trip_length" id="radio_trip_length_label"></label>
+								</td>
+							</tr>
+						</table>
+			</div>
+		<div id="products" class="listview ui-button">
+			
+		</div>
+	  </div>
+	  <!-- Symbol_trip_history - trip list start -->
+      <div id="sym_triplist_in_open_dialog" class="class_fun_div">
+		<div id="tripsum_in_dialog"></div>
+		<div id="products_in_dialog" class="listview ui-button">
+			
+		</div>
+	  </div>
+	  <!--Symbol_ub_trip_m-->
+	  <div id="sym_editpage" class="class_fun_div">
+	  
+		<div class="trip_prenext_bt">
+	  		<div class="class_pretrip_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#pretrip' class="pre_trip_link"></a></div>
+			<div class="class_nextrip_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#nextrip' class="next_trip_link"></a></div>
+			<button id="OpenCloseMarker"  class="class_btInMap" style="z-index:100;"></button>
+			<div id="tripname"></div>
+		</div>
+		 <div id="sym_edit_bt_list">
+				<div id="b_open_trip" class="class_left_bt">	
+					<img src="" id="img_open_trip" class="class_left_bt"  onClick="if(g_isForMobile==false){TripListDialog();}else{}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
+					<span class="tip" id="open_trip_tip"></span>
+				</div>
+				<div id="b_seq_trip" class="class_left_bt">	
+					<img src="" id="img_seq_trip" name="img_seq_trip" class="class_left_bt" onClick="if(g_isForMobile==false){changeCursorToCut($(this));}else{openMarkplaceWindow();}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>				
+					<span class="tip" id="seg_trip_tip"></span>
+				</div>
+				<div id="b_add_note" class="class_left_bt">	
+					<img src="" id="img_add_note" class="class_left_bt" onClick="if(g_isForMobile==false){inputNoteDialog();}else{startRecordTrip();}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
+					<span class="tip" id="add_note_tip"></span>
+				</div>
+				<div id="b_export_trip" class="class_left_bt">	
+					<img src="" id="img_exp_trip" class="class_left_bt" onClick="$('#dialog-tripname').dialog('open');"  onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
+					<span class="tip" id="exp_trip_tip"></span>
+				</div>
+		 </div>
+		 <div id="edit_display_area">
+			 <div id="dialog" title="Trip Note" class="ui-widget"></div>
+			 <div id="map_canvas">
+		
+			 </div>
+			<div id="div_reloadtoDefault" style="z-index:100;"><button id="reloadtoDefault" class="class_btInMap" style="z-index:100;">default</button></div>
+			<div id="div_copyStaticMap" style="z-index:100;"><button id="copyStaticMap"  class="class_btInMap" style="z-index:100;"></button></div>
+			<div id="div_copyDynamicMap" style="z-index:100;"><button id="copyDynamicMap" class="class_btInMap" style="z-index:100;"></button></div>
+			 <div id="calculate_area" class="class_paper">
+				 <div id="calculate_area_sub">
+				<!--<img id="img_calculate_area" src=""></img>	-->
+				<table id="calculation_table">
+				<caption></caption>
+				<thead>
+					<tr id="calculate_col">
+					</tr>
+				</thead>
+				<tbody>
+					<tr id="altitude_table">
+					</tr>
+					<tr id="speed_table">
+					</tr>
+					<tr id="checkin_table">
+					</tr>
+				</tbody>
+				</table>	
+				<div id="visualization" style=""></div>
+				</div>	
+			</div>
+		 </div>
+			<div id="unit_radio" style="width:100%">
+				<table id="atable" border="0" cellspacing="0" cellpadding="0">
+					<tr>
+						<td class="aradio">
+							<input type="radio" id="radio1" name="radio" value="s"/><label for="radio1" id="radio_second"></label>
+						</td>
+						 <td class="aradio">
+							<input type="radio" id="radio2" name="radio" value="m"/><label for="radio2" id="radio_minute"></label>
+						</td>
+						<td class="aradio">
+							<input type="radio" id="radio3" name="radio" value="h"/><label for="radio3" id="radio_hour"></label>
+						</td>
+					</tr>
+				</table>
+			</div>
+		 <div id="images_scroll" class="class_scroll">
+			 <a id="scroll_to_left" class="class_float_div" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+			 <div id="view_scroll">
+			 <div id="images_scroll_content">
+			<div id="images_scroll_content_1" class="class_float_div"></div>
+			<div id="images_scroll_content_2" class="class_float_div"></div>
+			<div id="images_scroll_content_3" class="class_float_div"></div>
+			<div id="images_scroll_content_4" class="class_float_div"></div>
+			<div id="images_scroll_content_5" class="class_float_div"></div>
+			<div id="images_scroll_content_6" class="class_float_div"></div>
+			<div id="images_scroll_content_7" class="class_float_div"></div>
+			</div>
+			</div>
+			<a id="scroll_to_right" class="class_float_div" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
+		 </div>
+		 <div id="images_ants" class="class_ants">
+			<img id="img_ant" src="" onMouseOver="rotateInterval($(this),2);" onMouseOut="stopRotateInterval($(this));"></img>		 
+		 </div>
+
+		  <div id="markplacewindow" class="class_mark_place class_fun_div">
+			<div class="content-primary" id="markplace_fn_content">	
+				<ul data-role="listview" id="markplace_fn_list">
+					<button style="width:480px;border:0" id="sym_takepicture"><img src="images/s/takepicture.png"></img></button>
+					<button style="width:480px;border:0" onClick="$('#markplacewindow :input').attr('disabled', true);$('#emotion_compass').show();" id="sym_selectemotion">
+					<div id="emotion-sel" style="width:480px;height:101px;background:url('images/s/selectemotion.png') no-repeat "></div>
+					</button>
+					<button style="width:480px;border:0" id="sym_textarea"><div style="width:480px;height:235px;resize:none;background:url('images/s/typenotearea.png') no-repeat "><textarea id='placemarktext' style='width:90%;height:90%;'></textarea></div></button>
+					<div class="class_takemarker_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#takemarker' class="takemarker_bt_link">check in</a></div>
+				</ul>
+			</div>
+		  </div>
+		 <div id="emotion_compass">
+			<img id="emotion-c" src="images/s/emotion-compass.png" class="class_mark_place"  usemap="#emotion-c" onMouseOver="" onMouseOut=""></img>
+			<map id="emotion-c_map" name="emotion-c">
+			<area shape="circle" name="bored" coords="144,245,24" href="#" />
+			<area shape="circle" name="sad" coords="176,296,23" href="#" />
+			<area shape="circle" name="sleepy" coords="240,316,23" href="#" />
+			<area shape="circle" name="peaceful" coords="304,295,23" href="#" />
+			<area shape="circle" name="relaxed" coords="336,244,22" href="#" />
+			<area shape="circle" name="pleased" coords="338,183,24" href="#" />
+			<area shape="circle" name="happy" coords="302,135,23" href="#" />
+			<area shape="circle" name="excited" coords="239,114,23" href="#" />
+			<area shape="circle" name="angry" coords="179,135,23" href="#" />
+			<area shape="circle" name="nervous" coords="142,184,22" href="#" />
+			<area shape="circle" name="calm" coords="238,214,41" href="#" />
+			</map>
+		</div>
+	  </div>
+	  <!--Symbol_ub_friend_list-->
+	  <div id="sym_friends" class="class_fun_div">
+		<div class="content-primary" id="friend_content">	
+			<ul data-role="listview" id="friend_list">
+			</ul>
+		</div>
+	  </div>
+	  <!--Symbol_about-->
+		<div id="about_page" class="class_fun_div content_Text"> 
+	
+				</div>
+
+		</div>
+	<div id="end_Text" class="content_Text">
+	<img id="img_des_ant" src=""></img>&nbsp;&nbsp;© 2012 ANTrip IIS Sinica | Design by TMSG | Valid XHTML5.0 | CSS
+	</div>
+   </div>
+	<div id="dialog-register" class="ui-widget" style="z-index:1010;" >
+		<p></p><p align="left"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput1'></label><input id='reg_username' placeholder='USERNAME' value='' type='text' /></fieldset></div>
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput2'></label><input id='reg_email' placeholder='EMAIL' value='' type='text' /></fieldset></div>
+		<sup id="email_forgotten">(Your password will be sent to this email if forgotten)</sup><br/><br/>
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput3'></label><input id='reg_password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput4'></label><input id='reg_re_password' placeholder='Re-Enter PASSWORD' value='' type='password' /></fieldset></div> 
+		</p>
+	</div>
+	<div id="dialog-tripname" class="ui-widget" style="" >
+		<p id="typetripname" class="validateTips">Please Type your Trip Name:</p>
+		<div data-role='fieldcontain'><fieldset data-role='tripgroup'><label for='tripinput1' id='tripinput1'>Trip Name</label>&nbsp;&nbsp;&nbsp;<input id='trip_name' class="text ui-widget-content ui-corner-all"  placeholder='TRIPNAME' value='New Trip' type='text' /></fieldset></div>
+		</p>
+	</div>
+	<div id="dialog-confirm" class="ui-widget" style="display:none;" title="Alert">
+		<p></p><p align="left"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span><p id="logoutwhenrecord"></p></p>
+	</div>
+</body>
+</html>
+<script type="text/javascript"> 
+	// it is for first time to detect since some browser(firefox) can't load language script at windows.ready
+	g_isForMobile = false;
+	if(g_ready==false)
+	{
+		g_ready=true;
+		var lang = $.cookie("lang");
+		if(lang!=null){
+			g_lang = lang;
+		}
+		setLanguage();
+	}
+
+</script>
