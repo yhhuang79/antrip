@@ -654,6 +654,13 @@
 		});
 	}
 
+	var g_tip;
+	var g_tip_intval = null;
+	function slowHideTip(){
+			g_tip.fadeOut('slow', function() {
+				g_tip.hide();
+			});
+	}
 
 	/* Tooltip sample*/
 	$(function() {
@@ -665,7 +672,7 @@
 				tip.appendTo('body');
 			}, function() {
 				tip.appendTo(this);
-			}).mousemove(function(e) {
+			}).mouseenter(function(e) {
 				var x = e.pageX + 20,
 					y = e.pageY + 20,
 					w = tip.width(),
@@ -681,10 +688,15 @@
 					"padding-top":"10px",
 					display:"block"
 				});
-			}).mouseout(function(e) {
-				tip.css({
-					visibility:"hidden",
-					display:"none"
+				g_tip = tip;
+				g_tip_intval = setTimeout("slowHideTip()",3000);
+			}).mouseleave(function(e) {
+				if(g_tip_intval != null){
+					window.clearInterval(g_tip_intval);
+					g_tip_intval = null;
+				}
+				tip.fadeOut('slow', function() {
+					tip.hide();
 				});
 			});
 		});
