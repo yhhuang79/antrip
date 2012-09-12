@@ -236,6 +236,10 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public void calculateTripInfo(){
+		
+	}
+	
 	synchronized public long createNewTripInfo(String userid, String tripid, String starttime) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
@@ -289,6 +293,22 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public long insertEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
+			String endaddrpt3, String endaddrpt4, String endaddrpt5) {
+		if (db.isOpen()) {
+			ContentValues cv = new ContentValues();
+			cv.put("endaddrpt1", endaddrpt1);
+			cv.put("endaddrpt2", endaddrpt2);
+			cv.put("endaddrpt3", endaddrpt3);
+			cv.put("endaddrpt4", endaddrpt4);
+			cv.put("endaddrpt5", endaddrpt5);
+//			Log.e("dbhelper", "insert end address: " + cv.toString());
+			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+		} else {
+			return -2;
+		}
+	}
+	
 	/**
 	 * Insert user inputed trip name, and the calculated trip length, also the
 	 * time from last location report
@@ -311,22 +331,6 @@ public class DBHelper128 {
 			cv.put("count", count);
 			
 			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-		} else {
-			return -2;
-		}
-	}
-	
-	synchronized public long insertEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
-			String endaddrpt3, String endaddrpt4, String endaddrpt5) {
-		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			cv.put("endaddrpt1", endaddrpt1);
-			cv.put("endaddrpt2", endaddrpt2);
-			cv.put("endaddrpt3", endaddrpt3);
-			cv.put("endaddrpt4", endaddrpt4);
-			cv.put("endaddrpt5", endaddrpt5);
-//			Log.e("dbhelper", "insert end address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
 			return -2;
@@ -766,8 +770,8 @@ public class DBHelper128 {
 			} else {
 				//there is no on going trip, show everything
 				//Log.e("getalltripinfoforhtml", "tripid=null");
-//				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
+//				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
 			}
 			
 			if (mCursor != null) {

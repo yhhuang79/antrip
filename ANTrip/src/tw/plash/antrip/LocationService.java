@@ -84,6 +84,7 @@ public class LocationService extends Service {
 		nullLocation = new Location("");
 		nullLocation.setLatitude(-999.0);
 		nullLocation.setLongitude(-999.0);
+		nullLocation.setAccuracy(-999.0f);
 	}
 	
 	@Override

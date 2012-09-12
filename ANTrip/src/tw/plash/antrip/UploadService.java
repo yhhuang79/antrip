@@ -116,25 +116,29 @@ public class UploadService extends Service {
 				//if self check is in progress, don't start again
 				if(!selfCheckAndUploadIsRunning){
 					selfCheckAndUploadIsRunning = true;
-					String sid = pref.getString("sid", null);
-					if(sid != null){
-						DBHelper128 dh = new DBHelper128(getApplicationContext());
-						HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(sid);
-						dh.closeDB();
-						if(tmp != null){
-							Log.e("upload service", "keys: " + tmp.keySet().toString() + ";values: " + tmp.values().toString());
-							startNotification(1);
-							for(String key : tmp.keySet()){
-								Long tag = System.currentTimeMillis();
-								updateThreadStatus(tag, 0);
-								new uploadThread(tag, sid).execute(key, tmp.get(key).toString());
+					if(pref != null){
+						String sid = pref.getString("sid", null);
+						if(sid != null){
+							DBHelper128 dh = new DBHelper128(getApplicationContext());
+							HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(sid);
+							dh.closeDB();
+							if(tmp != null){
+//								Log.e("upload service", "keys: " + tmp.keySet().toString() + ";values: " + tmp.values().toString());
+								startNotification(1);
+								for(String key : tmp.keySet()){
+									Long tag = System.currentTimeMillis();
+									updateThreadStatus(tag, 0);
+									new uploadThread(tag, sid).execute(key, tmp.get(key).toString());
+								}
+							} else{
+								//no unfinished upload
+								stopSelf();
 							}
 						} else{
-							//no unfinished upload
+							//not logged in yet, does not know whose records to look for in the DB
 							stopSelf();
 						}
 					} else{
-						//not logged in yet, does not know whose records to look for in the DB
 						stopSelf();
 					}
 				}
