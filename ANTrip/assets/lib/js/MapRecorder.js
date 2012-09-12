@@ -465,17 +465,15 @@
 		var curlatlng = null;
 		if(g_currentmarker!=null){
 			curlatlng = g_currentmarker.getPosition();
-			//alert(curlatlng);
 		}
 
 		if(curlatlng == null || curlatlng.equals(latlng) != true){
-			//alert(curlatlng);
-			//alert(latlng);
 			if(g_currentmarker!=null){
 				g_currentmarker.setMap(null);
 				g_currentmarker = null;
 			}
 			g_currentmarker =  new google.maps.Marker({ 
+					'animation': google.maps.Animation.BOUNCE,
 					'position': latlng, 
 					'bounds': true,
 					'icon': im+"ant_24.png",
