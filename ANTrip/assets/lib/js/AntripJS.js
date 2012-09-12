@@ -249,6 +249,12 @@
 		MM_preloadImages(trip_m_img);
 
 		$("#sym_triplist").hide();
+		if(window.antrip){
+			$("#Symbol_ub_home").hide();
+		}
+		else{
+			;
+		}
 
 		$('#Stage').css("background-image", url+scroll_img+")");
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
@@ -405,7 +411,12 @@
 			$('#markplacewindow').hide();
 
 			$("#tripname").html("");
-			$("#Symbol_ub_home").show();
+			if(window.antrip){
+				;
+			}
+			else{
+				$("#Symbol_ub_home").show();
+			}
 			$("#Symbol_trip_history").show();
 			$("#Symbol_ub_trip_m").show();
 			$("#Symbol_friend").show();
@@ -683,18 +694,25 @@
 		});
 	}
 
-
+	var g_tip;
+	var g_tip_intval = null;
+	function slowHideTip(){
+			g_tip.fadeOut('slow', function() {
+				g_tip.hide();
+			});
+	}
 	/* Tooltip sample*/
 	$(function() {
 		$('div[class*=class_left_bt],div[class*=class_top_bt]').each(function() {
 			var tip = $(this).find('.tip');
+
 			$(this).hover(
 
 			function() {
 				tip.appendTo('body');
 			}, function() {
 				tip.appendTo(this);
-			}).mousemove(function(e) {
+			}).click(function(e) {
 				var x = e.pageX + 20,
 					y = e.pageY + 20,
 					w = tip.width(),
@@ -709,10 +727,15 @@
 					"padding-left":"20px",
 					display:"block"
 				});
-			}).mouseout(function(e) {
-				tip.css({
-					visibility:"hidden",
-					display:"none"
+				g_tip = tip;
+				g_tip_intval = setTimeout("slowHideTip()",3000);
+			}).mouseleave(function(e) {
+				if(g_tip_intval != null){
+					window.clearInterval(g_tip_intval);
+					g_tip_intval = null;
+				}
+				tip.fadeOut('slow', function() {
+					tip.hide();
 				});
 			});
 		});

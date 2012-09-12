@@ -286,12 +286,48 @@
 			window.antrip.setText(text);
 		}
 	}
-
-	function syncPosition(result){
-		cleanGlobalArray();
-		ShowRecorderMap();
-		addPosition(result);
+	
+	var g_worker=null;
+	function syncPosition(result){		
+		//if(g_worker==null){
+			cleanGlobalArray();
+			ShowRecorderMap();
+			addPosition(result);
+			Concurrent.Thread.create(function(){
+				addPosition(result);
+			});
+			/*g_worker = createWorker(addPosition);
+			g_worker.postMessage({'cmd': 'start', 'msg': result.toString()});
+		}*/
 	}
+
+	function createWorker(msgObj){    
+		// create worker  
+		//alert(msgObj); 
+		var worker = new Worker("lib/js/worker.js");  
+		//alert(worker); 
+		worker.addEventListener('message', function(e) {
+			//	alert(e.data); // update info (get the trigger e.data) 
+				if(msgObj){
+					if(e.data!=null && e.data!=''){
+						//alert(e.data); 
+						msgObj(eval(e.data));
+					}
+					else{
+						//alert(e.data); 
+						msgObj();
+					}
+					g_worker.terminate();
+					g_worker = null;
+				}
+		}, false);
+
+		worker.onerror = function(e){  
+			alert("error at line ["+ e.lineno +"]: " + e.message); //display error message 
+		}
+		return worker;
+	}
+  
 
 	function addPosition(result){
 		var self =  $('#map_canvas_2').gmap('get','map');
@@ -379,6 +415,24 @@
 			g_markerCluster = null;
 		}
 		g_markerCluster = new MarkerClusterer(self, g_tripPointObjArray_2);
+
+		var curlatlng = null;
+		if(g_currentmarker!=null){
+			curlatlng = g_currentmarker.getPosition();
+		}
+		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+		if(curlatlng == null || curlatlng.equals(latlng) != true){
+			if(g_currentmarker!=null){
+				g_currentmarker.setMap(null);
+				g_currentmarker = null;
+			}
+			g_currentmarker =  new google.maps.Marker({ 
+				'animation': google.maps.Animation.BOUNCE,
+				'position': latlng,
+				'icon': im+"ant_24.png",
+			});
+			g_currentmarker.setMap(self);
+		}
 
 		$('#map_canvas_2').gmap('refresh');
 	}
@@ -473,6 +527,12 @@
 				;
 			}
 			else{
+			/*	if(g_worker==null){
+						g_worker = createWorker(getLocation);
+						if(g_worker){
+							g_worker.postMessage({'cmd': 'start', 'msg': ''});
+						}
+				}*/
 				tripRecorder = setInterval(function(){getLocation()},5000);
 			}
 			changeIconToRecoding();
