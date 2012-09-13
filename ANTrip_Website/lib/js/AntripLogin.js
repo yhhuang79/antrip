@@ -9,7 +9,6 @@
 			modal: true,
 			title:g_str_register,
 			show: { effect: 'drop', direction: "up"},
-			zIndex:9999,
 			open: function (event, ui) {
 				$('.ui-dialog-buttonpane').css({
 					'background-image':url+im+"typenotearea.png)",
@@ -32,6 +31,9 @@
 				$('#reg_re_password').attr('placeholder',g_str_re_password);
 				$('#email_forgotten').html(g_str_email_forgotten);
 				$('#sym_video').hide();
+			},
+			close: function() {
+				 $('#sym_video').show();
 			},
 			buttons: [{
 						text: g_str_create_account,

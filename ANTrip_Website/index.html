@@ -25,6 +25,7 @@
 	<link rel="stylesheet" type="text/css" href="lib/css/queryLoader.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui-1.8.21.custom.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/minframe.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery.tagsinput.css" />
 	<link rel="shortcut icon" href="images/favicon.ico" />
 	<link rel="Bookmark" href="images/favicon.ico" type="image/x-icon" />
 	<script type="text/javascript" src="./lib/js/sendMail.js"></script>
@@ -41,6 +42,8 @@
 	<script type="text/javascript" src="lib/js/showCal.js"></script>
 	<script type="text/javascript" src="lib/js/loadScript.js"></script>
 	<script type="text/javascript" src="lib/js/basicFunction.js"></script>
+	<script type="text/javascript" src="lib/js/jquery.tagsinput.js"></script>
+	<script type="text/javascript" src="lib/js/jquery.editable-1.3.3.js"></script>
 	<script type="text/javascript" src="lib/js/AntripJS.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.cookie.js"></script>
 	<script type="text/javascript" src="lib/js/markerclusterer.js"></script>
@@ -128,9 +131,9 @@
 		<div class="trip_prenext_bt">
 	  		<div class="class_pretrip_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#pretrip' class="pre_trip_link"></a></div>
 			<div class="class_nextrip_bt"><a data-role='button' data-transition='fade' data-theme='a' href='#nextrip' class="next_trip_link"></a></div>
-			<button id="OpenCloseMarker"  class="class_btInMap" style="z-index:100;"></button>
 			<div id="tripname"></div>
 		</div>
+		<div id="div_trip_tags"><input id="trip_tags" type="text" class="tags" value="" /></div>
 		 <div id="sym_edit_bt_list">
 				<div id="b_open_trip" class="class_left_bt">	
 					<img src="" id="img_open_trip" class="class_left_bt"  onClick="if(g_isForMobile==false){TripListDialog();}else{}" onMouseOver="rotateInterval($(this));" onMouseOut="stopRotateInterval($(this));"></img>
@@ -151,6 +154,7 @@
 		 </div>
 		 <div id="edit_display_area">
 			 <div id="dialog" title="Trip Note" class="ui-widget"></div>
+			 <button id="OpenCloseMarker"  class="class_btInMap" style="z-index:100;"></button>
 			 <div id="map_canvas">
 		
 			 </div>

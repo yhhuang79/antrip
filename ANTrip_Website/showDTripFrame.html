@@ -31,21 +31,44 @@
 			var strShowDLink = getRootPath()+"/showDTripPage.html?userid="+userid+"&trip_id="+trip_id+"&g_lang="+g_lang+"&g_calUnit="+g_calUnit;
 			$("#c-c-iframe").attr('src',strShowDLink);  
 			 $("#c-c-iframe").load(function(){
-				var frameheight = $("#c-c-iframe").contents().height();
-				$("#c-c-iframe").height(frameheight); 
-				$("#c-c-iframe").width('100%');  
-				//alert(sheight);
+				var framewidth = 1100;
+				var frameheight = 1200;
+				
+			//	alert(sheight);
+				var swidth = $.getUrlVar('width');
 				var sheight = $.getUrlVar('height');
-				if(sheight==null){
-					sheight = frameheight;
+				var scale = 1;
+				if(swidth==null){
+					swidth = framewidth;
+					scale = swidth / framewidth;
+					if(sheight==null){
+						sheight = frameheight;
+					}
+					else{
+						scale = sheight / frameheight;
+					}
 				}
-				var scale = sheight / frameheight;
-				//alert(scale);
+				else{
+					scale = swidth / framewidth;
+				}
+				$("#c-c-iframe").width(framewidth);  
+				$("#c-c-iframe").height(frameheight); 
+				//alert(1/scale);
 				$('iframe').css('-webkit-transform', 'scale('+scale+')');
+				$('iframe').css('-webkit-transform-origin', '0 0');
 				$('iframe').css('-moz-transform', 'scale('+scale+')');
+				$('iframe').css('-moz-transform-origin', '0 0');
 				$('iframe').css('-ms-transform', 'scale('+scale+')');
+				$('iframe').css('-ms-transform-origin', '0 0');
 				$('iframe').css('-o-transform', 'scale('+scale+')');
+				$('iframe').css('-o-transform-origin', '0 0');
 				$('iframe').css('transform', 'scale('+scale+')');
+				$('iframe').css('transform-origin', '0 0');
+			//	$('iframe').css('-webkit-transform', 'scale('+scale+') translate(-'+(framewidth)*(1-scale)+'px, -'+(frameheight)*(1-scale)+'px)');
+			//	$('iframe').css('-moz-transform', 'scale('+scale+') translate(-'+(framewidth)*(1-scale)+'px, -'+(frameheight)*(1-scale)+'px)');
+			//	$('iframe').css('-o-transform', 'scale('+scale+') translate(-'+(framewidth)*(1-scale)+'px, -'+(frameheight)*(1-scale)+'px)');
+			//	$('iframe').css('-ms-transform', 'scale('+scale+') translate(-'+(framewidth)*(1-scale)+'px, -'+(frameheight)*(1-scale)+'px)');
+			//	$('iframe').css('transform', 'scale('+scale+') translate(-'+(framewidth)*(1-scale)+'px, -'+(frameheight)*(1-scale)+'px)');
 				$("#c-c-iframe").css('visibility','visible');
 			}); 
 		});
@@ -54,6 +77,6 @@
 	<!--Adobe Edge Runtime End-->
 </head>
 <body id="body">
-<iframe width="0" style="visibility:hidden"  scrolling="no"  src="" frameborder="0" id="c-c-iframe"></iframe>
+<iframe style="visibility:hidden; float:left; position: absolute; top:0px; left:0px;"  scrolling="no"  src="" frameborder="0" id="c-c-iframe"></iframe>
 </body>
 </html>

@@ -506,18 +506,16 @@
 		for(var i=0;i<g_tripMarkerArray.length;i++){
 			var file = g_tripMarkerArray[i].getTitle();
 			if(file==""){
-				$("div[id=images_scroll_content_"+content_index+"]").append("<div><img id=scrollimg_"+i+" exif='true' src='images/takepicture.png' align='left bottom' class='class_imagesOfAlbum' onMouseOver=\"pointToMarkerOnMap("+i+")\" ></img></div><br/><br/>");
+				;//$("div[id=images_scroll_content_"+content_index+"]").append("<div><img id=scrollimg_"+i+" exif='true' src='images/takepicture.png' align='left bottom' class='class_imagesOfAlbum' onMouseOver=\"pointToMarkerOnMap("+i+")\" ></img></div><br/><br/>");
 			}
 			else{
 				$("div[id=images_scroll_content_"+content_index+"]").append("<div><img id=scrollimg_"+i+" exif='true' src='"+file+"' align='left bottom' class='class_imagesOfAlbum' onMouseOver=\"pointToMarkerOnMap("+i+")\" ></img></div><br/><br/>");
-
-
 				ImageInfo.loadInfo(file, albumcallback);
-			}
-			index++;
-			if(index>3){
-				content_index++;
-				index=1;
+				index++;
+				if(index>3){
+					content_index++;
+					index=1;
+				}
 			}
 		}
 

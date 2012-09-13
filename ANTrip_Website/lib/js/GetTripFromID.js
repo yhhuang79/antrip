@@ -141,23 +141,23 @@
 								placemarker.setMap(map);
 								g_tripMarkerArray.push(placemarker);
 							} else {
-								if(i==0||lastpoint==null)
+								if(i==0||firstpoint==null)
 								{
 									self.addMarker({ 
 										'position': latlng, 
 										'bounds': true,
-										'icon':"images/placemarker_cut_stop.png"
+										'icon':"images/placemarker_cut_start.png"
 									}).click(function(){
 										self.openInfoWindow({'content': point.timestamp+"<br/>"+latlng}, this);
 									});
-									lastpoint = latlng;
+									firstpoint = latlng;
 								}
 								else if(i==(result.CheckInDataList.length-1))
 								{
 									self.addMarker({ 
 										'position': latlng, 
 										'bounds': true,
-										'icon':"images/placemarker_cut_start.png"
+										'icon':"images/placemarker_cut_stop.png"
 									}).click(function(){
 										self.openInfoWindow({'content': point.timestamp+"<br/>"+latlng}, this);
 									});
