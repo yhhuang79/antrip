@@ -60,6 +60,11 @@
 		z-index:1011;
 	}
 
+	.class_topbtnGroup{
+		position:fixed;
+		background-position: top center;	
+	}
+
 	.topbtnTripClass{
 		position:fixed;
 		background-position: top center;
@@ -189,7 +194,7 @@
 		-webkit-border-radius: 3px;
 		-moz-border-radius: 3px;
 		border-radius: 3px;
-		font-size:15px;
+		font-size:20px;
 		font-family:Verdana, Geneva, sans-serif;
 		font-weight:bold;
 		visibility:hidden;
@@ -200,7 +205,7 @@
 	}
 
 	.ui-icon-login {
-		background-image: url("../../images/btnline.png");
+		background-image: url("../../images/s/btnline.png");
 	}
 
 	/*! List View CSS */
@@ -464,3 +469,9 @@
 		height:40px;
 		cursor: pointer;
 	}
+
+	.dropdown-menu, .dropdown-toggle, .dropdown-toggle:after, .dropdown-toggle:before, .dropdown-toggle:hover, .btn-group:hover , .dropdown-toggle:active, .btn-group:active, .dropdown.open, .dropdown.open.active {
+		background-image: url("../../images/s/topbt_bk.png");
+		background-repeat: repeat-y;
+		background-position: top center;
+	 }

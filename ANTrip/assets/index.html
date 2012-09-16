@@ -8,6 +8,8 @@
 <!--Adobe Edge Runtime-->
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery-1.7.2.js"></script>
+	<script type="text/javascript" src="lib/js/bootstrap-dropdown.js"></script>
+    <link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css" /> 
 	<script type="text/javascript" src="lib/jq_includes/jquery.mobile-1.1.0.min.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.bgiframe-2.1.2.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.ui.core.js"></script>
@@ -18,11 +20,12 @@
 	<script type="text/javascript" src="lib/jq_includes/jquery.ui.position.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.ui.dialog.js"></script>
 	<script type="text/JavaScript" src="lib/jq_includes/jquery-ui-1.8.21.custom.min.js"></script>
-	
+
 	<!--for google map javascript file-->
 	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.js"></script>
 	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.extensions.js"></script>
 	<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.overlays.js"></script>
+
 
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery.mobile-1.1.0.min.css" />
@@ -49,7 +52,7 @@
 <body id="body">
 	<table style="z-index:-100;width:100%;height:100%;display:table-caption;" id="mobiledeviceLayout">
 	</table>
-	
+
 	<div  align="center"  id="Stage">	
 		<div id="sym_topbtnGroup">
 		<div style="float:left;position: relative;">
@@ -59,7 +62,7 @@
 					<img src="" id="img_banner_logo" onMouseOver="scaleAnimation($(this),1.05)" onMouseOut="scaleRestore($(this))"></img>				</div>
 				<div id="tripname"></div>
 				   <div id="div_langOption"><span id="span_langtitle"></span><select id="langOption"></select></div>
-				<div id="Symbol_ub_trip_m" class="class_top_bt">	
+				<!--<div id="Symbol_ub_trip_m" class="class_top_bt">	
 					<img src="" class="class_top_bt" name="ub_trip_management"  id="ub_trip_management" onClick="ChangeToUsedIcon($(this))" ></img>				
 					<span class="tip" id="tip_ub_trip_m"></span>
 				</div>
@@ -70,6 +73,17 @@
 				<div id="Symbol_friend" class="class_top_bt" >	
 					<img src="" class="class_top_bt" name="ub_friend" id="ub_friend" onClick="ChangeToUsedIcon($(this))" ></img>
 					<span class="tip" id="tip_ub_f"></span>
+				</div>-->
+				<div id="Symbol_ub_trip_m"  class="dropdown  btn-group  class_topbtnGroup">
+					<div class="dropdown">
+							<a id="drop1" href="#" role="button" class="btn dropdown-toggle" data-toggle="dropdown"><img id="img_dropdown_toggle" src=""></img><b class="caret"></b></a>
+							<!--<img id="img_dropdown_toggle" class="btn dropdown-toggle" data-toggle="dropdown" src=""><b class="caret"></b>-->
+							 <ul class="dropdown-menu">
+								<li class="class_top_bt" onClick="ChangeToUsedIcon($('#ub_trip_management'))" ><a tabindex="1"><img src="" class="class_top_bt" name="ub_trip_management"  id="ub_trip_management"  ></img></a><span class="tip" id="tip_ub_trip_m"></span></li>
+								<li class="class_top_bt" onClick="ChangeToUsedIcon($('#ub_trip_history'))" ><a tabindex="2" ><img src="" class="class_top_bt" name="ub_trip_history" id="ub_trip_history"></a><span class="tip" id="tip_ub_trip_h"></span></li>
+								<li class="class_top_bt" onClick="ChangeToUsedIcon($('#ub_friend'))"><a tabindex="3"  id="Symbol_friend"><img src="" class="class_top_bt" name="ub_friend" id="ub_friend"></img></a><span class="tip" id="tip_ub_f"></span></li>
+							</ul>
+					</div>
 				</div>
 				<div id="Symbol_download" class="class_top_bt">	
 					<img src="" class="class_top_bt" name="ub_download" id="ub_download" onClick="ChangeToUsedIcon($(this))"></img>
@@ -204,6 +218,7 @@
 		<div data-role='fieldcontain'><fieldset data-role='tripgroup'><label for='tripinput1' id='tripinput1'>Trip Name</label><input id='trip_name' placeholder='TRIPNAME' value='My Trip' type='text' /></fieldset></div>
 		</p>
 	</div>
+
 </body>
 <!--load javascript file that should be loaded in the end of html-->
 <script type="text/javascript" src="lib/jq_includes/jquery.imagemapster.js"></script>	

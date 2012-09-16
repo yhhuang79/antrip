@@ -452,8 +452,28 @@
 		});
 		g_mapPath.setMap(self);
 	}
+	
+	var g_circle = null;
+	function drawCircle(center, rad){
+		var self =  $('#map_canvas_2').gmap('get','map');
+		if(g_circle!=null){
+			g_circle.setMap(null);
+			g_circle = null;
+		}
+		g_circle = new google.maps.Circle({
+					center: center,
+					radius: rad,
+					strokeColor: "#FF0000",
+					strokeOpacity: 0.8,
+					strokeWeight: 2,
+					fillColor: "#FF0000",
+					fillOpacity: 0.35
+		});
+		g_circle.setMap(self);
+	}
 
-	function setPosition(latitude, longitude){
+
+	function setPosition(latitude, longitude, accuracy){
 		if(latitude==null || longitude==null || latitude == latlng_undefined_value || longitude ==latlng_undefined_value){
 			return;
 		}
@@ -468,6 +488,11 @@
 		}
 
 		if(curlatlng == null || curlatlng.equals(latlng) != true){
+			var iconpath =  im+"ant_24.png";
+			if(accuracy!='undefined' && accuracy!=null){
+				drawCircle(latlng, accuracy);
+				iconpath = im+"ant_24_unlocat.png";
+			}
 			if(g_currentmarker!=null){
 				g_currentmarker.setMap(null);
 				g_currentmarker = null;
@@ -476,7 +501,7 @@
 					'animation': google.maps.Animation.BOUNCE,
 					'position': latlng, 
 					'bounds': true,
-					'icon': im+"ant_24.png",
+					'icon': iconpath,
 			});
 			g_bounds.extend(latlng);
 			g_currentmarker.setMap(self);

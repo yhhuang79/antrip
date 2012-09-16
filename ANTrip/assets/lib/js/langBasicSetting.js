@@ -36,6 +36,8 @@
 			$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 	});
 
+	$(".class_topbtnGroup").css("background-image", url+topbk_img+")");
+
 
 	$('#logoutwhenrecord').html(g_str_logoutwhenrecord);
 	$('#typetripname').html(g_str_typetripname);
