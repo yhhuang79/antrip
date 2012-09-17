@@ -720,7 +720,7 @@
 	}
 	/* Tooltip sample*/
 	$(function() {
-		$('div[class*=class_left_bt],div[class*=class_top_bt],li[class*=class_top_bt]').each(function() {
+		$('div[class*=class_left_bt],div[class*=class_top_bt]').each(function() {
 			var tip = $(this).find('.tip');
 
 			$(this).hover(
@@ -756,9 +756,124 @@
 				});
 			});
 		});
-
 	});
 
+	//get absolute position
+	jQuery.fn.getPos = function(){
+        var o = this[0];
+        var left = 0, top = 0, parentNode = null, offsetParent = null;
+        offsetParent = o.offsetParent;
+        var original = o;
+        var el = o;
+        while (el.parentNode != null) {
+            el = el.parentNode;
+            if (el.offsetParent != null) {
+                var considerScroll = true;
+                if (window.opera) {
+                    if (el == original.parentNode || el.nodeName == "TR") {
+                        considerScroll = false;
+                    }
+                }
+                if (considerScroll) {
+                    if (el.scrollTop && el.scrollTop > 0) {
+                        top -= el.scrollTop;
+                    }
+                    if (el.scrollLeft && el.scrollLeft > 0) {
+                        left -= el.scrollLeft;
+                    }
+                }
+            }            
+            if (el == offsetParent) {
+                left += o.offsetLeft;
+                if (el.clientLeft && el.nodeName != "TABLE") {
+                    left += el.clientLeft;
+                }
+                top += o.offsetTop;
+                if (el.clientTop && el.nodeName != "TABLE") {
+                    top += el.clientTop;
+                }
+                o = el;
+                if (o.offsetParent == null) {
+                    if (o.offsetLeft) {
+                        left += o.offsetLeft;
+                    }
+                    if (o.offsetTop) {
+                        top += o.offsetTop;
+                    }
+                }
+                offsetParent = o.offsetParent;
+            }
+        }
+        return {
+            left: left,
+            top: top
+        };
+    };
+
+	$(function() {
+		$('li[class*=class_top_bt]').each(function() {
+			var tip = $(this).find('.tip');
+			var offset = $(this).getPos();
+	//		$("#drop1").click(
+
+	//		function() {
+				//tip.appendTo('body');
+			//}, function() {
+				//alert(offset.x);
+				//tip.appendTo(this);
+			//}).mouseenter(function(e) {
+				
+				var x = $(this).width() + 85,
+					y = $(this).height() - 30;
+				tip.css({
+					left: x,
+					top: y,
+					'width': '150px',
+					'height': '20px',
+					'float':'left',
+					'position':'relative',
+					'background-image': url+tip_img+")",
+					visibility:"visible",
+					"padding-left":"20px",
+					display:"inline"
+				});
+				//g_tip = tip;
+				/*if(g_tip_intval != null){
+					window.clearInterval(g_tip_intval);
+					g_tip_intval = null;
+				}
+				g_tip_intval = setTimeout("slowHideTip()",3000);*/
+			$(this).click(function() {
+				//$("#Symbol_ub_trip_m").fadeOut('slow', function() {
+					$("#Symbol_ub_trip_m").stop();
+					$("#Symbol_ub_trip_m").animate({
+						'filter':'alpha(opacity=30)',
+						'-moz-opacity':'0.3',
+						'-khtml-opacity': '0.3',
+						'opacity': '0.3'
+					}, 3000, function() {});
+				//});
+			});
+			$("#drop1").mouseenter(function() {
+				//$("#Symbol_ub_trip_m").fadeOut('slow', function() {
+					$("#Symbol_ub_trip_m").stop();
+					$("#Symbol_ub_trip_m").animate({
+						'filter':'alpha(opacity=100)',
+						'-moz-opacity':'1.0',
+						'-khtml-opacity': '1.0',
+						'opacity': '1.0'
+					}, 1000, function() {});
+				//});
+			});
+		//	}).mouseleave(function(e) {
+
+			/*	tip.fadeOut('slow', function() {
+					tip.hide();
+				});*/
+		//	});
+		});
+
+	});
 
 	// login & logout page
 	$('#sym_login').ready(function(){
