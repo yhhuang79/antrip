@@ -828,8 +828,9 @@
 				tip.css({
 					left: x,
 					top: y,
+					'margin-bottom':-50,
 					'width': '150px',
-					'height': '20px',
+					'height': '50px',
 					'float':'left',
 					'position':'relative',
 					'background-image': url+tip_img+")",
@@ -1056,12 +1057,12 @@
 						g_triplength += localresult.tripInfoList.length;
 						$.each(localresult.tripInfoList, function(i,data){
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
-							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false";
+							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=150x150&sensor=false";
 							var appendcontent;
 
 							var tripname = data.trip_name;
 				
-							appendcontent="<button id='button"+sid+data.id+"' class='tripItem' href=''><div class='product'><div class='wrapper'><div class='listview_image'><div class='des_close_class' onClick=\"confirmDelete("+sid+","+data.id+");\"></div><img  onClick=\"if(window.antrip){window.antrip.uploadTrip("+data.id+"); $('#button"+sid+data.id+"').hide('slow');}\"  src='"+uploadicon_img+"' width='100px' style='border:2px solid #555;'/></div><div class='listview_description'  onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.id+";g_tripname='"+ tripname+"';OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#Symbol_about').show();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}g_showtripmap=true;showLocalTripData("+data.id+");\"><a class='listview' href='' rel='external'><img src='"+im+"deletemarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button id='button"+sid+data.id+"' class='tripItem' href=''><div class='product'><div class='wrapper'><div class='listview_image'><div class='des_close_class' onClick=\"confirmDelete("+sid+","+data.id+");\"></div><img  onClick=\"if(window.antrip){window.antrip.uploadTrip("+data.id+"); $('#button"+sid+data.id+"').hide('slow');}\"  src='"+uploadicon_img+"' width='150px' style='border:2px solid #555;'/></div><div class='listview_description'  onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.id+";g_tripname='"+ tripname+"';OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#Symbol_about').show();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}g_showtripmap=true;showLocalTripData("+data.id+");\"><a class='listview' href='' rel='external'><img src='"+im+"deletemarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":" + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 							
 							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 								$("div[id=products]").eq(0).append(appendcontent);
@@ -1078,12 +1079,12 @@
 						$.each(result.tripInfoList, function(i,data){
 							
 							var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
-							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+data.st_addr_prt2;
+							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 +"&zoom=12&size=150x150&sensor=false&markers=color:red|label:S|size:mid|"+data.st_addr_prt2;
 							var appendcontent;
 
 							var tripname = data.trip_name;
 
-							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";g_tripname='"+ tripname+"';OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href=''><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='' rel='external'><img src='"+im+"uploadedmarker.png' align=right></img><h3>" + data.trip_name  + "</h3><p>"+g_str_start+ ":"+ data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
+							appendcontent="<button class='tripItem' onClick=\"if(g_isForMobile==false){ChangeToUsedIcon($('#ub_trip_management'));}else{g_trip="+data.trip_id+";g_tripname='"+ tripname+"';OnlyShowADiv($('#ub_trip_management'));changeIconToBackBtn();$('#sym_edit_bt_list').hide();$('#map_canvas').css('margin-top','0');}ShowTripMapfromID("+sid+","+data.trip_id+");\" href=''><div class='product'><div class='wrapper'><div class='listview_image'><a class='listview' href='' rel='external'><img src='" + mapurl + "' style='border:2px solid #555;'/></a></div><div class='listview_description'><a class='listview' href='' rel='external'><img src='"+im+"uploadedmarker.png' align=right></img><h4>" + data.trip_name  + "</h4><p>"+g_str_start+ ":"+ data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et  + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></a></div></div></div></button>";
 
 							if(page==0|| g_isForMobile==true ||((index>(page-1)*g_numsofpage)&&(index<=page*g_numsofpage))){
 								$("div[id=products]").eq(0).append(appendcontent);

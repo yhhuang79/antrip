@@ -258,13 +258,13 @@
 		border-radius: 3px; */
 	}
 	.listview_image {
-		width:98px;
-		margin-top:5px;
+		width:150px;
+		margin-top:10px;
 		margin-left:12px;
 	}
 	.listview_description {
 		text-align:right;
-		width:310px;
+		width:260px;
 	}
 	.grid .product {
 		padding:0px;
