@@ -23,11 +23,11 @@
 		height: 800px;
 	}
 	#sym_logingroup{
-		margin-top:100px;
+		margin-top:80;
 		padding-top:0px;
 		float:center;
 		width:  100%;
-		height: 650px;
+		height: 680px;
 		background-repeat: no-repeat;
 		background-position: center center;
 	}
@@ -58,6 +58,10 @@
 		margin-top:0px;
 		width: 100%;
 		z-index:1011;
+		position:fixed;
+		background-position: top center;
+		left:50%;
+		margin-left:-240px;
 	}
 
 	.class_topbtnGroup{
@@ -66,10 +70,7 @@
 	}
 
 	.topbtnTripClass{
-		position:fixed;
-		background-position: top center;
-		left:50%;
-		margin-left:-240px;
+
 	}
 
 	#banner_logo{
@@ -222,6 +223,11 @@
 	a.listview:active{text-decoration: none ; color:#e60000; } 
 	a.listview:hover{text-decoration: none ; color:#e60000;}
 
+	a:link{text-decoration: none; } 
+	a:visited{text-decoration: none; } 
+	a:active{text-decoration: none ; } 
+	a:hover{text-decoration: none ; }
+
 	#products.listview {
 		font-family:Arial,Verdana,Sans-serif;
 		text-align:left;
@@ -259,8 +265,8 @@
 	}
 	.listview_image {
 		width:150px;
-		margin-top:10px;
-		margin-left:12px;
+		margin-top:8px;
+		margin-left:25px;
 	}
 	.listview_description {
 		text-align:right;

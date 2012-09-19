@@ -260,7 +260,7 @@
 		$('#sym_logingroup').css("background-image", url+backlogo_img+")");
 
 		$('.dropdown-toggle').dropdown();
-	//	$('.dropdown-menu').click(function(event){event.stopPropagation();});
+		$('.dropdown-toggle').click(function(event){event.stopPropagation();});
 		initTripNameDialog();
 
 		$("#overlay").css("display","none");
@@ -549,6 +549,7 @@
 						resizable: false,
 						draggable: false,
 						height:200,
+						zIndex:1013,
 						modal: true,
 						open: function (event, ui) {
 								$("#sym_edit_bt_list").css("display","none");
@@ -758,94 +759,26 @@
 		});
 	});
 
-	//get absolute position
-	jQuery.fn.getPos = function(){
-        var o = this[0];
-        var left = 0, top = 0, parentNode = null, offsetParent = null;
-        offsetParent = o.offsetParent;
-        var original = o;
-        var el = o;
-        while (el.parentNode != null) {
-            el = el.parentNode;
-            if (el.offsetParent != null) {
-                var considerScroll = true;
-                if (window.opera) {
-                    if (el == original.parentNode || el.nodeName == "TR") {
-                        considerScroll = false;
-                    }
-                }
-                if (considerScroll) {
-                    if (el.scrollTop && el.scrollTop > 0) {
-                        top -= el.scrollTop;
-                    }
-                    if (el.scrollLeft && el.scrollLeft > 0) {
-                        left -= el.scrollLeft;
-                    }
-                }
-            }            
-            if (el == offsetParent) {
-                left += o.offsetLeft;
-                if (el.clientLeft && el.nodeName != "TABLE") {
-                    left += el.clientLeft;
-                }
-                top += o.offsetTop;
-                if (el.clientTop && el.nodeName != "TABLE") {
-                    top += el.clientTop;
-                }
-                o = el;
-                if (o.offsetParent == null) {
-                    if (o.offsetLeft) {
-                        left += o.offsetLeft;
-                    }
-                    if (o.offsetTop) {
-                        top += o.offsetTop;
-                    }
-                }
-                offsetParent = o.offsetParent;
-            }
-        }
-        return {
-            left: left,
-            top: top
-        };
-    };
-
 	$(function() {
 		$('li[class*=class_top_bt]').each(function() {
 			var tip = $(this).find('.tip');
-			var offset = $(this).getPos();
-	//		$("#drop1").click(
+			var x = $(this).width() + 85,
+				y = $(this).height() - 30;
+			tip.css({
+				left: x,
+				top: y,
+				'margin-bottom':-50,
+				'width': '150px',
+				'height': '50px',
+				'float':'left',
+				'position':'relative',
+				'background-image': url+tip_img+")",
+				visibility:"visible",
+				"padding-left":"20px",
+				display:"inline"
+			});
 
-	//		function() {
-				//tip.appendTo('body');
-			//}, function() {
-				//alert(offset.x);
-				//tip.appendTo(this);
-			//}).mouseenter(function(e) {
-				
-				var x = $(this).width() + 85,
-					y = $(this).height() - 30;
-				tip.css({
-					left: x,
-					top: y,
-					'margin-bottom':-50,
-					'width': '150px',
-					'height': '50px',
-					'float':'left',
-					'position':'relative',
-					'background-image': url+tip_img+")",
-					visibility:"visible",
-					"padding-left":"20px",
-					display:"inline"
-				});
-				//g_tip = tip;
-				/*if(g_tip_intval != null){
-					window.clearInterval(g_tip_intval);
-					g_tip_intval = null;
-				}
-				g_tip_intval = setTimeout("slowHideTip()",3000);*/
 			$(this).click(function() {
-				//$("#Symbol_ub_trip_m").fadeOut('slow', function() {
 					$("#Symbol_ub_trip_m").stop();
 					$("#Symbol_ub_trip_m").animate({
 						'filter':'alpha(opacity=30)',
@@ -853,27 +786,17 @@
 						'-khtml-opacity': '0.3',
 						'opacity': '0.3'
 					}, 3000, function() {});
-				//});
 			});
-			$("#drop1").mouseenter(function() {
-				//$("#Symbol_ub_trip_m").fadeOut('slow', function() {
-					$("#Symbol_ub_trip_m").stop();
-					$("#Symbol_ub_trip_m").animate({
-						'filter':'alpha(opacity=100)',
-						'-moz-opacity':'1.0',
-						'-khtml-opacity': '1.0',
-						'opacity': '1.0'
-					}, 1000, function() {});
-				//});
-			});
-		//	}).mouseleave(function(e) {
-
-			/*	tip.fadeOut('slow', function() {
-					tip.hide();
-				});*/
-		//	});
 		});
-
+		$("#drop1").mouseenter(function() {
+				$("#Symbol_ub_trip_m").stop();
+				$("#Symbol_ub_trip_m").animate({
+					'filter':'alpha(opacity=100)',
+					'-moz-opacity':'1.0',
+					'-khtml-opacity': '1.0',
+					'opacity': '1.0'
+				}, 1000, function() {});
+		});
 	});
 
 	// login & logout page
@@ -883,6 +806,17 @@
 			Login();
 		});
 
+		if(window.antrip==null){
+			$("input").keydown(function(evt){
+				sid = $.cookie("sid");
+				if(sid==null){
+					if(evt.keyCode==13){
+						Login();
+					}
+				}
+			});
+		}
+
 		var logout = $(this).find('.logout_bt_link');
 		logout.click(function(){
 			Logout();
@@ -890,7 +824,7 @@
 
 		sid = $.cookie("sid");
 		if(window.antrip){
-			sid = window.antrip.getCookie("sid");;
+			sid = window.antrip.getCookie("sid");
 		}
 		if(sid==null){
 			$('.class_logout_bt').hide();
@@ -1366,6 +1300,7 @@
 			resizable: false,
 			draggable: false,
 			height:200,
+			zIndex:1013,
 			modal: true,
 			open: function (event, ui) {
 					//$("#sym_topbtnGroup").removeClass("topbtnTripClass");

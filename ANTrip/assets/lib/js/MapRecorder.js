@@ -226,6 +226,7 @@
 			height:260,
 			width: 400,
 			modal: true,
+			zIndex:1013,
 			open: function (event, ui) {
 				$('.ui-dialog-buttonpane').css({
 					'background-image':url+im+"typenotearea.png)",
@@ -275,7 +276,6 @@
 				}
 			},
 			close: function() {
-				//alert('close');
 				$('#dialog').dialog('close');
 			}
 		});
@@ -523,12 +523,14 @@
 	}
 
 	function ShowRecorderMap(){
-		$('#map_canvas').hide();
-		$('#map_canvas_2').fadeIn('slow', function() {
-				$('#map_canvas_2').show();
-		});
-	//	var self =  $('#map_canvas_2').gmap('get','map');
-	//	$('#map_canvas_2').addControl('control', google.maps.ControlPosition.LEFT_TOP);
+		if ($('#map_canvas').is(':visible')) {
+			$('#map_canvas').hide();
+		}
+		if($('#map_canvas_2').is(':visible')==false){
+			$('#map_canvas_2').fadeIn('slow', function() {
+					$('#map_canvas_2').show();
+			});
+		}
 		$("#overlay").css("height", "100px");
 		$("#overlay").css("padding-top", "50px");
 		$("#overlay").css("padding-bottom", "50px");
@@ -550,12 +552,6 @@
 				;
 			}
 			else{
-			/*	if(g_worker==null){
-						g_worker = createWorker(getLocation);
-						if(g_worker){
-							g_worker.postMessage({'cmd': 'start', 'msg': ''});
-						}
-				}*/
 				tripRecorder = setInterval(function(){getLocation()},5000);
 			}
 			changeIconToRecoding();
@@ -578,7 +574,6 @@
 
 		$('#markplacewindow :input').removeAttr('disabled');
 		$('#emotion_compass').hide();
-	//	$('#map_canvas').hide();
 		$('#map_canvas_2').gmap('refresh');
 	}
 
@@ -587,11 +582,11 @@
 			return;
 		}
 		if( $('#markplacewindow').is(":visible") ) {
-			$("#sym_topbtnGroup").hide();
+		//	$("#sym_topbtnGroup").hide();
 			$("#sym_topbtnGroup").addClass("topbtnTripClass");
-			$("#sym_topbtnGroup").fadeIn('slow', function() {
+			/*$("#sym_topbtnGroup").fadeIn('slow', function() {
 				$("#sym_topbtnGroup").show();
-			});
+			});*/
 			$('#edit_display_area :input').removeAttr('disabled');
 			$('#sym_topbtnGroup :input').removeAttr('disabled');
 			$('#markplacewindow :input').removeAttr('disabled');
@@ -600,11 +595,11 @@
 			$("#overlay").css("z-index","1010");
 			$("#overlay").css("display","none");
 		}else{
-			$("#sym_topbtnGroup").hide();
+			//$("#sym_topbtnGroup").hide();
 			$("#sym_topbtnGroup").removeClass("topbtnTripClass");
-			$("#sym_topbtnGroup").fadeIn('slow', function() {
+	/*		$("#sym_topbtnGroup").fadeIn('slow', function() {
 				$("#sym_topbtnGroup").show();
-			});
+			});*/
 			$('#edit_display_area').attr('disabled', true);
 			$('#sym_topbtnGroup').attr('disabled', true);
 			$("#overlay").css("z-index","1012");
