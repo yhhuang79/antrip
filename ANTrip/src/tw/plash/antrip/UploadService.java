@@ -13,6 +13,7 @@ import java.net.URLEncoder;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,6 +74,8 @@ public class UploadService extends Service {
 	// for keeping track of every thread's status
 	private HashMap<Long, Integer> threadStatus;
 	
+	private HashSet<String> ongoingTid;
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -87,6 +90,8 @@ public class UploadService extends Service {
 			selfCheckAndUploadIsRunning = false;
 			
 			pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+			
+			ongoingTid = new HashSet<String>();
 		}
 	}
 
@@ -94,9 +99,7 @@ public class UploadService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		if(intent != null){
 			String action = intent.getAction();
-			if (action == null) {
-				stopSelf();
-			} else if (action.equals("ACTION_UPLOAD_TRIP")) {
+			if (action.equals("ACTION_UPLOAD_TRIP")) {
 				// get unique id
 				String id = intent.getExtras().getString("id");
 				String sid = pref.getString("sid", null);
@@ -116,6 +119,7 @@ public class UploadService extends Service {
 				//if self check is in progress, don't start again
 				if(!selfCheckAndUploadIsRunning){
 					selfCheckAndUploadIsRunning = true;
+					//bug observed on LG LP920, first time install will get a null shared preference
 					if(pref != null){
 						String sid = pref.getString("sid", null);
 						if(sid != null){
@@ -142,7 +146,7 @@ public class UploadService extends Service {
 						stopSelf();
 					}
 				}
-			} else {
+			} else if(ongoingTid == null || ongoingTid.size() < 1){
 				stopSelf();
 			}
 		} else{
@@ -391,7 +395,7 @@ public class UploadService extends Service {
 				List<Address> firstAddr = geocoder.getFromLocation(first.latitude, first.longitude, 1);
 				if(firstAddr != null && !firstAddr.isEmpty()){
 					//Log.w("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
-					dh.insertStartaddr(
+					dh.setStartaddr(
 							uid, 
 							tid, 
 							(firstAddr.get(0).getCountryName() != null?firstAddr.get(0).getCountryName():"NULL"), 
@@ -402,7 +406,7 @@ public class UploadService extends Service {
 					//Log.w("upload service", "getstartaddress result: good");
 					return true;
 				} else{
-					dh.insertStartaddr(uid, tid, "", "", "", "", "Address not available");
+					dh.setStartaddr(uid, tid, "", "", "", "", "Address not available");
 					//Log.e("upload service", "getstartaddress error: reverse geocode failed");
 					return false;
 				}
@@ -420,7 +424,7 @@ public class UploadService extends Service {
 				List<Address> lastAddr = geocoder.getFromLocation(last.latitude, last.longitude, 1);
 				if(lastAddr != null && !lastAddr.isEmpty()){
 					//Log.w("upload service", "last address: \nadmin:" + lastAddr.get(0).getAdminArea() + "\ncountry code:" + lastAddr.get(0).getCountryCode() + "\ncountru name:" + lastAddr.get(0).getCountryName() + "\nfeature name:" + lastAddr.get(0).getFeatureName() + "\nlocale:" + lastAddr.get(0).getLocale() + "\nlocality:" + lastAddr.get(0).getLocality() + "\npostal code:" + lastAddr.get(0).getPostalCode() + "\npremises:" + lastAddr.get(0).getPremises() + "\nsubadmin:" + lastAddr.get(0).getSubAdminArea() + "\nsublocality:" + lastAddr.get(0).getSubLocality() + "\nsubthroughfare:" + lastAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + lastAddr.get(0).getThoroughfare());
-					dh.insertEndaddr(
+					dh.setEndaddr(
 							uid, 
 							tid, 
 							(lastAddr.get(0).getCountryName() != null?lastAddr.get(0).getCountryName():"NULL"), 
@@ -431,7 +435,7 @@ public class UploadService extends Service {
 					//Log.w("upload service", "getendaddress result: good");
 					return true;
 				} else{
-					dh.insertEndaddr(uid, tid, "", "", "", "", "Address not available");
+					dh.setEndaddr(uid, tid, "", "", "", "", "Address not available");
 					//Log.e("upload service", "getendaddress error: reverse geocode failed");
 					return false;
 				}

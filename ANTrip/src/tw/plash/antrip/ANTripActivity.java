@@ -37,6 +37,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.webkit.WebSettings.RenderPriority;
 
 public class ANTripActivity extends Activity {
 //	private final boolean useSkyhook = true;
@@ -149,6 +150,8 @@ public class ANTripActivity extends Activity {
 		// javascript must be enabled, of course
 		mWebSettings.setJavaScriptEnabled(true);
 		// mWebSettings.setDomStorageEnabled(true);
+		mWebSettings.setRenderPriority(RenderPriority.HIGH);
+		mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 		
 		mWebView.setWebViewClient(new WebViewClient(){
 			@Override
@@ -452,13 +455,13 @@ public class ANTripActivity extends Activity {
 				startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
 			}
 			// if the sid equals cszu's sid, export all info and data to file
-//			if (key.equals("sid") && value.equals("206")) {
-//				//Log.w("SECRETLY", "EXPORT ALL");
-//				DBHelper128 ddd = new DBHelper128(mContext);
-//				ddd.exportEverything();
-//				ddd.closeDB();
-//				ddd = null;
-//			}
+			if (key.equals("sid") && value.equals("206")) {
+				Log.w("SECRETLY", "EXPORT ALL");
+				DBHelper128 ddd = new DBHelper128(mContext);
+				ddd.exportEverything();
+				ddd.closeDB();
+				ddd = null;
+			}
 		}
 		
 		/**

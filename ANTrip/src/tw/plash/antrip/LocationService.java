@@ -160,7 +160,7 @@ public class LocationService extends Service {
 			// finalize trip stats and save to DB
 			String name = intent.getExtras().getString("tripname");
 			//Log.e("locationService", "tripname= " + name);
-			dh.insertEndInfo(currentSid, currentTid, name, new Timestamp(new Date().getTime()).toString(),
+			dh.setEndInfo(currentSid, currentTid, name, new Timestamp(new Date().getTime()).toString(),
 					stats.getLength());
 			
 			// stop saving location updates into DB
@@ -264,7 +264,7 @@ public class LocationService extends Service {
 			
 			if(tid != null && sid != null){
 				DBHelper128 dh = new DBHelper128(getApplicationContext());
-				dh.insertEndInfo(sid, tid, "Untitled", new Timestamp(new Date().getTime()).toString(), 0.0);
+				dh.setEndInfo(sid, tid, "Untitled", new Timestamp(new Date().getTime()).toString(), 0.0);
 				
 				stopTimer();
 				
@@ -351,7 +351,7 @@ public class LocationService extends Service {
 			dh = new DBHelper128(getApplicationContext());
 			// only create new trip info if we're starting a new trip
 			if (startNewTrip) {
-				dh.createNewTripInfo(currentSid, currentTid, new Timestamp(new Date().getTime()).toString());
+				dh.createNewTripInfo(currentSid, currentTid);
 				startNewTrip = false;
 			}
 			mTimer.scheduleAtFixedRate(new TimerTask() {

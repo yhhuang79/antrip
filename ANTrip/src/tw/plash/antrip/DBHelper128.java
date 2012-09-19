@@ -227,8 +227,7 @@ public class DBHelper128 {
 			cv.put("tripID", tripid);
 			// cco fields
 			cv.put("picture", cco.getPicturePath());
-			//because it will put "null" string if emotion id is null..., have to prevent this stupid thing
-			cv.put("emotion", cco.getEmotionID()!=null?String.valueOf(cco.getEmotionID()):null);
+			cv.put("emotion", cco.getEmotionID());
 			cv.put("note", cco.getCheckinText());
 			return db.insert(TRIP_DATA_TABLE, null, cv);
 		} else {
@@ -236,35 +235,40 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public void calculateTripInfo(){
-		
-	}
-	
-	synchronized public long createNewTripInfo(String userid, String tripid, String starttime) {
+	synchronized public long createNewTripInfo(String userid, String tripid) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
 			cv.put("tripid", tripid);
 			cv.put("userid", userid);
-			cv.put("starttime", starttime);
 			return db.insert(TRIP_INFO_TABLE, null, cv);
 		} else {
 			return -2;
 		}
 	}
 	
-	/**
-	 * Insert start time from the first location report
-	 * 
-	 * @param tripid
-	 * @param starttime
-	 * @return
-	 */
-	/*
-	 * synchronized public long insertStarttime(String tripid, String
-	 * starttime){ if(db.isOpen()){ ContentValues cv = new ContentValues();
-	 * cv.put("starttime", starttime); return db.update(TRIP_INFO_TABLE, cv,
-	 * "tripid=" + tripid, null); } else{ return -2; } }
-	 */
+//	synchronized public long createNewTripInfo(String userid, String tripid, String starttime) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			cv.put("tripid", tripid);
+//			cv.put("userid", userid);
+//			cv.put("starttime", starttime);
+//			return db.insert(TRIP_INFO_TABLE, null, cv);
+//		} else {
+//			return -2;
+//		}
+//	}
+	
+	synchronized public long setStartTime(String userid, String tripid, String starttime) {
+		if (db.isOpen()) {
+			ContentValues cv = new ContentValues();
+			cv.put("tripid", tripid);
+			cv.put("userid", userid);
+			cv.put("starttime", starttime);
+			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+		} else {
+			return -2;
+		}
+	}
 	
 	/**
 	 * Insert starting address from the first non-null location report
@@ -277,7 +281,7 @@ public class DBHelper128 {
 	 * @param startaddrpt5
 	 * @return
 	 */
-	synchronized public long insertStartaddr(String userid, String tripid, String startaddrpt1, String startaddrpt2,
+	synchronized public long setStartaddr(String userid, String tripid, String startaddrpt1, String startaddrpt2,
 			String startaddrpt3, String startaddrpt4, String startaddrpt5) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
@@ -293,7 +297,7 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long insertEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
+	synchronized public long setEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
 			String endaddrpt3, String endaddrpt4, String endaddrpt5) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
@@ -319,7 +323,7 @@ public class DBHelper128 {
 	 * @param length
 	 * @return
 	 */
-	synchronized public long insertEndInfo(String userid, String tripid, String name, String endtime, Double length) {
+	synchronized public long setEndInfo(String userid, String tripid, String name, String endtime, Double length) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
 			// pop up screen asking for user input
@@ -336,6 +340,18 @@ public class DBHelper128 {
 			return -2;
 		}
 	}
+	
+	synchronized public long setTripName(String userid, String tripid, String name) {
+		if (db.isOpen()) {
+			ContentValues cv = new ContentValues();
+			// pop up screen asking for user input
+			cv.put("name", name);
+			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+		} else {
+			return -2;
+		}
+	}
+	
 	
 	/**
 	 * for sync position function call
@@ -592,8 +608,8 @@ public class DBHelper128 {
 							tmp.put("accu", mCursor.getString(mCursor.getColumnIndexOrThrow("accuracy")));
 							// empty jsonobject to put in check-in info
 							JSONObject checkin = new JSONObject();
-							//if picture exists, put it in the checkin object
-							if (mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null) {
+							//if picture is not null nor "null", put it in the checkin object
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).equalsIgnoreCase("null")) {
 								// picture exists! put it in
 								// XXX cannot pass the complete path, need to
 								// strip it till only filename is left
@@ -608,14 +624,14 @@ public class DBHelper128 {
 								}
 							}
 							
-							//if emotion value exists, put it in the checkin object
+							//if emotion value is not null nor "null", put it in the checkin object
 							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")).equalsIgnoreCase("null")) {
 								// emotion exists! put it in
 								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
 							}
 							
-							//if check-in text exists, put it in the checkin object
-							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
+							//if check-in text is not null nor "null", put it in the checkin object
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("note")).equalsIgnoreCase("null")) {
 								// message exists! put it in
 								checkin.put("message", mCursor.getString(mCursor.getColumnIndexOrThrow("note")));
 							}
@@ -678,17 +694,17 @@ public class DBHelper128 {
 							tmp.put("accu", mCursor.getString(mCursor.getColumnIndexOrThrow("accuracy")));
 							// empty jsonobject to put in check-in info
 							JSONObject checkin = new JSONObject();
-							if (mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null) {
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("picture")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("picture")).equalsIgnoreCase("null")) {
 								// picture exists! put it in
 								// XXX cannot pass the complete path, need to
 								// strip it till only filename is left
 								checkin.put("picture_uri", mCursor.getString(mCursor.getColumnIndexOrThrow("picture")));
 							}
-							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null) {
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")).equalsIgnoreCase("null")) {
 								// emotion exists! put it in
 								checkin.put("emotion", mCursor.getString(mCursor.getColumnIndexOrThrow("emotion")));
 							}
-							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null) {
+							if (mCursor.getString(mCursor.getColumnIndexOrThrow("note")) != null && !mCursor.getString(mCursor.getColumnIndexOrThrow("note")).equalsIgnoreCase("null")) {
 								// message exists! put it in
 								checkin.put("message", mCursor.getString(mCursor.getColumnIndexOrThrow("note")));
 							}
