@@ -620,7 +620,7 @@ public class UploadService extends Service {
 				}
 			}
 			updateThreadStatus(threadTag, allgood?2:1);
-			Log.e("upload service", "upload result:\n" 
+			Log.e("upload service", "upload result:" + "\n" 
 			+ "get local tripid: " + (result[0]?"good":"bad")
 			+ "\nget new trip id: " + (result[1]?"good":"bad")
 			+ "\nget start address: " + (result[2]?"good":"bad")

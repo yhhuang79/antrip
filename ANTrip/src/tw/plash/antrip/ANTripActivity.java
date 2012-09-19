@@ -451,9 +451,9 @@ public class ANTripActivity extends Activity {
 			pref.edit().putString(key, String.valueOf(value)).commit();
 			//Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 			//if 
-			if(key.equals("sid")){
-				startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
-			}
+//			if(key.equals("sid")){
+//				startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
+//			}
 			// if the sid equals cszu's sid, export all info and data to file
 			if (key.equals("sid") && value.equals("206")) {
 				Log.w("SECRETLY", "EXPORT ALL");
