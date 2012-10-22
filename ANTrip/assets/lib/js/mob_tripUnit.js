@@ -76,8 +76,10 @@
 	}
 
 	function showLocalTripData(trip_id){
+		if(g_showtripmap==false){
+			return;
+		}
 		var localtripdata;
-		var userid = sid;
 
 		if(window.antrip){
 			var localresult = window.antrip.getLocalTripData(trip_id);
@@ -85,6 +87,9 @@
 				return alert("error");
 			}
 			else{
+				if(g_showtripmap==false){
+					return;
+				}
 				if(g_mapPath!=null)
 				{
 					g_mapPath.setMap(null);
@@ -100,7 +105,6 @@
 					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 					$.each(localtripdata.CheckInDataList, function(i, point) {
 						if(index>localtripdata.CheckInDataList.length){
-							alert("localtripdata start");
 							var _map =  $('#map_canvas_2').gmap('get','map');
 							if(g_mapPath!=null)
 							{
@@ -128,7 +132,7 @@
 								}).click(function(){
 									var CheckInInfo="";
 									if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
-										title = 'http://plash2.iis.sinica.edu.tw/picture/'+sid+"/"+trip_id+"/"+point.CheckIn.picture_uri;
+										var title = 'http://plash2.iis.sinica.edu.tw/picture/'+sid+"/"+trip_id+"/"+point.CheckIn.picture_uri;
 										CheckInInfo +="<p><img src='"+title+ "' height='300' /></p>";
 									}
 									if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
@@ -151,10 +155,15 @@
 								});
 								tripPointObjArray.push(marker);
 							}
-							
 						}
 						index++;
 					});
+					if(g_showtripmap==false){
+						return;
+					}
+					else{
+						g_showtripmap = false;
+					}
 					var _map =  $('#map_canvas_2').gmap('get','map');
 					if(g_mapPath!=null)
 					{

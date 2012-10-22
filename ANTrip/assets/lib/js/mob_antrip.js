@@ -73,7 +73,7 @@
 		
 		function initAPP(){
 			g_IsInited = true;
-			var appendcontent = "<ul id='menu-left' data-role='menu'><li><span data-role='button' data-icon='arrow-d' data-iconpos='right'><img id='dropdown_toggle' /></span><ul data-role='listview' data-inset='true' class='dropdown-menu'><li class='class_top_bt dropmenu_item' data-icon='false'><a class='class_top_bt_link'><img class='class_top_bt' id='tb_trip_recorder' /></a><span class='tip' id='tip_ub_trip_m'></span></li><li class='class_top_bt dropmenu_item' data-icon='false'><a class='class_top_bt_link' ><img class='class_top_bt' id='tb_trip_history' /></a><span class='tip' id='tip_ub_trip_h'></span></li><li class='class_top_bt dropmenu_item' data-icon='false'><a class='class_top_bt_link'><img class='class_top_bt' id='tb_friend' /></a><span class='tip' id='tip_ub_f'></span></li></ul></li></ul>"; 
+			var appendcontent = "<ul id='menu-left' data-role='menu'><li style='list-style-type:none;'><span data-role='button' data-icon='arrow-d' data-iconpos='right'><img id='dropdown_toggle' /></span><ul data-role='listview' data-inset='true' class='dropdown-menu'><li class='class_top_bt dropmenu_item' data-icon='false'><a class='class_top_bt_link'><img class='class_top_bt' id='tb_trip_recorder' /></a><span class='tip' id='tip_ub_trip_m'></span></li><li class='class_top_bt dropmenu_item' data-icon='false'><a class='class_top_bt_link' ><img class='class_top_bt' id='tb_trip_history' /></a><span class='tip' id='tip_ub_trip_h'></span></li><li class='class_top_bt dropmenu_item' data-icon='false'><a class='class_top_bt_link'><img class='class_top_bt' id='tb_friend' /></a><span class='tip' id='tip_ub_f'></span></li></ul></li></ul>"; 
 
 			//init login page
 			$('#blogin').unbind('click');
