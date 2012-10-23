@@ -38,6 +38,7 @@
 				}
 			}); 
 		}
+		g_triplistReset = true;
 		$.cookie("sid", null);
 		$("#username").attr("value","");
 		$("#password").attr("value","");

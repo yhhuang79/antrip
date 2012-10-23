@@ -7,13 +7,21 @@
 	var g_tripIndex=0;
 	var g_tripLength = 0;
 	var g_firstload = true;
+	var g_triplistReset = true;
 
-	$('#triplist').live('pageinit', function(){
+	/*$('#triplist').live('pageinit', function(){
 		reloadTripList();
+	});*/
+
+	$('#triplist').live('pageshow', function(){
+		if(g_triplistReset==true){
+			reloadTripList();
+			g_triplistReset = false;
+		}
 	});
 
+	var localresult=-1;
 	function showLocalTripList(){
-		var localresult=-1;
 		var div_data = [];
 		if(window.antrip){
 			localresult = eval("("+window.antrip.getLocalTripList()+")");
@@ -34,6 +42,10 @@
 		$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
 		var div_data = [];
 
+		var sid = $.cookie("sid");
+		if(window.antrip){
+			sid = window.antrip.getCookie("sid");
+		}
 		if(page==null || page=='undefined'){
 			page=1;
 		}
@@ -51,8 +63,7 @@
 				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null) ){
 					var str_noTrip = g_str_notrip;
 					div_data[i] ="<div class='class_friend_bt' style='text-align:center;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
-					$("#listview_3").append(div_data.join('')).listview('refresh');
-					return;
+					$("#listview_3").html(div_data.join('')).listview('refresh');
 				}
 				else{
 					if(result != null && result.tripInfoList != null && result.tripInfoList.length>0){
@@ -82,7 +93,7 @@
 		var localtripdata;
 
 		if(window.antrip){
-			var localresult = window.antrip.getLocalTripData(trip_id);
+			localresult = window.antrip.getLocalTripData(trip_id);
 			if(localresult==-1){
 				return alert("error");
 			}
@@ -271,6 +282,12 @@
 			data:{userid: sid, trip_id: trip_id},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
+				if(g_showtripmap==false){
+					return;
+				}
+				else{
+					g_showtripmap = false;
+				}
 				var firstlatlng=null;
 				var lastlatlng=null;
 				$.each(result.CheckInDataList, function(i, point) {
