@@ -178,7 +178,7 @@
 			$('#check-in_cancel').html("<span class=\"ui-btn-text\"></span>");
 			$("#check-in_cancel .ui-btn-text").text(g_str_cancel);
 			$('#register_yes').html("<span class=\"ui-btn-text\"></span>");
-			$("#register_yes .ui-btn-text").text(g_str_checkin);
+			$("#register_yes .ui-btn-text").text(g_str_reg);
 			$('#register_cancel').html("<span class=\"ui-btn-text\"></span>");
 			$("#register_cancel .ui-btn-text").text(g_str_cancel);
 			$('#camera_btn').html("<span class=\"ui-btn-text\"></span>");

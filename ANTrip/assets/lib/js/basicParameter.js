@@ -49,6 +49,7 @@
 		var g_str_end ="End";
 		var g_str_Length = "Length";
 
+		var g_str_reg = "Register";
 		 var g_str_register = " Registration";
 		 var g_str_or = "Or";
 		 var g_str_id = "ID";
