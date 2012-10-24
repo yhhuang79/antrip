@@ -137,7 +137,7 @@
 		background-image: url("../../images/typenotearea.png");
 	}
 
-	#chechin_bk{
+	#chechin_bk, #register_bk{
 		background-repeat: repeat;
 		background-image: url("../../images/desBK.png");
 	}

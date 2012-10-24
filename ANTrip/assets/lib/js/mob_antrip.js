@@ -177,6 +177,10 @@
 			$("#check-in_yes .ui-btn-text").text(g_str_checkin);
 			$('#check-in_cancel').html("<span class=\"ui-btn-text\"></span>");
 			$("#check-in_cancel .ui-btn-text").text(g_str_cancel);
+			$('#register_yes').html("<span class=\"ui-btn-text\"></span>");
+			$("#register_yes .ui-btn-text").text(g_str_checkin);
+			$('#register_cancel').html("<span class=\"ui-btn-text\"></span>");
+			$("#register_cancel .ui-btn-text").text(g_str_cancel);
 			$('#camera_btn').html("<span class=\"ui-btn-text\"></span>");
 			$('#camera_btn .ui-btn-text').html(g_str_takepicture);
 			$('#checkin_feeling').html(g_str_checkin_feeling);
@@ -207,6 +211,8 @@
 			$('#blogin .ui-btn-text').text(g_str_login);
 			$('#fblogin').html("<span class=\"ui-btn-inner ui-btn-corner-all\"><span class=\"ui-btn-text\"></span></span>");
 			$('#fblogin .ui-btn-text').text(g_str_fblogin);
+			$('#register_btn').html("<span class=\"ui-btn-inner ui-btn-corner-all\"><span class=\"ui-btn-text\"></span></span>");
+			$('#register_btn .ui-btn-text').text(g_str_register);
 
 			$('#blogin').css('width','50%');
 			$('#blogin').addClass('center_div');
@@ -232,6 +238,10 @@
 			$.mobile.changePage("#map");
 		});
 
+		$('#registerpage').live('pageshow',function(){
+			initRegisterDialog();
+		});
+
 		$(document).delegate('div:jqmData(role="page")', 'pagebeforeshow', function(){ 
 			if($(this).attr('id')=='map' || $(this).attr('id')=='triplist' || $(this).attr('id')=='friendlist'){
 				var titleTable = {	
@@ -249,6 +259,7 @@
 				if($(this).attr('id')=='map'){
 					var replaceHtml = "<li data-iconpos='right' class='ui-btn-right'><a href='' data-icon='check' id='CheckinButton' data-rel='dialog' class='class_right_bt'><img src='"+g_checkin_invalid_imgPath+"' id='img_CheckInButton'  style='display:none'/><span class='tip' id='checkin_bt_tip'>"+g_str_checkin+"</span></a><a href='javascript:startRecordTrip()' data-icon='gear' id='RecordButton' class='class_right_bt' ><img src='"+g_tripRecorderPath+"' id='img_RecordButton' /><span class='tip' id='record_bt_tip'>"+g_str_startrecording+"</span></a>" ;
 					
+					//disable logout button
 					if(window.antrip){
 						;
 					}
@@ -474,5 +485,33 @@
 						showTripList(g_tripPage);
 					}
 				});
+		}
+
+		function initRegisterDialog(){
+			$('.ui-dialog-buttonpane').css({
+				'background-image':url+im+"typenotearea.png)",
+				'background-position':"center center",
+				'background-repeat': 'no-repeat',
+			});
+			$("button").css({
+				color: "#000000",
+			});
+			$('.ui-dialog .ui-dialog-content').css({
+				'background': '#ffffff',
+				'background-image':url+im+"typenotearea.png)",
+				'background-position':"center center",
+				'background-repeat': 'no-repeat',
+			});
+			$('#registerpage').find('div:jqmData(role="header")').find('h1').html(g_str_register);
+			$('#reg_username').attr('placeholder',g_str_id);
+			$('#reg_email').attr('placeholder',g_str_email);
+			$('#reg_username').attr('value', "");
+			$('#reg_email').attr('value', "");
+			$('#email_forgotten').html(g_str_email_forgotten);
+			$('#reg_password').attr('placeholder',g_str_password);
+			$('#reg_re_password').attr('placeholder',g_str_re_password);
+			$('#reg_password').attr('value', "");
+			$('#reg_re_password').attr('value', "");
+			$('#email_forgotten').html(g_str_email_forgotten);
 		}
 //-->

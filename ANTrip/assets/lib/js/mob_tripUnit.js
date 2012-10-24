@@ -9,10 +9,6 @@
 	var g_firstload = true;
 	var g_triplistReset = true;
 
-	/*$('#triplist').live('pageinit', function(){
-		reloadTripList();
-	});*/
-
 	$('#triplist').live('pageshow', function(){
 		if(g_triplistReset==true){
 			reloadTripList();

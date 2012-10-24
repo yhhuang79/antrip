@@ -132,13 +132,17 @@
     			var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
     			return results[1] || 0;
 			}
-			$(document).bind('pagecreate', function(){
+			$(document).delegate('div:jqmData(role="page")', 'pagecreate', function(){ 
 				if(window.antrip){
 					sid = window.antrip.getCookie("sid");
 				} else {
 					sid = $.cookie("sid");
 				}
-				if(sid==null) $.mobile.changePage("#login");
+				if(sid==null){
+					if($(this).attr('id')!='registerpage'){
+						$.mobile.changePage("#login");
+					}
+				}
 			});
 			// map page
 			var mobileDemo = { 'center': '57.7973333,12.0502107', 'zoom': 6 };
@@ -351,15 +355,35 @@
                     </fieldset>
                 </div>
 					<a data-role="button" data-transition="fade" data-theme="a" href="#login" id="blogin">
-						登入
 					</a>
 					<a data-role="button" data-transition="fade" data-theme="b" data-icon="facebook" href="" onClick="window.open('http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php','Facebook OAuth認證','toolbar=no,resizable=no,scrollbars=auto');return false"  id='fblogin'>
-						Login with Facebook
+					</a>
+					<a href="#registerpage" id="register_btn" data-icon="check" data-rel="dialog">
 					</a>
 				<!--<a href="http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php" data-rel="dialog">Login with Facebook</a>-->
             </div>
         </div>
-	<!-- login page end-->	
+	<!-- login page end-->
+	<!-- Registration Dialog -->
+		<div data-role="page" id="registerpage">	
+			<div data-role="header" data-theme="b" data-position="inline">
+				<h1></h1>
+			</div>
+			<div data-role="content" data-theme="b" id='register_bk'>
+				<form action>
+					<p style="text-align:center"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput1'></label><input id='reg_username' placeholder='USERNAME' value='' type='text' /></fieldset></div>
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput2'></label><input id='reg_email' placeholder='EMAIL' value='' type='text' /></fieldset></div>
+					<sup id="email_forgotten"></sup><br/><br/>
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput3'></label><input id='reg_password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput4'></label><input id='reg_re_password' placeholder='Re-Enter PASSWORD' value='' type='password' /></fieldset></div> 
+					</p>
+					<div class="ui-block-b"><a href="javascript:verifyRegister();" data-role="button" data-icon="check" data-theme="b"  id='register_yes'></a></div>
+					<div class="ui-block-b"><a href="#login" data-role="button" data-icon="check" data-theme="b" id='register_cancel'></a></div>
+				</form>
+			</div>
+		</div>
+	<!-- Registration Dialog end -->	
 	<!-- main page start-->		
         <div data-role="page" id="mainpage">
             <div data-theme="a" data-role="header" data-position="fixed" >
@@ -479,7 +503,6 @@
 				<h1>Check in</h1>
 			</div>
 			<div data-role="content" data-theme="b" id='chechin_bk'>
-				<div class="ui-grid-solo" id="imgView"><div>
 				<form action>
 					<div data-role="fieldcontain" id='chechin_message_bk'>
 						<textarea name="textarea" id="message" placeholder='' class="linedivclass"  onChange="SetText(this.value);"></textarea>

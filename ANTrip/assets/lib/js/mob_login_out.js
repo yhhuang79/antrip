@@ -50,4 +50,42 @@
 		$.mobile.changePage("#login");
 		$.mobile.hidePageLoadingMsg();
 	}
+	function registerID(){
+		var UN=$("#reg_username").val();
+		var org_password = $("#reg_password").val();
+		var password = hex_md5(org_password);
+		var EM= $("#reg_email").val();
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/SignUp.php',
+							data:{username: UN, password: password, email: EM},			
+								type: 'GET', dataType: 'jsonp', cache: false,
+						success:function(result){	
+							if(result.sid != "0"){ 
+								$("#username").attr("value",$("#reg_username").val());
+								$("#password").attr("value",$("#reg_password").val());
+								Login();
+								return;
+							} else { 
+								alert("Register Fail");
+								return false;
+							}
+						}
+		});
+	}
+
+	function verifyRegister(){
+		if($("#reg_username").val()==""||
+			$("#reg_email").val()==""||
+			$("#reg_password").val()==""||
+			$("#reg_re_password").val()==""){
+			alert("Some data are missing!");
+			return false;
+		}
+		else if($("#reg_password").val() != $("#reg_re_password").val()){
+			alert(g_str_pswnotsync);
+			return false;
+		}
+		else{
+			return registerID();
+		}
+	}
 //-->

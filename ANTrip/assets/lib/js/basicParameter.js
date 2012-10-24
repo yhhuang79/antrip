@@ -49,6 +49,17 @@
 		var g_str_end ="End";
 		var g_str_Length = "Length";
 
+		 var g_str_register = " Registration";
+		 var g_str_or = "Or";
+		 var g_str_id = "ID";
+		 var g_str_password = "PASSWORD";
+		 var g_str_email = "EMAIL";
+		 var g_str_re_password = "Re-Enter PASSWORD";
+		 var g_str_email_forgotten = "(Your password will be sent to this email if forgotten)";
+		 var g_str_create_account = "Create an account";
+		 var g_str_hasregistered = "You have login! Don't register again!";
+		 var g_str_pswnotsync ="The password is not confirmed to sync!";
+
 		var g_str_loading = "Now Loading...";
 		var g_str_localizationing = "Now Locating...";
 		var g_str_iamhere = "You are here!";
