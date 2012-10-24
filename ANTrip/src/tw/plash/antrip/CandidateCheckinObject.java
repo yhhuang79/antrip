@@ -2,6 +2,8 @@ package tw.plash.antrip;
 
 import java.io.Serializable;
 
+import android.location.Location;
+
 public class CandidateCheckinObject implements Serializable{
 	
 	/**
@@ -14,6 +16,8 @@ public class CandidateCheckinObject implements Serializable{
 	private String picturePath;
 	private String pictureName;
 	
+	private Location location;
+	
 	/**
 	 * initialize all fields with null value
 	 */
@@ -22,6 +26,7 @@ public class CandidateCheckinObject implements Serializable{
 		checkinText = null;
 		picturePath = null;
 		pictureName = null;
+		location = null;
 	}
 
 	public Integer getEmotionID() {
@@ -56,5 +61,13 @@ public class CandidateCheckinObject implements Serializable{
 			e.printStackTrace();
 			this.pictureName = null;
 		}
+	}
+	
+	public Location getLocation(){
+		return location;
+	}
+	
+	public void setLocation(Location inputLoc){
+		this.location = inputLoc;
 	}
 }

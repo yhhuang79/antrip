@@ -3,53 +3,50 @@ package tw.plash.antrip;
 import java.io.File;
 import java.util.Locale;
 import java.util.PriorityQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningServiceInfo;
 import android.app.AlertDialog;
-import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.IntentFilter;
 import android.content.DialogInterface.OnClickListener;
+import android.content.res.Configuration;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
+import android.inputmethodservice.Keyboard.Key;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.View;
-import android.view.Window;
+import android.view.KeyEvent;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.webkit.WebSettings.RenderPriority;
+import android.widget.FrameLayout;
 
 public class ANTripActivity extends Activity {
-//	private final boolean useSkyhook = true;
 	
 	private Context mContext;
-	private WebView mWebView;
+	private WebView mWebView = null;
+	private FrameLayout webViewPlaceholder;
 	
-	private Integer previousMode;
 	private Integer currentMode;
-	
-	private View usableArea;
-	private boolean loadIndex = false;
 	
 	private CandidateCheckinObject cco;
 	
@@ -58,60 +55,278 @@ public class ANTripActivity extends Activity {
 	
 	private SharedPreferences pref;
 	
+	private LinkedBlockingQueue<Location> locationQueue;
+	
 	private PriorityQueue<String> urlQueue;
 	private Handler mHandler;
 	private boolean canPostAgain;
 	private boolean canCallJavaScript = false;
 	
-	private BroadcastReceiver br = new BroadcastReceiver() {
+	boolean mIsBound;
+	private Messenger outMessenger = null;
+	final private Messenger inMessenger = new Messenger(new IncomingHandler());
+	private class IncomingHandler extends Handler{
 		@Override
-		public void onReceive(Context context, Intent intent) {
-			// not recording, just positioning
-			if (intent.getAction().equals("ACTION_LOCATION_SERVICE_SET_POSITION")) {
-				Location loc = (Location) intent.getExtras().getParcelable("location");
-				String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + ","
-						+ loc.getLongitude() + ")";
-				// push this location update to html
-				queuedLoadURL(singleLocationUpdateURL);
-				// recording, syncing the whole position list
-			} else if (intent.getAction().equals("ACTION_LOCATION_SERVICE_ADD_POSITION")) {
-				String addpos = intent.getExtras().getString("location");
-				String addPositionUrl = "javascript:addPosition(" + addpos + ")";
-				queuedLoadURL(addPositionUrl);
-				// recording, adding a new point to the list
-			} else if (intent.getAction().equals("ACTION_LOCATION_SERVICE_SYNC_POSITION")) {
-				String syncpos = intent.getExtras().getString("location");
-				String syncPositionUrl = "javascript:syncPosition(" + syncpos + ")";
-				queuedLoadURL(syncPositionUrl);
-			} else if(intent.getAction().equals("ACTION_RELOAD_TRIPLIST")){
-				queuedLoadURL("javascript:reloadTripList()");
-			}else{
-				// huh?
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case AntripService.MSG_LOCATION_UPDATE:
+				//location update should provide with a non-null location related object
+				if (msg.obj != null) {
+					//will be provided with different location object in recording/non-recording situation
+					if (AntripService.isRecording()) {
+						/**
+						 * location updates during recording will be in the form of yu-hsiang style, Stringed, JSON format check-in list
+						 * so we need to test the data type first before passing to the JavaScript function in the html UI
+						 * - syncPosition method is now deprecated, only addPosition is being used
+						 */
+						if(msg.obj instanceof String){
+							String addpos = (String) msg.obj;
+							String addPositionUrl = "javascript:addPosition(" + addpos + ")";
+							//use the buffered thread-safe url loading method
+							bufferedLoadURL(addPositionUrl);
+						} else{
+							Log.e("Activity", "Message handle error: location update without STRING object");
+						}
+					} else {
+						/**
+						 * non recording location updates will be in the form of Android Location object
+						 * 
+						 */
+						if(msg.obj instanceof Location){
+							Location loc = (Location) msg.obj;
+							// setPosition
+							String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + "," + loc.getLongitude() + ")";
+							//use the buffered thread-safe url loading method
+							bufferedLoadURL(singleLocationUpdateURL);
+						} else{
+							Log.e("Activity", "Message handle error: location update without LOCATION object");
+						}
+					}
+				} else{
+					Log.e("Activity", "Message handle error: location update msg object does not have object payload");
+				}
+				break;
+			case AntripService.MSG_LOCATION_UPDATE_CHECKIN:
+				if(msg.obj != null){
+					if(msg.obj instanceof Location){
+						if(cco != null){
+							cco.setLocation((Location) msg.obj);
+						} else{
+							Log.e("Activity", "Check-in object error: check-in object is null, cannot set location");
+						}
+					} else{
+						Log.e("Activity", "Message handle error: check-in location update without LOCATION object");
+					}
+				} else{
+					Log.e("Activity", "Message handle error: check-in msg object does not have object payload");
+				}
+				break;
+				
+			default:
+				super.handleMessage(msg);
 			}
+		}
+	}
+	
+	private ServiceConnection mConnection = new ServiceConnection() {
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			Log.w("Activity", "mConnection: onServiceConnected");
+			outMessenger = new Messenger(service);
+			try{
+				Message msg = Message.obtain(null, AntripService.MSG_REGISTER_CLIENT);
+				msg.replyTo = inMessenger;
+				outMessenger.send(msg);
+			} catch(RemoteException e){
+				e.printStackTrace();
+			}
+		}
+		
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			Log.w("Activity", "mConnection: onServiceDisconnected");
+			outMessenger = null;
 		}
 	};
 	
-	public void onWindowFocusChanged(boolean hasFocus) {
-		usableArea = getWindow().findViewById(Window.ID_ANDROID_CONTENT);
-		if (hasFocus) {
-			//Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " hasFocus la");
-		} else {
-			//Log.w("DISPLAY", usableArea.getWidth() + " x " + usableArea.getHeight() + " no focus");
+	private void sendMessageToService(int msgType, Object payload){
+		if(mIsBound){
+			if(outMessenger != null){
+				try {
+					switch(msgType){
+					//set mode = map view
+					case AntripService.MSG_INIT_LOCATION_THREAD:
+						outMessenger.send(Message.obtain(null, msgType));
+						break;
+					//set mode != map view
+					case AntripService.MSG_STOP_LOCATION_THREAD:
+						outMessenger.send(Message.obtain(null, msgType));
+						break;
+//					case AntripService.MSG_START_RECORDING:
+//						outMessenger.send(Message.obtain(null, msgType, payload));
+//						break;
+					case AntripService.MSG_STOP_RECORDING_PRE:
+						outMessenger.send(Message.obtain(null, msgType));
+						break;
+					case AntripService.MSG_STOP_RECORDING_ACTUAL:
+						outMessenger.send(Message.obtain(null, msgType, payload));
+						break;
+					case AntripService.MSG_GET_CHECKIN_LOCATION:
+						outMessenger.send(Message.obtain(null, msgType));
+						break;
+					case AntripService.MSG_SAVE_CHECKIN_LOCATION:
+						outMessenger.send(Message.obtain(null, msgType, payload));
+						break;
+					case AntripService.MSG_SET_USERID:
+						outMessenger.send(Message.obtain(null, msgType, payload));
+						break;
+					case AntripService.MSG_LOGOUT_EVENT:
+						outMessenger.send(Message.obtain(null, msgType));
+						break;
+					default:
+						break;
+					}
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			} else{
+				
+			}
+		} else{
+			
 		}
-		if (loadIndex) {
+	}
+	
+	void doBindService(){
+		bindService(new Intent(mContext, AntripService.class), mConnection, Context.BIND_AUTO_CREATE);
+		mIsBound = true;
+	}
+	
+	void doUnbindService(){
+		if(mIsBound){
+			if(outMessenger != null){
+				try {
+					Message msg = Message.obtain(null, AntripService.MSG_UNREGISTER_CLIENT);
+					msg.replyTo = inMessenger;
+					outMessenger.send(msg);
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			} else{
+				
+			}
+			unbindService(mConnection);
+			mIsBound = false;
+		} else{
+			
+		}
+	}
+	
+	private void initUI(){
+		Log.e("Activity", "initUI: called");
+		//frameview where webview will be placed
+		webViewPlaceholder = (FrameLayout) findViewById(R.id.webViewPlaceHolder);
+		//first time running, webview will be null
+		if(mWebView == null){
+			Log.e("Activity", "initUI: webview being init");
+			//init a new webview object
+			mWebView = new WebView(mContext);
+			//some settings need to be changed in the webview
+			WebSettings mWebSettings = mWebView.getSettings();
+			// javascript must be enabled, of course
+			mWebSettings.setJavaScriptEnabled(true);
+			//render/cache settings are supposed to speed up webpage rendering speed
+			mWebSettings.setRenderPriority(RenderPriority.HIGH);
+			mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+			//make sure no javascript is called before webpage finished loading
+			mWebView.setWebViewClient(new WebViewClient(){
+				@Override
+				public void onPageFinished(WebView view, String url) {
+					Log.w("acvitivy", "webview: page finished");
+					canCallJavaScript = true;
+				}
+			});
+			
+			mWebView.setWebChromeClient(new WebChromeClient() {
+				/**
+				 * intercept and replace JavaScript alert dialog with native android
+				 * for better visual experiance...
+				 */
+				@Override
+				public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+					new AlertDialog.Builder(mContext)
+							.setCancelable(false)
+							.setMessage(message)
+							.setNeutralButton(R.string.okay,
+								new OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										// inform javascript the alert dialog is
+										// dismissed
+										result.confirm();
+									}
+								}).show();
+					return true;
+				}
+				
+				/**
+				 * display any message javascript console might have, for debuging
+				 * purpose
+				 */
+				@Override
+				public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+					Log.e("consolemsg", consoleMessage.message() + " @line: " + consoleMessage.lineNumber() + " from: "
+							+ consoleMessage.sourceId());
+					return true;
+				}
+			});
+			// name the javascript interface "antrip"
+			mWebView.addJavascriptInterface(new jsinter(), "antrip");
+			//"cancalljavascript" is false until "onpagefinished", so first time loading url will have to use the 
+			//webview method, instead of the buffered method
 			mWebView.loadUrl("file:///android_asset/index.html");
-			loadIndex = false;
 		}
-	};
+		Log.e("Activity", "initUI: adding webview to placeholder");
+		//if not first time running, webview will be preserved and added back to placeholder with original state
+		webViewPlaceholder.addView(mWebView);
+	}
 	
-	private boolean isMyServiceRunning() {
-		ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-			if (LocationService.class.getName().equals(service.service.getClassName())) {
-				return true;
-			}
+	/**
+	 * handle the configuration change ourself, currently only the orientation event is intercepted
+	 */
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		if(mWebView != null){
+			webViewPlaceholder.removeView(mWebView);
 		}
-		return false;
+		
+		super.onConfigurationChanged(newConfig);
+		
+		//need to make a landscape layout
+		setContentView(R.layout.main);
+		//re-init the UI
+		initUI();
+	}
+	
+	/**
+	 * save the state of the webview, to be restored after the rotation event
+	 */
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		
+		mWebView.saveState(outState);
+	}
+	
+	/**
+	 * restore the state of the webview, usually this occurs after the rotation event
+	 */
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+		
+		mWebView.restoreState(savedInstanceState);
 	}
 	
 	@Override
@@ -121,89 +336,26 @@ public class ANTripActivity extends Activity {
 		setContentView(R.layout.main);
 		
 		mContext = this;
-		// perform a self check, upload any unfinished jobs
-		// if there are unfinished jobs, it will be uploaded SECRETLY
-		// if there are no unfinished jobs, service will stop it self
-		startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
-		
-		mWebView = (WebView) findViewById(R.id.webview);
-		
-		previousMode = null;
-		
+
 		urlQueue = new PriorityQueue<String>();
 		mHandler = new Handler();
 		canPostAgain = true;
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		
-		//error case: is recording but service is not running
-		if(pref.getString("isRecording", null) != null && pref.getString("isRecording", null).equals("true")){
-			//is recording = true, now check if service is running or not
-			if(!isMyServiceRunning()){
-				//service is not running, reset everything
-				pref.edit().remove("isRecording").commit();
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_CLEAN_UP"));
-			}
-		}
-		
-		WebSettings mWebSettings = mWebView.getSettings();
-		// javascript must be enabled, of course
-		mWebSettings.setJavaScriptEnabled(true);
-		// mWebSettings.setDomStorageEnabled(true);
-		mWebSettings.setRenderPriority(RenderPriority.HIGH);
-		mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
-		
-		mWebView.setWebViewClient(new WebViewClient(){
-			@Override
-			public void onPageFinished(WebView view, String url) {
-				//Log.w("acvitivy", "page finished");
-				canCallJavaScript = true;
-			}
-		});
-		mWebView.setWebChromeClient(new WebChromeClient() {
-			/**
-			 * intercept and replace JavaScript alert dialog with native android
-			 * for better visual experiance...
-			 */
-			@Override
-			public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
-				new AlertDialog.Builder(mContext)
-						.setCancelable(false)
-						.setMessage(message)
-						.setNeutralButton(R.string.okay,
-							new OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									// inform javascript the alert dialog is
-									// dismissed
-									result.confirm();
-								}
-							}).show();
-				return true;
-			}
-			
-			/**
-			 * display any message javascript console might have, for debuging
-			 * purpose
-			 */
-			@Override
-			public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-				//Log.e("consolemsg", consoleMessage.message() + " @line: " + consoleMessage.lineNumber() + " from: "
-//						+ consoleMessage.sourceId());
-				return true;
-			}
-		});
-		// name the javascript interface "antrip"
-		mWebView.addJavascriptInterface(new jsinter(), "antrip");
-		// now after all the settings, load the html file
-		// mWebView.loadUrl("file:///android_asset/index.html");
-		// queuedLoadURL("file:///android_asset/index.html");
-		loadIndex = true;
+		initUI();
 	}
 	
+	/**
+	 * some trick to make sure javascript interface works properly
+	 *
+	 */
 	public interface JavaScriptCallback {
 	}
 	
+	/**
+	 * supposedly the javascript interface will work without hiccup after implementing the interface
+	 */
 	private class jsinter implements JavaScriptCallback {
 		
 		// private final String imagepath =
@@ -213,11 +365,11 @@ public class ANTripActivity extends Activity {
 		// null, need to check before proceeding
 		private final String imagepath = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
 		
-		public void logout() {
-			// remove sid and stop stuffs
-			//Log.w("logged", "out");
-			
-		}
+//		public void logout() {
+//			// remove sid and stop stuffs
+//			Log.w("logged", "out");
+//			sendMessageToService(AntripService.MSG_LOGOUT_EVENT, null);
+//		}
 		
 		// need a function to provide detailed trip data(reviewing historic
 		// trip)
@@ -263,13 +415,9 @@ public class ANTripActivity extends Activity {
 		 */
 		public String startRecording() {
 			Long tid = System.nanoTime();
-//			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_RECORDING")
-					.putExtra("tid", tid.toString()));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_RECORDING")
-//						.putExtra("tid", tid.toString()));
-//			}
+			//XXX
+			//start recording with the newly generated tripid
+			startService(new Intent("START_RECORDING", null, mContext, AntripService.class).putExtra("tid", tid));
 			return tid.toString();
 		}
 		
@@ -277,24 +425,17 @@ public class ANTripActivity extends Activity {
 		 * 
 		 */
 		public void stopRecording(String tripname) {
-//			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_STOP_RECORDING")
-					.putExtra("tripname", tripname));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_STOP_RECORDING")
-//					.putExtra("tripname", tripname));
-//			}
+			//XXX
+			//the recording should already be stopped, just save the name and we're all done
+			sendMessageToService(AntripService.MSG_STOP_RECORDING_ACTUAL, tripname);
 		}
 		
 		/**
 		 * user is naming their trip, don't broadcast positions
 		 */
 		public void prepareStopRecording(){
-//			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
-//			}
+			//basically just stop the recording here, calculate the trip statistics
+			sendMessageToService(AntripService.MSG_STOP_RECORDING_PRE, null);
 		}
 		
 		/*
@@ -307,45 +448,17 @@ public class ANTripActivity extends Activity {
 			String isrec = pref.getString("isRecording", null);
 			switch (currentMode) {
 			case 3:
-				// start location service
-//				if (useSkyhook) {
-					startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
-					startService(new Intent(mContext, LocationService.class)
-							.setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-//				} else {
-//					startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_SERVICE"));
-//					startService(new Intent(mContext, LocationServiceGPS.class)
-//							.setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-//				}
-				if (isrec != null && isrec.equals("true")) {
-//					if (useSkyhook) {
-						startService(new Intent(mContext, LocationService.class)
-								.setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
-//					} else {
-//						startService(new Intent(mContext, LocationServiceGPS.class)
-//								.setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
-//					}
-				}
+				//need to start location service
+				sendMessageToService(AntripService.MSG_INIT_LOCATION_THREAD, null);
 				break;
 			case 1:
 			case 2:
 			case 4:
 			default:
 				// stop location service if not recording
-				
-				//Log.w("setMode", "isrec= " + isrec);
-				if (isrec == null || !isrec.equals("true")) {
-//					if (useSkyhook) {
-						stopService(new Intent(mContext, LocationService.class));
-//					} else {
-//						stopService(new Intent(mContext, LocationServiceGPS.class));
-//					}
-				}
+				sendMessageToService(AntripService.MSG_STOP_LOCATION_THREAD, null);
 				break;
 			}
-			// not sure if I need to know what the previous mode was, save it
-			// anyway
-			previousMode = currentMode;
 		}
 		
 		/**
@@ -365,11 +478,6 @@ public class ANTripActivity extends Activity {
 			intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 			// launch the intent with code
 			startActivityForResult(intent, REQUEST_CODE_TAKE_PICTURE);
-			
-			// should add extra functions to camera, e.g. filters, special
-			// effects, stickers, etc.
-			// startActivityForResult((new Intent(mContext,
-			// test21.class).putExtra("requestCode", 1)), 1);
 		}
 		
 		/**
@@ -402,12 +510,7 @@ public class ANTripActivity extends Activity {
 			//Log.w("activity", "start checkin called");
 			cco = new CandidateCheckinObject();
 			// request a check-in location from service
-//			if (useSkyhook) {
 			Log.e("activity", "start check-in");
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_GET_CHECKIN_LOCATION"));
-//			}
 		}
 		
 		/**
@@ -416,14 +519,8 @@ public class ANTripActivity extends Activity {
 		 */
 		public void endCheckin() {
 			// send cco to service via startService call with action and extras
-//			if (useSkyhook) {
 			Log.w("activity", "end check-in, cco.emotion= " + cco.getEmotionID() + ", cco.text= " + cco.getCheckinText());
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_SAVE_CCO").putExtra("cco",
-						cco));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_SAVE_CCO").putExtra(
-//						"cco", cco));
-//			}
+			sendMessageToService(AntripService.MSG_SAVE_CHECKIN_LOCATION, cco);
 		}
 		
 		/**
@@ -432,12 +529,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void cancelCheckin() {
 			cco = null;
-//			if (useSkyhook) {
 			Log.e("activity", "cancel check-in");
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_CANCEL_CHECKIN"));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_CANCEL_CHECKIN"));
-//			}
 		}
 		
 		/**
@@ -450,17 +542,16 @@ public class ANTripActivity extends Activity {
 		public void setCookie(String key, String value) {
 			pref.edit().putString(key, String.valueOf(value)).commit();
 			//Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
-			//if 
-//			if(key.equals("sid")){
-//				startService(new Intent(mContext, UploadService.class).setAction("ACTION_SELF_CHECK_AND_UPLOAD"));
-//			}
-			// if the sid equals cszu's sid, export all info and data to file
-			if (key.equals("sid") && value.equals("206")) {
-				Log.w("SECRETLY", "EXPORT ALL");
-				DBHelper128 ddd = new DBHelper128(mContext);
-				ddd.exportEverything();
-				ddd.closeDB();
-				ddd = null;
+			//login action, send sid to service
+			if(key.equalsIgnoreCase("sid")){
+				sendMessageToService(AntripService.MSG_SET_USERID, value);
+				if(value.equals("206")){
+					Log.w("SECRETLY", "EXPORT ALL");
+					DBHelper128 ddd = new DBHelper128(mContext);
+					ddd.exportEverything();
+					ddd.closeDB();
+					ddd = null;
+				}
 			}
 		}
 		
@@ -471,6 +562,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public String getCookie(String key) {
 			//Log.w("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
+			//
 			return pref.getString(key, null);
 		}
 		
@@ -485,21 +577,6 @@ public class ANTripActivity extends Activity {
 		}
 		
 		public String getLocale() {
-			// //Log.e("locale/getDisplayLanguage",
-			// Locale.getDefault().getDisplayLanguage());
-			// //Log.e("locale/getCountry", Locale.getDefault().getCountry());
-			// //Log.e("locale/getDisplayCountry",
-			// Locale.getDefault().getDisplayCountry());
-			// //Log.e("locale/getDisplayName",
-			// Locale.getDefault().getDisplayName());
-			// //Log.e("locale/getDisplayVariant",
-			// Locale.getDefault().getDisplayVariant());
-			// //Log.e("locale/getISO3Country",
-			// Locale.getDefault().getISO3Country());
-			// //Log.e("locale/getISO3Language",
-			// Locale.getDefault().getISO3Language());
-			// //Log.e("locale/getLanguage", Locale.getDefault().getLanguage());
-			// //Log.e("locale/getVariant", Locale.getDefault().getVariant());
 			return Locale.getDefault().getLanguage();
 		}
 		
@@ -510,7 +587,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void uploadTrip(String id) {
 			//Log.w("activity", "upload trip: " + id);
-			startService(new Intent(mContext, UploadService.class).setAction("ACTION_UPLOAD_TRIP").putExtra("id", id));
+//			startService(new Intent(mContext, UploadService.class).setAction("ACTION_UPLOAD_TRIP").putExtra("id", id));
 		}
 		
 		/**
@@ -521,44 +598,12 @@ public class ANTripActivity extends Activity {
 			//Log.w("activity", "delete trip: " + id);
 			DBHelper128 dh = new DBHelper128(mContext);
 			//Log.w("activity", "rows deleted=" + dh.deleteTrip(id));
-			queuedLoadURL("javascript:reloadTripList()");
-		}
-		
-		/**
-		 * return screen density value
-		 * 
-		 * @return
-		 */
-		public float getdpi() {
-			DisplayMetrics dm = new DisplayMetrics();
-			getWindowManager().getDefaultDisplay().getMetrics(dm);
-			return dm.density;
-		}
-		
-		/**
-		 * return all display related metrics in the following order density;
-		 * scaled density; x dpi; y dpi; width pixels; height pixels
-		 * 
-		 * @return float[] containing the 6 display metrics
-		 * @throws JSONException
-		 */
-		public String getScreenInfo() throws JSONException {
-			DisplayMetrics dm = new DisplayMetrics();
-			getWindowManager().getDefaultDisplay().getMetrics(dm);
-			// return new float[]{dm.density, dm.scaledDensity, dm.xdpi,
-			// dm.ydpi, usableArea.getWidth(), usableArea.getHeight()};
-			String s = "{\"density\":\"" + dm.density 
-					+ "\", \"scaledDensity\":\"" + dm.scaledDensity
-					+ "\", \"xdpi\":\"" + dm.xdpi 
-					+ "\", \"ydpi\":\"" + dm.ydpi 
-					+ "\", \"width\":\""+ usableArea.getWidth() 
-					+ "\", \"height\":\"" + usableArea.getHeight() + "\"}";
-			//Log.e("screeninfo", s);
-			return new JSONObject(s).toString();
+			bufferedLoadURL("javascript:reloadTripList()");
 		}
 		
 		public void reloadIndex(){
-			mWebView.loadUrl("file:///android_asset/index.html");
+			bufferedLoadURL("file:///android_asset/index.html");
+//			mWebView.loadUrl("file:///android_asset/index.html");
 		}
 	}
 	
@@ -568,7 +613,7 @@ public class ANTripActivity extends Activity {
 	 * 
 	 * @param url
 	 */
-	private void queuedLoadURL(final String url) {
+	private void bufferedLoadURL(final String url) {
 		urlQueue.offer(url);
 		// if already running, don't post again
 		if (canPostAgain) {
@@ -601,69 +646,56 @@ public class ANTripActivity extends Activity {
 	}
 	
 	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch(keyCode){
+		case KeyEvent.KEYCODE_MENU:
+			Log.e("Activity", "onKeyDown: MENU MENU MENU");
+			
+			return true;
+		case KeyEvent.KEYCODE_BACK:
+			Log.e("Activity", "onKeyDown: BACK BACK BACK");
+			//show a warning window to the user
+			new AlertDialog.Builder(mContext)
+				.setCancelable(false)
+				.setMessage("are you sure you want to quit ANTRIP?")
+				.setPositiveButton("yeah", new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						finish();
+					}
+				}).setNegativeButton("nah...", new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+					}
+				}).show();
+			return true;
+		default:
+			//other keys we don't care about
+			return false;
+		}
+	}
+	
+	@Override
 	protected void onResume() {
 		super.onResume();
-		// need to notify location service to send location update
-		IntentFilter filter = new IntentFilter();
-		filter.addAction("ACTION_LOCATION_SERVICE_SET_POSITION");
-		filter.addAction("ACTION_LOCATION_SERVICE_ADD_POSITION");
-		filter.addAction("ACTION_LOCATION_SERVICE_SYNC_POSITION");
-		registerReceiver(br, filter);
-		// only notify service to start broadcasting if it is running, either
-		// isrec = true, or we're in mode 3
-		String isrec = pref.getString("isRecording", null);
-		if (isrec != null && isrec.equals("true")) {
-//			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class)
-						.setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-				startService(new Intent(mContext, LocationService.class)
-						.setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class)
-//						.setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-//				startService(new Intent(mContext, LocationServiceGPS.class)
-//						.setAction("ACTION_LOCATION_SERVICE_SYNC_POSITION"));
-//			}
-		} else if (currentMode != null && currentMode == 3) {
-			// need to re-start the service if it is in recorder mode
-//			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class).setAction("ACTION_START_SERVICE"));
-				startService(new Intent(mContext, LocationService.class)
-						.setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class).setAction("ACTION_START_SERVICE"));
-//				startService(new Intent(mContext, LocationServiceGPS.class)
-//						.setAction("ACTION_ACTIVITY_IS_READY_FOR_BROADCAST"));
-//			}
-		}
-		
+		doBindService();
 	}
 	
 	@Override
 	protected void onPause() {
 		super.onPause();
-		// save to pref that activity is NOT ready for broadcast
-		String isrec = pref.getString("isRecording", null);
-		// only 2 cases where service is running, isrec = true, or we're in mode
-		// 3
-		if (isrec != null && isrec.equals("true")) {
-//			if (useSkyhook) {
-				startService(new Intent(mContext, LocationService.class)
-						.setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
-//			} else {
-//				startService(new Intent(mContext, LocationServiceGPS.class)
-//						.setAction("ACTION_ACTIVITY_NOT_READY_FOR_BROADCAST"));
-//			}
-		} else {
-			// not recording
-//			if (useSkyhook) {
-				stopService(new Intent(mContext, LocationService.class));
-//			} else {
-//				stopService(new Intent(mContext, LocationServiceGPS.class));
-//			}
+		try{
+			doUnbindService();
+		} catch(Throwable t){
+			Log.e("AntripActivity", "Failed to unbind from AntripService");
 		}
-		// need to notify location service not to send location update
-		unregisterReceiver(br);
+		
+		// short circuit logic, if startService is not called, stop service will not be called
+		// if start service is called AND is not recording a trip, stop service will be called
+		if(AntripService.isStarted() && !AntripService.isRecording()){
+			stopService(new Intent(getApplicationContext(), AntripService.class));
+		}
 	}
 	
 	@Override
@@ -688,7 +720,7 @@ public class ANTripActivity extends Activity {
 				}
 				
 				// mWebView.loadUrl(imageURL);
-				queuedLoadURL(imageURL);
+				bufferedLoadURL(imageURL);
 				//Log.e("onActivityResult", "imageURL= " + imageURL);
 				if (cco != null) {
 					cco.setPicturePath(imageuri);
@@ -704,7 +736,7 @@ public class ANTripActivity extends Activity {
 				// handle all exceptions
 				
 				// mWebView.loadUrl(noImageURL);
-				queuedLoadURL(noImageURL);
+				bufferedLoadURL(noImageURL);
 				break;
 			}
 		}

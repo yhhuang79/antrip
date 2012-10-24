@@ -33,7 +33,7 @@ import android.util.Log;
 public class DBHelper128 {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
-	private static final int DATABASE_VERSION = 3; // required by SQLite tool
+	private static final int DATABASE_VERSION = 4; // required by SQLite tool
 	
 	private static final String TRIP_DATA_TABLE = "tripdatatable";
 	private static final String TRIP_INFO_TABLE = "tripinfotable";
@@ -53,16 +53,16 @@ public class DBHelper128 {
 			+ "accuracy TEXT, " 
 			+ "userid TEXT, "
 			+ "tripid TEXT, " 
-			+ "picture TEXT default NULL, " 
-			+ "emotion TEXT default NULL, "
-			+ "note TEXT default NULL, " 
+			+ "picture TEXT, " 
+			+ "emotion TEXT, "
+			+ "note TEXT, " 
 			+ "uploadstatus INTEGER default 0)";
 	
 	private static final String CREATE_TABLE_TRIP_INFO = "CREATE TABLE " + TRIP_INFO_TABLE
 			+ "(id INTEGER PRIMARY KEY, " 
 			+ "tripid TEXT, " 
 			+ "userid TEXT, " 
-			+ "name TEXT, " 
+			+ "name TEXT default 'Untitled Trip', " 
 			+ "starttime TEXT, "
 			+ "endtime TEXT, " 
 			+ "length REAL, " 
@@ -77,7 +77,8 @@ public class DBHelper128 {
 			+ "endaddrpt3 TEXT, " 
 			+ "endaddrpt4 TEXT, " 
 			+ "endaddrpt5 TEXT, "
-			+ "uploadstage INTEGER default 0)";
+			+ "uploadstage INTEGER default 0, "
+			+ "infoiscomplete INTEGER default 0)";
 	
 	/**
 	 * Extends SQLiteOpenHelper, this subclass is only good for creating a
@@ -212,10 +213,33 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long insert(Location location, String userid, String tripid, CandidateCheckinObject cco) {
+//	synchronized public long insert(Location location, String userid, String tripid, CandidateCheckinObject cco) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			locationStringConverter l2s = new locationStringConverter(location);
+//			cv.put("latitude", l2s.getLatitude());
+//			cv.put("longitude", l2s.getLongitude());
+//			cv.put("timestamp", new Timestamp(Long.valueOf(l2s.getTime())).toString());
+//			cv.put("altitude", l2s.getAltitude());
+//			cv.put("speed", l2s.getSpeed());
+//			cv.put("bearing", l2s.getBearing());
+//			cv.put("accuracy", l2s.getAccuracy());
+//			cv.put("userID", userid);
+//			cv.put("tripID", tripid);
+//			// cco fields
+//			cv.put("picture", cco.getPicturePath());
+//			cv.put("emotion", cco.getEmotionID());
+//			cv.put("note", cco.getCheckinText());
+//			return db.insert(TRIP_DATA_TABLE, null, cv);
+//		} else {
+//			return -2;
+//		}
+//	}
+	
+	synchronized public long insert(CandidateCheckinObject cco, String userid, String tripid) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
-			locationStringConverter l2s = new locationStringConverter(location);
+			locationStringConverter l2s = new locationStringConverter(cco.getLocation());
 			cv.put("latitude", l2s.getLatitude());
 			cv.put("longitude", l2s.getLongitude());
 			cv.put("timestamp", new Timestamp(Long.valueOf(l2s.getTime())).toString());
@@ -232,6 +256,15 @@ public class DBHelper128 {
 			return db.insert(TRIP_DATA_TABLE, null, cv);
 		} else {
 			return -2;
+		}
+	}
+	
+	synchronized public void saveTripStats(String userid, String tripid, TripStats stats){
+		if(db.isOpen()){
+			ContentValues cv = new ContentValues();
+			
+		} else{
+			return;
 		}
 	}
 	
@@ -330,6 +363,24 @@ public class DBHelper128 {
 			cv.put("name", name);
 			cv.put("endtime", endtime);
 			cv.put("length", length);
+			// count the number of points directly from DB
+			int count = (int) getNumberofPoints(userid, tripid);
+			cv.put("count", count);
+			
+			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
+			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+		} else {
+			return -2;
+		}
+	}
+	
+	synchronized public long setEndInfo(String userid, String tripid, String name, TripStats stats) {
+		if (db.isOpen()) {
+			ContentValues cv = new ContentValues();
+			// pop up screen asking for user input
+			cv.put("name", name);
+//			cv.put("endtime", endtime);
+//			cv.put("length", length);
 			// count the number of points directly from DB
 			int count = (int) getNumberofPoints(userid, tripid);
 			cv.put("count", count);
@@ -1062,7 +1113,7 @@ public class DBHelper128 {
 					return;
 				}
 			} catch (IOException e) {
-				
+				return;
 			}
 		} else {
 			return;

@@ -1,63 +1,101 @@
 package tw.plash.antrip;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import android.location.Location;
 
 public class TripStats {
-	
-	private String startTime;
-	private String endTime;
-	
+	//time when start record button is pushed
+	private String buttonStartTime;
+	//time of the LAST inaccurate point
+	private String lastInaccuratePointTime;
+	//time of the GOOD good point
+	private String lastGoodPointTime;
+	//time when end record button is pushed
+	private String buttonEndTime;
 	//in meters
-	private final Float accuThreshold = 50.0f;
+	private final Float accuThreshold = 1499.0f;
 	//in meters
 	private final Double radius = 6371008.7714;
 	//in meters
-	private Double totalLength;
+	private Double totalValidLength;
+	//total points
 	private Integer totalPointCount;
+	// exclude -999 points
+	private Integer totalValidPointCount;
+	// exclude accuracy > threshold
+	private Integer totalAccuratePointCount;
+	// regardless of accuracy
+	private Integer totalCheckinPointCount;
 	//holder
 	private Location previousLoc;
 	
 	public TripStats() {
-		totalLength = 0.0;
+		buttonStartTime = null;
+		lastInaccuratePointTime = null;
+		lastGoodPointTime = null;
+		buttonEndTime = null;
+		
+		totalValidLength = 0.0;
 		totalPointCount = 0;
+		totalValidPointCount = 0;
+		totalAccuratePointCount = 0;
+		totalCheckinPointCount = 0;
+		
 		previousLoc = null;
-		startTime = null;
-		endTime = null;
 	}
 	
-	public void addOnePoint(Location loc){
+	public void addOnePoint(Location loc, boolean checkin){
 		//don't proceed if null was inputted
 		if(loc != null){
+			//input not null, add one count
+			totalPointCount += 1;
 			//if previous location was not null, it is not the first time adding point
 			if(previousLoc != null){
-				//lat & lon should both be greater than the null location value
-				if(loc.getLatitude() > -999.0 && loc.getLongitude() > -999.0){
-					if(loc.getAccuracy() < accuThreshold){
-						if(startTime == null){
-							//set start time if no previous start time was set
-							startTime = new Timestamp(new Date().getTime()).toString();
+				if(checkin){
+					//is a check-in point, skip all validity check
+					totalCheckinPointCount += 1;
+					//regardless of accuracy, check-in points are to be kept in DB
+					totalValidLength += greatCircleDistance(previousLoc, loc);
+					//replace the location in holder with current location
+					previousLoc = loc;
+				} else{
+					// not a check-in point, check for validity and accuracy
+					if(isValidPoint(loc)){
+						totalValidPointCount += 1;
+						if(isAccuratePoint(loc)){
+							totalAccuratePointCount += 1;
+							//input location is valid, calculate the distance
+							totalValidLength += greatCircleDistance(previousLoc, loc);
+							//replace the location in holder with current location
+							previousLoc = loc;
+						} else{
+							//inaccurate points
 						}
-						//update end time whenever a valid point is inputed
-						endTime = new Timestamp(new Date().getTime()).toString();
-						//input location is valid, calculate the distance
-						totalLength += greatCircleDistance(previousLoc, loc);
-						//replace the location in holder with current location
-						previousLoc = loc;
+					} else{
+						//invalid points
 					}
 				}
 			} else{
 				//previous location was null, first time adding point
 				previousLoc = loc;
 			}
-			//input not null, add one count
-			totalPointCount += 1;
 		}
 	}
 	
+	private boolean isValidPoint(Location loc){
+		if(loc.getLatitude() > -999.0 && loc.getLongitude() > -999.0){
+			return true;
+		} else{
+			return false;
+		}
+	}
 	
+	private boolean isAccuratePoint(Location loc){
+		if(loc.getAccuracy() < accuThreshold){
+			return true;
+		} else{
+			return false;
+		}
+	}
 	
 	private Double greatCircleDistance(Location one, Location two){
 		Double dlat = toRad(two.getLatitude() - one.getLatitude());
@@ -72,20 +110,56 @@ public class TripStats {
 	private Double toRad(Double degree){
 		return degree/180*Math.PI;
 	}
-	
-	public Double getLength(){
-		return totalLength;
+
+	public String getButtonStartTime() {
+		return buttonStartTime;
 	}
-	
-	public Integer getCount(){
+
+	public void setButtonStartTime(String buttonStartTime) {
+		this.buttonStartTime = buttonStartTime;
+	}
+
+	public String getLastInaccuratePointTime() {
+		return lastInaccuratePointTime;
+	}
+
+	public void setLastInaccuratePointTime(String lastInaccuratePointTime) {
+		this.lastInaccuratePointTime = lastInaccuratePointTime;
+	}
+
+	public String getLastGoodPointTime() {
+		return lastGoodPointTime;
+	}
+
+	public void setLastGoodPointTime(String lastGoodPointTime) {
+		this.lastGoodPointTime = lastGoodPointTime;
+	}
+
+	public String getButtonEndTime() {
+		return buttonEndTime;
+	}
+
+	public void setButtonEndTime(String buttonEndTime) {
+		this.buttonEndTime = buttonEndTime;
+	}
+
+	public Double getTotalValidLength() {
+		return totalValidLength;
+	}
+
+	public Integer getTotalPointCount() {
 		return totalPointCount;
 	}
-	
-	public String getStartTime(){
-		return startTime;
+
+	public Integer getTotalValidPointCount() {
+		return totalValidPointCount;
 	}
-	
-	public String getEndTime(){
-		return endTime;
+
+	public Integer getTotalAccuratePointCount() {
+		return totalAccuratePointCount;
+	}
+
+	public Location getPreviousLoc() {
+		return previousLoc;
 	}
 }

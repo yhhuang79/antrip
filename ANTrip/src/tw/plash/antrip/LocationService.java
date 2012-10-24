@@ -15,10 +15,14 @@ import org.json.JSONObject;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.media.ExifInterface;
+import android.os.BatteryManager;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -50,6 +54,17 @@ public class LocationService extends Service {
 	private String currentTid = null;
 	private String currentSid = null;
 	private TripStats stats = null;
+	/*
+	 * battery stuff
+	 */
+	private BroadcastReceiver batteryStatusReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			//XXX not done yet
+			//if battery level drops below a preset cutoff point, stop and save the trip immediately
+			intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+		}
+	};
 	/**
 	 * generic
 	 */
@@ -85,6 +100,8 @@ public class LocationService extends Service {
 		nullLocation.setLatitude(-999.0);
 		nullLocation.setLongitude(-999.0);
 		nullLocation.setAccuracy(-999.0f);
+		
+		registerReceiver(batteryStatusReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 	}
 	
 	@Override
@@ -149,23 +166,15 @@ public class LocationService extends Service {
 			
 		} else if (action.equals("ACTION_STOP_RECORDING")) {
 			
+			String name = intent.getExtras().getString("tripname");
+			
+			stopTimer(currentSid, currentTid, name, stats);
+			
 			//TODO feels like i should flush the queue before stopping timer
 			//if so, i need to move the queue part to a separate function, so that it can be called from other places
 			duringCheckin = false;
 			
 			isRecording = false;
-			
-			//Log.e("LocationService", "stop recording");
-			
-			// finalize trip stats and save to DB
-			String name = intent.getExtras().getString("tripname");
-			//Log.e("locationService", "tripname= " + name);
-			dh.setEndInfo(currentSid, currentTid, name, new Timestamp(new Date().getTime()).toString(),
-					stats.getLength());
-			
-			// stop saving location updates into DB
-			// kill the runnable that's been saving location to DB
-			stopTimer();
 			
 			// remove all the related preference entries
 			stats = null;
@@ -173,7 +182,7 @@ public class LocationService extends Service {
 			pref.edit().remove("trip_id").commit();
 			stopForeground(true);
 			
-		} else if (action.equals("ACTION_GET_CHECKIN_LOCATION")) {
+		} else if (action.equals("ACTION_PAUSE_LOCATION_BROADCAST")) {
 			//Log.e("LocationService", "get check-in location");
 			
 			duringCheckin = true;
@@ -196,7 +205,7 @@ public class LocationService extends Service {
 			// buffer
 			// take the value out of the buffer
 			if (picPath != null) {
-				GeoTagPicture(picPath, location.getLatitude(), location.getLongitude());
+				ExifEditor.GeoTagPicture(picPath, location.getLatitude(), location.getLongitude(), String.valueOf(location.getTime()));
 			}
 			dh.insert(location, currentSid, currentTid, cco);
 			// the object to be returned
@@ -289,39 +298,39 @@ public class LocationService extends Service {
 	 * @param path
 	 * @param point
 	 */
-	private void GeoTagPicture(String path, double latitude, double longitude) {
-		ExifInterface exif;
-		
-		try {
-			exif = new ExifInterface(path);
-			int num1Lat = (int) Math.floor(latitude);
-			int num2Lat = (int) Math.floor((latitude - num1Lat) * 60);
-			double num3Lat = (latitude - ((double) num1Lat + ((double) num2Lat / 60))) * 3600000;
-			
-			int num1Lon = (int) Math.floor(longitude);
-			int num2Lon = (int) Math.floor((longitude - num1Lon) * 60);
-			double num3Lon = (longitude - ((double) num1Lon + ((double) num2Lon / 60))) * 3600000;
-			
-			exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat + "/1," + num2Lat + "/1," + num3Lat + "/1000");
-			exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon + "/1," + num2Lon + "/1," + num3Lon + "/1000");
-			
-			if (latitude > 0) {
-				exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
-			} else {
-				exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
-			}
-			
-			if (longitude > 0) {
-				exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
-			} else {
-				exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
-			}
-			
-			exif.saveAttributes();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	private void GeoTagPicture(String path, double latitude, double longitude) {
+//		ExifInterface exif;
+//		
+//		try {
+//			exif = new ExifInterface(path);
+//			int num1Lat = (int) Math.floor(latitude);
+//			int num2Lat = (int) Math.floor((latitude - num1Lat) * 60);
+//			double num3Lat = (latitude - ((double) num1Lat + ((double) num2Lat / 60))) * 3600000;
+//			
+//			int num1Lon = (int) Math.floor(longitude);
+//			int num2Lon = (int) Math.floor((longitude - num1Lon) * 60);
+//			double num3Lon = (longitude - ((double) num1Lon + ((double) num2Lon / 60))) * 3600000;
+//			
+//			exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat + "/1," + num2Lat + "/1," + num3Lat + "/1000");
+//			exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon + "/1," + num2Lon + "/1," + num3Lon + "/1000");
+//			
+//			if (latitude > 0) {
+//				exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
+//			} else {
+//				exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
+//			}
+//			
+//			if (longitude > 0) {
+//				exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
+//			} else {
+//				exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
+//			}
+//			
+//			exif.saveAttributes();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	/**
 	 * Cancel all tasks and let Dalvik GC timer
@@ -332,6 +341,21 @@ public class LocationService extends Service {
 			mTimer.purge();
 			mTimer = null;
 		}
+		if (dh != null) {
+			dh.closeDB();
+			dh = null;
+		}
+	}
+	
+	void stopTimer(String sid, String tid, String name, TripStats stats) {
+		if (mTimer != null) {
+			mTimer.cancel();
+			mTimer.purge();
+			mTimer = null;
+		}
+		
+		dh.setEndInfo(sid, tid, name, stats);
+		
 		if (dh != null) {
 			dh.closeDB();
 			dh = null;
@@ -364,7 +388,7 @@ public class LocationService extends Service {
 						// don't want to input null stuff into database
 						location = getCurrentNullLocation();
 					}
-					stats.addOnePoint(location);
+					stats.addOnePoint(location, false);
 					dh.insert(location, currentSid, currentTid);
 					//Log.e("locationService", "actual DB insert2");
 					/**
@@ -420,6 +444,8 @@ public class LocationService extends Service {
 		super.onDestroy();
 		
 		//Log.e("locationService", "onDestroy called");
+		
+		unregisterReceiver(batteryStatusReceiver);
 		
 		_xps.abort();
 		
