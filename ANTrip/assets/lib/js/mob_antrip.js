@@ -205,7 +205,6 @@
 			$('#username').addClass('fontclass');
 			$('#password').attr('placeholder',g_password_holder);
 			$('#username').addClass('fontclass');
-			//$('#username').focus();
 
 			$('#blogin').html("<span class=\"ui-btn-inner ui-btn-corner-all\"><span class=\"ui-btn-text\"></span></span>");
 			$('#blogin .ui-btn-text').text(g_str_login);
@@ -213,6 +212,8 @@
 			$('#fblogin .ui-btn-text').text(g_str_fblogin);
 			$('#register_btn').html("<span class=\"ui-btn-inner ui-btn-corner-all\"><span class=\"ui-btn-text\"></span></span>");
 			$('#register_btn .ui-btn-text').text(g_str_register);
+
+			initRegisterDialog();
 
 			$('#blogin').css('width','50%');
 			$('#blogin').addClass('center_div');
@@ -231,6 +232,9 @@
 				if(g_currentPageID==g_PageIDTable['login']){
 					$.mobile.changePage("#mainpage");
 				}
+			}
+			else{
+				$('#username').setfocus();
 			}
 		}
 
