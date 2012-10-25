@@ -185,6 +185,9 @@
 			$('#camera_btn .ui-btn-text').html(g_str_takepicture);
 			$('#checkin_feeling').html(g_str_checkin_feeling);
 			$('#message').attr("placeholder", g_str_placemarkertext);
+			$('a[id*=page_back]').each(function() {
+				 $(this).html(g_str_back);
+			});
 
 			//init multi-lang for emotion type
 			$('#pleased_tip').html(g_str_pleased);
@@ -247,17 +250,28 @@
 		});
 
 		$(document).delegate('div:jqmData(role="page")', 'pagebeforeshow', function(){ 
-			if($(this).attr('id')=='map' || $(this).attr('id')=='triplist' || $(this).attr('id')=='friendlist'){
+			if($(this).attr('id')=='map' || $(this).attr('id')=='triplist' || $(this).attr('id')=='friendlist' || $(this).attr('id')=='findfriend' || $(this).attr('id')=='friendrequest'){
 				var titleTable = {	
 					"mainpage": g_str_antrip,
 					"map": g_str_recordtrip,
 					"triplist": g_str_triphistory,
-					"friendlist": g_str_friend
+					"friendlist": g_str_friend,
+					"findfriend": g_str_searchFriend,
+					"friendrequest": g_str_friendRequest
 				};
 
 				//change title name
-				$(this).find('div:jqmData(role="header")').html(g_page.find('div:jqmData(role="header")').html());
-				$(this).find('div:jqmData(role="header")').find(g_titleSize).html(titleTable[$(this).attr('id')]);
+				if($(this).attr('id')!='findfriend' && $(this).attr('id')!='friendrequest' ){
+					$(this).find('div:jqmData(role="header")').html(g_page.find('div:jqmData(role="header")').html());
+					$(this).find('div:jqmData(role="header")').find(g_titleSize).html(titleTable[$(this).attr('id')]);
+				}
+				else{
+					$(this).find('div:jqmData(role="header")').find('h4').replaceWith( "<"+g_titleSize+" style='text-align:center'>" + titleTable[$(this).attr('id')] + "</"+g_titleSize+">" );
+					if($(this).attr('id')=='findfriend'){
+						$("#friendrequest").html(g_str_friendRequest);
+					}
+					return;
+				}
 
 				//change logout button to check-in  
 				if($(this).attr('id')=='map'){
@@ -279,7 +293,7 @@
 					$(this).find('div:jqmData(role="header")').find('.ui-btn-right').replaceWith( "<a href='' class='ui-btn-right class_right_bt'></a>" );
 				}
 				else if($(this).attr('id')=='friendlist'){
-					$(this).find('div:jqmData(role="header")').find('.ui-btn-right').replaceWith( "<a href='#findfriend' data-icon='search' id='findfriend' data-iconpos='right' data-prefetch class='ui-btn-right class_right_bt' data-transition='pop'>Friend</a>" );
+					$(this).find('div:jqmData(role="header")').find('.ui-btn-right').replaceWith( "<a href='#findfriend' data-icon='search' id='findfriend' data-iconpos='right' data-prefetch class='ui-btn-right class_right_bt' data-transition='pop'>"+g_str_addFriend+"</a>" );
 				}
 				initRightBtTips();
 				//add page click event

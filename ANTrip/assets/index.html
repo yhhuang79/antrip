@@ -110,7 +110,7 @@
 					data:{user_id : userid, friend_name : friendname},
 					type: 'GET', dataType: 'jsonp', cache: false,
 					success:function(result){
-						alert("Add Friend - " + friendname);
+						alert(g_str_addFriend+" - " + friendname);
 					}
 				});			
 			}
@@ -176,7 +176,7 @@
 					type: 'GET', dataType: 'jsonp', cache: false,
 					success:function(result){
 						$.each(result.friend_list, function(i,data){
-							div_data[i] ="<li><a href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a></li>";
+							div_data[i] ="<li><a class='listview' href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3></a></li>";
 						});
 						$("#listview_2").append(div_data.join('')).listview('refresh');
 						$.mobile.hidePageLoadingMsg();
@@ -201,7 +201,7 @@
 							success:function(result){
 								$.each(result.user_list, function(i,data){
 									var requestUrl = "javascript:addFriend(" + sid + " ,\"" + data.name + "\")";
-									div_data[i] ="<li><a href='" + requestUrl + "'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a><a href='" + requestUrl + "' data-icon='plus'><h3>Add Friend</h3></a></li>";
+									div_data[i] ="<li><a class='listview' href='" + requestUrl + "'><img src='" + data.image + "'/><h3>" + data.name  + "</h3></a><a href='" + requestUrl + "' data-icon='plus'><h3>"+g_str_addFriend+"</h3></a></li>";
 								});
 								$("#userlistview").html(div_data.join('')).listview('refresh');
 								$.mobile.hidePageLoadingMsg();
@@ -221,7 +221,7 @@
 						$.each(result.friendrequest_list, function(i,data){
 							//var requestUrl = "http://plash2.iis.sinica.edu.tw/api/ConfirmFriendRequest.php?fid=" + data.fid + "&friendname=" + data.name + "&passcode=" + data.passcode;
 							var requestUrl = "javascript:confirmFriend(" + data.fid + ",\"" + data.name + "\",\"" + data.passcode + "\")";
-							div_data[i] ="<li><a href='" + requestUrl + "'><img src='" + data.image + "'/><h3>" + data.name  + "</h3><p>" + data.id + "</p></a><a href='" + requestUrl + "' data-icon='plus'><h3>Add Friend</h3></a></li>";
+							div_data[i] ="<li><a href='" + requestUrl + "'><img src='" + data.image + "'/><h3>" + data.name  + "</h3></a><a href='" + requestUrl + "' data-icon='plus'><h3>"+g_str_addFriend+"</h3></a></li>";
 						});
 						$("#requestlistview").append(div_data.join('')).listview('refresh');
 						$.mobile.hidePageLoadingMsg();
@@ -427,7 +427,7 @@
             <div data-theme="a" data-role="header" data-position="fixed" >
 				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="pop">Back</a>
                 <h4>AnTrip lite</h4>
-				<a href="#findfriend" data-icon="search" id="findfriend" data-prefetch data-transition="pop">Friend</a>
+				<a href="#findfriend" data-icon="search" id="findfriend" data-prefetch data-transition="pop"></a>
             </div>
 			<div data-role="content">
 				<div class="content-primary" id="content-primary_1">	
@@ -440,9 +440,9 @@
 	<!-- find friend start -->
 	    <div data-role="page" id="findfriend">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#friendlist" data-icon="arrow-l" data-iconpos="left" data-transition="pop">Back</a>
+				<a href="#friendlist" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
-				<a href="#friendrequest" data-icon="info" id="friendrequest">Friend</a>
+				<a href="#friendrequest" data-icon="info" id="friendrequest"></a>
             </div>
 			<div data-role="content">
 				<div class="content-primary" id="content-primary_3">
@@ -457,7 +457,7 @@
 	<!-- friend request start -->
 	    <div data-role="page" id="friendrequest">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#findfriend" data-icon="arrow-l" data-iconpos="left" data-transition="pop">Back</a>
+				<a href="#findfriend" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
             </div>
 			<div data-role="content">

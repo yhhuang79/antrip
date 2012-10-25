@@ -43,6 +43,9 @@
 		var g_str_logout = "Logout!";
 		var g_str_login = "Login";
 		var g_str_fblogin = "Facebook Login";
+		var g_str_addFriend ="Add friend";
+		var g_str_searchFriend ="Search Friends";
+		var g_str_friendRequest ="Friends Request";
 		var g_username_holder="ID";
 		var g_password_holder="PASSWORD";
 		var g_str_start ="Start";
@@ -97,6 +100,7 @@
 		var g_str_triphistory = "Trip History";
 		var g_str_friend = "Friends List";
 		var g_str_prepage = "Previous Page";
+		var g_str_back = "Back";
 
 		var g_str_typetripname="Please type your trip name:";
 		var g_str_untitledtrip ="untitled trip";
@@ -111,7 +115,7 @@
 		var emocompass_img = im+ "emotion-compass_eng.png";
 		var uploadicon_img = im+ "uploadicon_eng.png";
 		var g_str_placemarkertext = "Please Type your Message";
-		backlogo_img = im+ "background_eng.png";
+		var backlogo_img = im+ "background_eng.png";
 
 		var g_str_antrip = "ANTrip";
 		var g_Tooltip = {	

@@ -95,6 +95,12 @@
 		margin:0 0;
 	}
 
+	.listview{
+		background-repeat: repeat-x;
+		background-position: bottom center;
+		background-image: url("../../images/listBK.png");
+	}
+
 	.des_close_class{
 		float:right;
 		position: relative;
