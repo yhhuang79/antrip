@@ -167,7 +167,7 @@
 			$('#login').find('div:jqmData(role="header")').find('h4').replaceWith( "<"+g_titleSize+" style='text-align:center'>" + g_str_antrip + "</"+g_titleSize+">" );
 			$('#login').find('div:jqmData(role="content")').addClass('fixedBK');
 			$('#login').find('div:jqmData(role="content")').addClass('center_content');
-			$('#login').find('div:jqmData(role="content")').css("background-image", url+backlogo_img+")");
+			$('#login_bk').css("background-image", url+backlogo_img+")");
 			$('body').find('div:jqmData(role="page")').css("background-image", url+back_img+")");
 
 			$('#emotion-sel').css("background", url+selemotion_img+") no-repeat");
