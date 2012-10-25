@@ -2,6 +2,8 @@ package tw.plash.antrip;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.json.JSONObject;
+
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +29,7 @@ public class AntripService extends Service implements LocationPublisher{
 	private Long currentTid;
 	private String currentUid;
 	private SharedPreferences pref;
+	private TripStats stats;
 	
 	//make sure both stop_recording_pre and stop_recording_actual are called
 	//if the pre-actual action is incomplete, will save default values to DB in onDestroy
@@ -62,10 +65,12 @@ public class AntripService extends Service implements LocationPublisher{
 		public void handleMessage(Message msg) {
 			switch(msg.what){
 			case MSG_REGISTER_CLIENT:
+				Log.i("AntripService", "IncomingHandler: case-MSG_REGISTER_CLIENT");
 				//save the client info, so we can send messages back later
 				outMessager = msg.replyTo;
 				break;
 			case MSG_UNREGISTER_CLIENT:
+				Log.i("AntripService", "IncomingHandler: case-MSG_UNREGISTER_CLIENT");
 				//if not recording but skyhook location is running, stop it
 				if(!isRecording && skyhookLocation != null){
 					skyhookLocation.cancel();
@@ -77,6 +82,7 @@ public class AntripService extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_INIT_LOCATION_THREAD:
+				Log.i("AntripService", "IncomingHandler: case-MSG_INIT_LOCATION_THREAD");
 				if(skyhookLocation != null){
 					//ignore this call, skyhookLocation is already running
 					Log.w("AntripService", "IncomingHandler: init location thread called when skyhooklocation!=null");
@@ -86,32 +92,26 @@ public class AntripService extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_STOP_LOCATION_THREAD:
+				Log.i("AntripService", "IncomingHandler: case-MSG_STOP_LOCATION_THREAD");
 				if(isRecording){
 					//ignore this call because a trip is recording
 					Log.w("AntripService", "IncomingHandler: stop location thread called when isrecording=true");
 				} else{
-					skyhookLocation.cancel();
-					skyhookLocation = null;
+					if(skyhookLocation != null){
+						skyhookLocation.cancel();
+						skyhookLocation = null;
+					} else{
+						Log.e("AntripService", "IncomingHandler: msg_stop_location_thread error");
+					}
 				}
 				break;
-//			case MSG_START_RECORDING:
-//				//need to init DB connection here
-//				if(dh != null){
-//					//dh is not null, a trip is probably recording now...
-//					Log.e("AntripService", "IncomingHandler: start recording called when dh is NOT null");
-//				} else{
-//					dh = new DBHelper128(getApplicationContext());
-//					if(msg.obj instanceof Long){
-//						currentTid = (Long) msg.obj;
-//					}
-//				}
-//				break;
 			case MSG_STOP_RECORDING_PRE:
-				//need to finalize trip stats
-				
+				Log.i("AntripService", "IncomingHandler: case-MSG_STOP_RECORDING_PRE");
 				//close the DB here, if trip name needs to be saved, re-open it
 				if(dh != null){
-					
+					//need to finalize trip stats
+					isRecording = false;
+					dh.saveTripStats(currentUid, currentTid.toString(), stats);
 					dh.closeDB();
 					dh = null;
 				} else{
@@ -120,24 +120,25 @@ public class AntripService extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_STOP_RECORDING_ACTUAL:
-				//actually closes DB
-				if(dh != null){
+				Log.i("AntripService", "IncomingHandler: case-MSG_STOP_RECORDING_ACTUAL");
+				if(msg.obj instanceof String){
+					if(dh != null){
+						//do nothing, but seriously this should not happen
+					} else{
+						dh = new DBHelper128(getApplicationContext());
+					}
+					dh.setTripName(currentUid, currentTid.toString(), (String)msg.obj);
 					dh.closeDB();
 					dh = null;
-				} else{
-					if(msg.obj instanceof String){
-						dh = new DBHelper128(getApplicationContext());
-						dh.setTripName(currentUid, currentTid.toString(), (String)msg.obj);
-					} else{
-						
-					}
 				}
 				break;
 			case MSG_GET_CHECKIN_LOCATION:
+				Log.i("AntripService", "IncomingHandler: case-MSG_GET_CHECKIN_LOCATION");
 				//activity requesting a loaction for check-in points, send a location back
 				sendMessageToUI(MSG_LOCATION_UPDATE_CHECKIN, skyhookLocation.getLastNonNullLocation());
 				break;
 			case MSG_SAVE_CHECKIN_LOCATION:
+				Log.i("AntripService", "IncomingHandler: case-MSG_SAVE_CHECKIN_LOCATION");
 				if(dh != null){
 					if(msg.obj instanceof CandidateCheckinObject){
 						dh.insert((CandidateCheckinObject)msg.obj, currentUid, currentTid.toString());
@@ -149,9 +150,11 @@ public class AntripService extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_START_UPLOAD:
+				Log.i("AntripService", "IncomingHandler: case-MSG_START_UPLOAD");
 				//XXX
 				break;
 			case MSG_SET_USERID:
+				Log.i("AntripService", "IncomingHandler: case-MSG_SET_USERID");
 				if(msg.obj instanceof String){
 					currentUid = (String) msg.obj;
 				} else{
@@ -159,6 +162,7 @@ public class AntripService extends Service implements LocationPublisher{
 				}
 				break;
 			default:
+				Log.i("AntripService", "IncomingHandler: case-default");
 				super.handleMessage(msg);
 			}
 		}
@@ -173,7 +177,12 @@ public class AntripService extends Service implements LocationPublisher{
 	@Override
 	public void onRebind(Intent intent) {
 		super.onRebind(intent);
-		
+		if(isRecording){
+			//i think this only happens when you are doing check-in...
+			if(locationQueue != null && !locationQueue.isEmpty()){
+				sendMessageToUI(MSG_LOCATION_UPDATE, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
+			}
+		}
 	}
 	
 	@Override
@@ -182,25 +191,47 @@ public class AntripService extends Service implements LocationPublisher{
 		return true; //return true to use "onRebind"
 	}
 	
-	public void sendMessageToUI(int msgType, Object payload){
-		if(outMessager != null){
-			try {
-				//activity binded, leMessager can deliver message
-				switch(msgType){
-				case MSG_LOCATION_UPDATE_CHECKIN:
+	public void sendMessageToUI(int msgType, Object payload) {
+		try {
+			// activity binded, leMessager can deliver message
+			switch (msgType) {
+			case MSG_LOCATION_UPDATE_CHECKIN:
+				if (outMessager != null) {
 					outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE_CHECKIN, payload));
-					break;
-				case MSG_LOCATION_UPDATE:
-					outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, payload));
-					break;
-				default:
-					break;
 				}
-			} catch (RemoteException e) {
-				e.printStackTrace();
+				break;
+			case MSG_LOCATION_UPDATE:
+				if(isRecording){
+					if(outMessager != null){
+						//convert to yu-hsiang styled check-in json string before sending
+						if(payload instanceof JSONObject){
+							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, ((JSONObject)payload).toString()));
+						} else if(payload instanceof Location){
+							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, CheckinJSONConverter.fromLocationtoCheckinJSON((Location)payload).toString()));
+						} else{
+							//should not happen
+						}
+					} else{
+						//save all the location update during check-in as-is
+						if(locationQueue != null){
+							locationQueue.offer((Location)payload);
+						}
+					}
+				} else{
+					if(outMessager != null){
+						if(payload instanceof Location){
+							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, payload));
+						} else{
+							//what is going on
+						}
+					}
+				}
+				break;
+			default:
+				break;
 			}
-		} else{
-			//no activity binded, hold or discard the messages?
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -217,11 +248,15 @@ public class AntripService extends Service implements LocationPublisher{
 		
 		dh = null;
 		
+		stats = null;
+		
 		locationQueue = new LinkedBlockingQueue<Location>();
 		
 		stopRecordingActionUnfinished = false;
 		
 		isRunning = true;
+		isRecording = false;
+		isStarted = false;
 	}
 	
 	public static boolean isRunning(){
@@ -249,7 +284,9 @@ public class AntripService extends Service implements LocationPublisher{
 				} else if(!isStarted){
 					dh = new DBHelper128(getApplicationContext());
 					currentTid = intent.getLongExtra("tid", -1);
+					stats = new TripStats();
 					isStarted = true;
+					isRecording = true;
 					//should start foreground here, with a notification of course
 					
 				} else{
@@ -281,11 +318,17 @@ public class AntripService extends Service implements LocationPublisher{
 
 	@Override
 	public void newLocationUpdate(Location location) {
-		//XXX
-		if(LocationFilter.accuracyFilter(location)){
-			//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
-			sendMessageToUI(MSG_LOCATION_UPDATE, location);
-			return;
+		Log.w("AntripService", "newLocationUpdate: new location received");
+		//not recording, repost only valid and accurate opints to UI
+		if(LocationFilter.validityFilter(location)){
+			if(LocationFilter.accuracyFilter(location)){
+				//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
+				sendMessageToUI(MSG_LOCATION_UPDATE, location);
+			} else{
+				//inaccurate points
+			}
+		} else{
+			//invalid points
 		}
 		//if 3 consecutive location updates failed the filter, show a warning banner on screen
 		
@@ -293,6 +336,7 @@ public class AntripService extends Service implements LocationPublisher{
 		if(isRecording){
 			if(dh != null){
 				dh.insert(location, currentUid, currentTid.toString());
+				stats.addOnePoint(location, false);
 			} else{
 				//this should not happen
 			}

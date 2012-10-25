@@ -23,6 +23,22 @@ public class LocationFilter {
 		return false;
 	}
 	
+	static public boolean validityFilter(Location inputLocation){
+		final int VALIDITY_THRESHOLD = -999;
+		if(inputLocation != null){
+			//at least input is not null
+			if(!inputLocation.getProvider().isEmpty() && !inputLocation.getProvider().equalsIgnoreCase("null")){
+				//location provider value should not be empty or "null"
+				if(inputLocation.getLatitude() > VALIDITY_THRESHOLD){
+					//latitude value is larger then -999, meaning -998~infinity, thus assume valid
+					//we mark invalid location with latitude value of -999
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	static public void something(){
 		
 	}

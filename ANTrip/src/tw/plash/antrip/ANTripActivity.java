@@ -111,6 +111,7 @@ public class ANTripActivity extends Activity {
 					if(msg.obj instanceof Location){
 						if(cco != null){
 							cco.setLocation((Location) msg.obj);
+							doUnbindService();
 						} else{
 							Log.e("Activity", "Check-in object error: check-in object is null, cannot set location");
 						}
@@ -445,7 +446,7 @@ public class ANTripActivity extends Activity {
 		public void setMode(int mode) {
 			currentMode = mode;
 			//Log.w("setMode", "mode= " + currentMode);
-			String isrec = pref.getString("isRecording", null);
+//			String isrec = pref.getString("isRecording", null);
 			switch (currentMode) {
 			case 3:
 				//need to start location service
@@ -507,8 +508,10 @@ public class ANTripActivity extends Activity {
 		 * also request a coordinate from location service
 		 */
 		public void startCheckin() {
-			//Log.w("activity", "start checkin called");
 			cco = new CandidateCheckinObject();
+			//get a location for check-in purpose
+			sendMessageToService(AntripService.MSG_GET_CHECKIN_LOCATION, null);
+			//Log.w("activity", "start checkin called");
 			// request a check-in location from service
 			Log.e("activity", "start check-in");
 		}
@@ -518,6 +521,8 @@ public class ANTripActivity extends Activity {
 		 * candidate check-in object to location service to be saved
 		 */
 		public void endCheckin() {
+			//reconnect to service to receive all the location updates during check-in, also save the check-in point
+			doBindService();
 			// send cco to service via startService call with action and extras
 			Log.w("activity", "end check-in, cco.emotion= " + cco.getEmotionID() + ", cco.text= " + cco.getCheckinText());
 			sendMessageToService(AntripService.MSG_SAVE_CHECKIN_LOCATION, cco);
@@ -528,6 +533,8 @@ public class ANTripActivity extends Activity {
 		 * candidate check-in object
 		 */
 		public void cancelCheckin() {
+			//reconnect to service to receive all the location updates during check-in
+			doBindService();
 			cco = null;
 			Log.e("activity", "cancel check-in");
 		}

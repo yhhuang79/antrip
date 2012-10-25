@@ -12,8 +12,6 @@ public class TripStats {
 	//time when end record button is pushed
 	private String buttonEndTime;
 	//in meters
-	private final Float accuThreshold = 1499.0f;
-	//in meters
 	private final Double radius = 6371008.7714;
 	//in meters
 	private Double totalValidLength;
@@ -43,7 +41,7 @@ public class TripStats {
 		previousLoc = null;
 	}
 	
-	public void addOnePoint(Location loc, boolean checkin){
+	synchronized public void addOnePoint(Location loc, boolean checkin){
 		//don't proceed if null was inputted
 		if(loc != null){
 			//input not null, add one count
@@ -59,9 +57,9 @@ public class TripStats {
 					previousLoc = loc;
 				} else{
 					// not a check-in point, check for validity and accuracy
-					if(isValidPoint(loc)){
+					if(LocationFilter.validityFilter(loc)){
 						totalValidPointCount += 1;
-						if(isAccuratePoint(loc)){
+						if(LocationFilter.accuracyFilter(loc)){
 							totalAccuratePointCount += 1;
 							//input location is valid, calculate the distance
 							totalValidLength += greatCircleDistance(previousLoc, loc);
@@ -78,22 +76,6 @@ public class TripStats {
 				//previous location was null, first time adding point
 				previousLoc = loc;
 			}
-		}
-	}
-	
-	private boolean isValidPoint(Location loc){
-		if(loc.getLatitude() > -999.0 && loc.getLongitude() > -999.0){
-			return true;
-		} else{
-			return false;
-		}
-	}
-	
-	private boolean isAccuratePoint(Location loc){
-		if(loc.getAccuracy() < accuThreshold){
-			return true;
-		} else{
-			return false;
 		}
 	}
 	
