@@ -170,6 +170,7 @@
 			$('#friendlist').live('pagebeforeshow', function(){
 				//var sid = $.cookie("sid");
 				var div_data = [];
+				$("#listview_2").html("");
 				$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
 				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendList.php',
 					data:{sid : sid},
