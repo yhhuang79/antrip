@@ -63,6 +63,7 @@ public class ANTripActivity extends Activity {
 	private boolean canPostAgain;
 	private boolean canCallJavaScript = false;
 	private boolean needToLogout = false;
+//	private boolean duringCheckin = false;
 	
 	boolean mIsBound;
 	private Messenger outMessenger = null;
@@ -114,7 +115,7 @@ public class ANTripActivity extends Activity {
 						if(cco != null){
 							cco.setLocation((Location) msg.obj);
 							Log.w("antripActivity", "IncomingHandler: update check-in loc: " + ((Location) msg.obj).toString());
-							doUnbindService();
+//							doUnbindService();
 						} else{
 							Log.e("Activity", "Check-in object error: check-in object is null, cannot set location");
 						}
@@ -355,6 +356,8 @@ public class ANTripActivity extends Activity {
 		mHandler = new Handler();
 		canPostAgain = true;
 		
+		locationQueue = new LinkedBlockingQueue<Location>();
+		
 		initUI();
 	}
 	
@@ -427,9 +430,10 @@ public class ANTripActivity extends Activity {
 		 */
 		public String startRecording() {
 			Long tid = System.nanoTime();
+			Log.i("actripActivity", "jsinterface: startrecording with tid=" + tid.toString());
 			//XXX
 			//start recording with the newly generated tripid
-			startService(new Intent("START_RECORDING", null, mContext, AntripService.class).putExtra("tid", tid));
+			startService(new Intent(mContext, AntripService.class).setAction("START_RECORDING").putExtra("tid", tid));
 			return tid.toString();
 		}
 		
@@ -519,6 +523,7 @@ public class ANTripActivity extends Activity {
 		 * also request a coordinate from location service
 		 */
 		public void startCheckin() {
+//			duringCheckin = true;
 			cco = new CandidateCheckinObject();
 			//get a location for check-in purpose
 			sendMessageToService(AntripService.MSG_GET_CHECKIN_LOCATION, null);
@@ -532,11 +537,14 @@ public class ANTripActivity extends Activity {
 		 * candidate check-in object to location service to be saved
 		 */
 		public void endCheckin() {
+			String addpos = CheckinJSONConverter.fromCCOtoCheckinJSON(cco).toString();
+			bufferedLoadURL("javascript:addPosition(" + addpos + ")");
 			//reconnect to service to receive all the location updates during check-in, also save the check-in point
 			doBindService();
 			// send cco to service via startService call with action and extras
 			Log.w("activity", "end check-in, cco.emotion= " + cco.getEmotionID() + ", cco.text= " + cco.getCheckinText());
 			sendMessageToService(AntripService.MSG_SAVE_CHECKIN_LOCATION, cco);
+//			duringCheckin = false;
 		}
 		
 		/**
@@ -548,6 +556,7 @@ public class ANTripActivity extends Activity {
 			doBindService();
 			cco = null;
 			Log.e("activity", "cancel check-in");
+//			duringCheckin = false;
 		}
 		
 		/**

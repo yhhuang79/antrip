@@ -59,4 +59,37 @@ public class CheckinJSONConverter {
 		}
 		return null;
 	}
+	
+	static public JSONObject fromCCOtoCheckinJSON(CandidateCheckinObject cco){
+		if(cco != null){
+			if(!cco.getLocation().getProvider().isEmpty() && !cco.getLocation().getProvider().equalsIgnoreCase("null")){
+				JSONObject result = new JSONObject();
+				try {
+					JSONArray array = new JSONArray();
+					JSONObject tmp = new JSONObject();
+					tmp.put("lat", cco.getLocation().getLatitude());
+					tmp.put("lng", cco.getLocation().getLongitude());
+					tmp.put("timestamp", cco.getLocation().getTime());
+					JSONObject checkin = new JSONObject();
+					if(cco.getCheckinText() != null){
+						checkin.put("message", cco.getCheckinText());
+					}
+					if(cco.getEmotionID() != null){
+						checkin.put("emotion", cco.getEmotionID());
+					}
+					if(cco.getPicturePath() != null){
+						checkin.put("picture_uri", cco.getPicturePath());
+					}
+					tmp.put("CheckIn", checkin);
+					array.put(tmp);
+					result.put("CheckInDataList", array);
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				Log.e("CheckinJSONConverter", "fromLocationtoCheckinJSON result: " + result.toString());
+				return result;
+			}
+		}
+		return null;
+	}
 }

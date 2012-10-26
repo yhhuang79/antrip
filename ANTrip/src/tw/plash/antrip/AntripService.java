@@ -115,6 +115,7 @@ public class AntripService extends Service implements LocationPublisher{
 					//need to finalize trip stats
 					stopForeground(true);
 					isRecording = false;
+					isStarted = false;
 					stats.setButtonEndTime(new Timestamp(new Date().getTime()).toString());
 					dh.saveTripStats(currentUid, currentTid.toString(), stats);
 					dh.closeDB();
@@ -308,6 +309,7 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i("antripService", "onstartCommand: called");
 		//this function might be called when Android system kills service for fun
 		//when calling from activity, need to pass an action string, so service can tell who's the caller
 		//only set isstarted=true when activity called startservice with action string
