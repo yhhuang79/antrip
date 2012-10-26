@@ -390,6 +390,7 @@
 
 					g_showtripmap = true;
 					if(local=="true"){
+						$("#tripmap").find("#page_back").attr("href", "#triplist");
 						$("#share_trip").hide();
 					}
 					else{
@@ -398,10 +399,12 @@
 							sid = window.antrip.getCookie("sid");
 						}
 						if(userid!=sid){
+							$("#tripmap").find("#page_back").attr("href", "#friendlist");
 							$("#share_trip").hide();
 						}
 						else{
 							$("#share_trip").show();
+							$("#tripmap").find("#page_back").attr("href", "#triplist");
 							$("#share_trip").attr("href", "#friendCheckDialog?trip_id="+trip_id);
 						}
 					}
