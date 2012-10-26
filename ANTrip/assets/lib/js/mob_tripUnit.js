@@ -394,7 +394,7 @@
 		}
 	}
 
-	function getShareTripListbyFriend(friend_id){
+	function getShareTripListbyFriend(friend_id, callback){
 		var trip_list = null;
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetAuthTripInfoComponent.php',
 			data:{userid : sid, friend_id:friend_id},
@@ -402,8 +402,13 @@
 			success:function(result){
 				if(result.getAuthTrip.toString()!='undefined' && result.getAuthTrip.toString()!=""){
 					trip_list=result.getAuthTrip.toString().split(",");
+					//alert(result.getAuthTrip.toString());
+					//alert(trip_list);
 					//tripnum = trip_list.length;
 					$("#overlay").css("display","none");
+				}
+				if(callback!='undefined' && callback!=null){
+					callback(trip_list);
 				}
 			},
 			error: function(xhr) {
@@ -416,15 +421,16 @@
 	function showTripListDetails(trip_list, share_userid, share_username, appendToObj){
 		$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
 		var div_data = [];
-		for(var index=0;index<trip_list.length;index++)
-		{
+		var index=0;
+		function callback(index){
 			var trip_data = trip_list[index].toString();
 			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php',
 				data:{userid: share_userid, trip_id:trip_data},
 				type: 'GET', dataType: 'jsonp', cache: false, async: false,
 				success:function(result){
 					if(result == null  || result.length==0){
-						;
+						index++;
+						callback(index);
 					}
 					else{
 						g_trip = trip_data;
@@ -436,14 +442,21 @@
 						var tripurl = "#tripmap?userid="+ share_userid +"&trip_id="+ trip_data+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=false";
 						var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
 						div_data[index] ="<li id='collaps_div_"+share_userid+data.trip_id+"' ><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>";
+						if(index==trip_list.length-1){
+							if(appendToObj!=null && appendToObj!="undefined"){
+								appendToObj.append(div_data.join('')).listview();
+								$.mobile.hidePageLoadingMsg();
+							}
+						}
+						else{
+							index++;
+							callback(index);
+						}
 					}
 				}
 			});
 		}
-		if(appendToObj!=null && appendToObj!="undefined"){
-			appendToObj.append(div_data.join('')).listview();
-		}
-		$.mobile.hidePageLoadingMsg();
+		callback(index);
 	}
 
 //-->

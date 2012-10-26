@@ -176,20 +176,25 @@
 					type: 'GET', dataType: 'jsonp', cache: false,
 					success:function(result){
 						$.each(result.friend_list, function(i,data){
-							var trip_list = getShareTripListbyFriend(data.id);
-							var length =0;
-							if(trip_list!=null){
-								length = trip_list.length;
+							//var trip_list = g_trip_list;
+							//alert(trip_list);
+							function callback(trip_list){
+								var length =0;
+								if(trip_list!=null){
+									length = trip_list.length;
+								}
+								div_data[i] ="<div id='li_listview_"+data.id+"' data-role='collapsible' data-collapsed='false'><h3><img src='" + data.image + "'/>" + data.name  + "<br/>" +g_str_sharenumberoftrip+":"+length +"</h3><ul id='div_listview_"+data.id+"' data-role='listview'></ul></div>";
+								$("#listview_2").append(div_data[i]);
+								$("#li_listview_"+data.id).collapsible({refresh:true});
+								$("#li_listview_"+data.id).click(function(e) {
+										event.stopImmediatePropagation();
+										if(length>0 && $("#div_listview_"+data.id).html()==""){
+											showTripListDetails(trip_list, data.id, data.name, $("#div_listview_"+data.id));
+										}
+										return false;
+								});
 							}
-							div_data[i] ="<div id='li_listview_"+data.id+"' data-role='collapsible' data-collapsed='false'><h3><img src='" + data.image + "'/>" + data.name  + "<br/>" +g_str_sharenumberoftrip+":"+length +"</h3><ul id='div_listview_"+data.id+"' data-role='listview'></ul></div>";
-							$("#listview_2").append(div_data[i]);
-							$("#li_listview_"+data.id).collapsible({refresh:true});
-							$("#li_listview_"+data.id).click(function(e) {
-									event.stopImmediatePropagation();
-									if(length>0 && $("#div_listview_"+data.id).html()==""){
-										showTripListDetails(trip_list, data.id, data.name, $("#div_listview_"+data.id));
-									}
-							});
+							getShareTripListbyFriend(data.id, callback);
 						});
 						$.mobile.hidePageLoadingMsg();
 					}
