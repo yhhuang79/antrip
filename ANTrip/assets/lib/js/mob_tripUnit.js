@@ -445,6 +445,12 @@
 						if(index==trip_list.length-1){
 							if(appendToObj!=null && appendToObj!="undefined"){
 								appendToObj.append(div_data.join('')).listview();
+								appendToObj.find('li').each(function() {
+									$(this).click(function(e){
+										 event.stopImmediatePropagation();
+										$(this).find('a').trigger('click');
+									});
+								});
 								$.mobile.hidePageLoadingMsg();
 							}
 						}
