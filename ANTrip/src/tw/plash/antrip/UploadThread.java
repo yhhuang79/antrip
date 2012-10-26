@@ -179,9 +179,9 @@ public class UploadThread extends AsyncTask<Void, Void, Integer>{
 		super.onPostExecute(result);
 		if(result == null){
 			new AlertDialog.Builder(mContext)
-			.setTitle("error")
-			.setMessage("upload failed, please try again later")
-			.setNeutralButton("okay...", new OnClickListener() {
+			.setTitle(R.string.error)
+			.setMessage(R.string.upload_failed_warning)
+			.setNeutralButton(R.string.okay, new OnClickListener() {
 				@Override
 				public void onClick(DialogInterface dialog, int which) {}
 			})
