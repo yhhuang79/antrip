@@ -1,9 +1,13 @@
 package tw.plash.antrip;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONObject;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,10 +35,6 @@ public class AntripService extends Service implements LocationPublisher{
 	private SharedPreferences pref;
 	private TripStats stats;
 	
-	//make sure both stop_recording_pre and stop_recording_actual are called
-	//if the pre-actual action is incomplete, will save default values to DB in onDestroy
-	private boolean stopRecordingActionUnfinished;
-	
 	//these static fields should be put together in a separate class
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
@@ -55,6 +55,8 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	static final int MSG_LOCATION_UPDATE_CHECKIN = 22;
 	
+	private boolean shouldAddPosition = false;
+	
 	private SkyhookLocation skyhookLocation;
 	
 	private Messenger outMessager = null;
@@ -68,29 +70,30 @@ public class AntripService extends Service implements LocationPublisher{
 				Log.i("AntripService", "IncomingHandler: case-MSG_REGISTER_CLIENT");
 				//save the client info, so we can send messages back later
 				outMessager = msg.replyTo;
-				break;
-			case MSG_UNREGISTER_CLIENT:
-				Log.i("AntripService", "IncomingHandler: case-MSG_UNREGISTER_CLIENT");
-				//if not recording but skyhook location is running, stop it
-				if(!isRecording && skyhookLocation != null){
-					skyhookLocation.cancel();
-					skyhookLocation = null;
+				if(shouldAddPosition){
+					sendMessageToUI(MSG_LOCATION_UPDATE, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
+					shouldAddPosition = false;
 				}
-				//if the client unregisters, we nullify the messenger
-				if(outMessager == msg.replyTo){
-					outMessager = null;
-				}
-				break;
 			case MSG_INIT_LOCATION_THREAD:
 				Log.i("AntripService", "IncomingHandler: case-MSG_INIT_LOCATION_THREAD");
 				if(skyhookLocation != null){
 					//ignore this call, skyhookLocation is already running
 					Log.w("AntripService", "IncomingHandler: init location thread called when skyhooklocation!=null");
 				} else{
-					skyhookLocation = new SkyhookLocation(getApplicationContext(), AntripService.this);
-					skyhookLocation.run(10);
+					if(pref.contains("sid")){
+						skyhookLocation = new SkyhookLocation(getApplicationContext(), AntripService.this);
+						skyhookLocation.run(10);
+					} else{
+						Log.w("AntripService", "IncomingHandler: init location thread call without sid");
+					}
 				}
-				break;
+				break;	
+			case MSG_UNREGISTER_CLIENT:
+				Log.i("AntripService", "IncomingHandler: case-MSG_UNREGISTER_CLIENT");
+				//if the client unregisters, we nullify the messenger
+				if(outMessager == msg.replyTo){
+					outMessager = null;
+				}
 			case MSG_STOP_LOCATION_THREAD:
 				Log.i("AntripService", "IncomingHandler: case-MSG_STOP_LOCATION_THREAD");
 				if(isRecording){
@@ -110,7 +113,9 @@ public class AntripService extends Service implements LocationPublisher{
 				//close the DB here, if trip name needs to be saved, re-open it
 				if(dh != null){
 					//need to finalize trip stats
+					stopForeground(true);
 					isRecording = false;
+					stats.setButtonEndTime(new Timestamp(new Date().getTime()).toString());
 					dh.saveTripStats(currentUid, currentTid.toString(), stats);
 					dh.closeDB();
 					dh = null;
@@ -170,24 +175,35 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	@Override
 	public IBinder onBind(Intent intent) {
-		
+		Log.e("AntripService", "onBind");
+		if(intent != null){
+			intent.getAction();
+		}
 		return inMessenger.getBinder();
 	}
 	
 	@Override
 	public void onRebind(Intent intent) {
 		super.onRebind(intent);
+		Log.e("AntripService", "onRebind");
+		if(intent != null){
+			intent.getAction();
+		}
 		if(isRecording){
-			//i think this only happens when you are doing check-in...
+			//check-in
+			//return from settings
 			if(locationQueue != null && !locationQueue.isEmpty()){
-				sendMessageToUI(MSG_LOCATION_UPDATE, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
+				Log.w("AntripService", "onRebind: update from Q");
+				shouldAddPosition = true;
 			}
+		} else{
+			Log.w("AntripService", "onRebind: lalala");
 		}
 	}
 	
 	@Override
 	public boolean onUnbind(Intent intent) {
-		
+		Log.e("AntripService", "onUnbind");
 		return true; //return true to use "onRebind"
 	}
 	
@@ -196,6 +212,7 @@ public class AntripService extends Service implements LocationPublisher{
 			// activity binded, leMessager can deliver message
 			switch (msgType) {
 			case MSG_LOCATION_UPDATE_CHECKIN:
+				Log.e("AntripService", "sendMessagetoUI: check-in location update");
 				if (outMessager != null) {
 					outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE_CHECKIN, payload));
 				}
@@ -205,25 +222,43 @@ public class AntripService extends Service implements LocationPublisher{
 					if(outMessager != null){
 						//convert to yu-hsiang styled check-in json string before sending
 						if(payload instanceof JSONObject){
+							Log.e("AntripService", "sendMessagetoUI: jsonobject location update");
 							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, ((JSONObject)payload).toString()));
+							//
+							locationQueue.clear();
 						} else if(payload instanceof Location){
+							Log.e("AntripService", "sendMessagetoUI: location object location update");
 							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, CheckinJSONConverter.fromLocationtoCheckinJSON((Location)payload).toString()));
 						} else{
 							//should not happen
+							Log.e("AntripService", "sendMessagetoUI: location update something wrong");
 						}
 					} else{
 						//save all the location update during check-in as-is
 						if(locationQueue != null){
-							locationQueue.offer((Location)payload);
+							if(payload instanceof Location){
+								Log.e("AntripService", "sendMessagetoUI: location, outmessagr=null, location object");
+								locationQueue.offer((Location)payload);
+							} else{
+								//mmm
+								Log.e("AntripService", "sendMessagetoUI: location, outmessagr=null, location object, something wrong");
+							}
 						}
 					}
 				} else{
 					if(outMessager != null){
 						if(payload instanceof Location){
-							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, payload));
+							if(currentUid != null){
+								outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, payload));
+							} else{
+								Log.e("AntripService", "sendMessagetoUI: not logged in yet, don't send location update");
+							}
 						} else{
 							//what is going on
+							Log.e("AntripService", "sendMessagetoUI: why u no send location update");
 						}
+					} else{
+						Log.e("AntripService", "sendMessagetoUI: outMessenger is s till null");
 					}
 				}
 				break;
@@ -252,7 +287,7 @@ public class AntripService extends Service implements LocationPublisher{
 		
 		locationQueue = new LinkedBlockingQueue<Location>();
 		
-		stopRecordingActionUnfinished = false;
+//		stopRecordingActionUnfinished = false;
 		
 		isRunning = true;
 		isRecording = false;
@@ -280,15 +315,17 @@ public class AntripService extends Service implements LocationPublisher{
 			if(intent.getAction().equalsIgnoreCase("START_RECORDING")){
 				if(dh != null){
 					//dh is not null, a trip is probably recording now...
-					Log.e("AntripService", "IncomingHandler: start recording called when dh is NOT null");
+					Log.e("AntripService", "onStartCommand: dh not null, possibly already recording...");
 				} else if(!isStarted){
 					dh = new DBHelper128(getApplicationContext());
 					currentTid = intent.getLongExtra("tid", -1);
+					Log.e("AntripService", "onStartCommand: starting to record, tid= " + currentTid.toString());
 					stats = new TripStats();
+					stats.setButtonStartTime(new Timestamp(new Date().getTime()).toString());
 					isStarted = true;
 					isRecording = true;
 					//should start foreground here, with a notification of course
-					
+					showNotification();
 				} else{
 					//is already started, why is this being called again?
 				}
@@ -301,18 +338,35 @@ public class AntripService extends Service implements LocationPublisher{
 		return START_STICKY;
 	}
 	
+	private void showNotification(){
+		Notification notification = new Notification(R.drawable.ant_24, "LOL ANTRIP WUT", System.currentTimeMillis());
+		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), ANTripActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+		notification.setLatestEventInfo(getApplicationContext(), "Antrip", "is recording...", pendingIntent);
+		startForeground(1337, notification);
+	}
+	
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		Log.e("AntripService", "onDestroy: LOL WUT");
 		
 		currentTid = null;
 		
 		locationQueue = null;
 		
+		if(dh != null){
+			dh.closeDB();
+		}
 		dh = null;
 		
+		if(skyhookLocation != null){
+			skyhookLocation.cancel();
+		}
 		skyhookLocation = null;
 		
+		isRecording = false;
+		isStarted = false;
 		isRunning = false;
 	}
 
@@ -337,6 +391,7 @@ public class AntripService extends Service implements LocationPublisher{
 			if(dh != null){
 				dh.insert(location, currentUid, currentTid.toString());
 				stats.addOnePoint(location, false);
+//				Log.e("antripService", "newLodationUpdate: length = " + stats.getTotalValidLength() + ", accu pts=" + stats.getTotalAccuratePointCount() + ", started@" + stats.getButtonStartTime());
 			} else{
 				//this should not happen
 			}

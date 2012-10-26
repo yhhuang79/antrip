@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.location.Location;
+import android.util.Log;
 
 public class CheckinJSONConverter {
 	
@@ -30,6 +31,7 @@ public class CheckinJSONConverter {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
+				Log.e("CheckinJSONConverter", "fromQtoCheckinJSON result: " + result.toString());
 				return result;
 			}
 		}
@@ -51,6 +53,7 @@ public class CheckinJSONConverter {
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
+				Log.e("CheckinJSONConverter", "fromLocationtoCheckinJSON result: " + result.toString());
 				return result;
 			}
 		}

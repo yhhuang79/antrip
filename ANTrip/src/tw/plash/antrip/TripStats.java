@@ -1,5 +1,7 @@
 package tw.plash.antrip;
 
+import java.sql.Timestamp;
+
 import android.location.Location;
 
 public class TripStats {
@@ -59,8 +61,10 @@ public class TripStats {
 					// not a check-in point, check for validity and accuracy
 					if(LocationFilter.validityFilter(loc)){
 						totalValidPointCount += 1;
+						lastInaccuratePointTime = new Timestamp(loc.getTime()).toString();
 						if(LocationFilter.accuracyFilter(loc)){
 							totalAccuratePointCount += 1;
+							lastGoodPointTime = new Timestamp(loc.getTime()).toString();
 							//input location is valid, calculate the distance
 							totalValidLength += greatCircleDistance(previousLoc, loc);
 							//replace the location in holder with current location
@@ -93,6 +97,17 @@ public class TripStats {
 		return degree/180*Math.PI;
 	}
 
+	public String getNonNullEndTime(){
+		if(buttonEndTime != null){
+			return buttonEndTime;
+		} else if(lastInaccuratePointTime != null){
+			return lastInaccuratePointTime;
+		} else{
+			//no further value available, must return a value
+			return lastGoodPointTime;
+		}
+	}
+	
 	public String getButtonStartTime() {
 		return buttonStartTime;
 	}
@@ -105,16 +120,8 @@ public class TripStats {
 		return lastInaccuratePointTime;
 	}
 
-	public void setLastInaccuratePointTime(String lastInaccuratePointTime) {
-		this.lastInaccuratePointTime = lastInaccuratePointTime;
-	}
-
 	public String getLastGoodPointTime() {
 		return lastGoodPointTime;
-	}
-
-	public void setLastGoodPointTime(String lastGoodPointTime) {
-		this.lastGoodPointTime = lastGoodPointTime;
 	}
 
 	public String getButtonEndTime() {

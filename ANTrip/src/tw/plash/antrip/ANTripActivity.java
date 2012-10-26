@@ -13,11 +13,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.res.Configuration;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.inputmethodservice.Keyboard.Key;
+import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -39,6 +38,7 @@ import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 public class ANTripActivity extends Activity {
 	
@@ -52,6 +52,7 @@ public class ANTripActivity extends Activity {
 	
 	private Uri imageUri;
 	private final int REQUEST_CODE_TAKE_PICTURE = 100;
+	private final int REQUEST_CODE_DO_SETTINGS = 101;
 	
 	private SharedPreferences pref;
 	
@@ -61,6 +62,7 @@ public class ANTripActivity extends Activity {
 	private Handler mHandler;
 	private boolean canPostAgain;
 	private boolean canCallJavaScript = false;
+	private boolean needToLogout = false;
 	
 	boolean mIsBound;
 	private Messenger outMessenger = null;
@@ -111,6 +113,7 @@ public class ANTripActivity extends Activity {
 					if(msg.obj instanceof Location){
 						if(cco != null){
 							cco.setLocation((Location) msg.obj);
+							Log.w("antripActivity", "IncomingHandler: update check-in loc: " + ((Location) msg.obj).toString());
 							doUnbindService();
 						} else{
 							Log.e("Activity", "Check-in object error: check-in object is null, cannot set location");
@@ -164,9 +167,6 @@ public class ANTripActivity extends Activity {
 					case AntripService.MSG_STOP_LOCATION_THREAD:
 						outMessenger.send(Message.obtain(null, msgType));
 						break;
-//					case AntripService.MSG_START_RECORDING:
-//						outMessenger.send(Message.obtain(null, msgType, payload));
-//						break;
 					case AntripService.MSG_STOP_RECORDING_PRE:
 						outMessenger.send(Message.obtain(null, msgType));
 						break;
@@ -181,9 +181,6 @@ public class ANTripActivity extends Activity {
 						break;
 					case AntripService.MSG_SET_USERID:
 						outMessenger.send(Message.obtain(null, msgType, payload));
-						break;
-					case AntripService.MSG_LOGOUT_EVENT:
-						outMessenger.send(Message.obtain(null, msgType));
 						break;
 					default:
 						break;
@@ -200,11 +197,23 @@ public class ANTripActivity extends Activity {
 	}
 	
 	void doBindService(){
+		Log.w("AntripActivity", "doBindService");
 		bindService(new Intent(mContext, AntripService.class), mConnection, Context.BIND_AUTO_CREATE);
 		mIsBound = true;
+		if(needToLogout){
+			Log.e("AntripActivity", "NeedToLogout~~");
+			if(AntripService.isRecording()){
+				sendMessageToService(AntripService.MSG_STOP_RECORDING_PRE, null);
+			}
+			sendMessageToService(AntripService.MSG_STOP_LOCATION_THREAD, null);
+			bufferedLoadURL("javascript:Logout()");
+			
+			needToLogout = false;
+		}
 	}
 	
 	void doUnbindService(){
+		Log.w("AntripActivity", "doUnbindService");
 		if(mIsBound){
 			if(outMessenger != null){
 				try {
@@ -247,6 +256,7 @@ public class ANTripActivity extends Activity {
 					Log.w("acvitivy", "webview: page finished");
 					canCallJavaScript = true;
 				}
+				
 			});
 			
 			mWebView.setWebChromeClient(new WebChromeClient() {
@@ -337,12 +347,13 @@ public class ANTripActivity extends Activity {
 		setContentView(R.layout.main);
 		
 		mContext = this;
-
+		
+		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+		Log.e("USERNAME", pref.getString("usrname", "LOL"));
+		
 		urlQueue = new PriorityQueue<String>();
 		mHandler = new Handler();
 		canPostAgain = true;
-		
-		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		
 		initUI();
 	}
@@ -366,11 +377,11 @@ public class ANTripActivity extends Activity {
 		// null, need to check before proceeding
 		private final String imagepath = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
 		
-//		public void logout() {
-//			// remove sid and stop stuffs
-//			Log.w("logged", "out");
+		public void logout() {
+			// remove sid and stop stuffs
+			Log.w("logged", "out");
 //			sendMessageToService(AntripService.MSG_LOGOUT_EVENT, null);
-//		}
+		}
 		
 		// need a function to provide detailed trip data(reviewing historic
 		// trip)
@@ -446,9 +457,9 @@ public class ANTripActivity extends Activity {
 		public void setMode(int mode) {
 			currentMode = mode;
 			//Log.w("setMode", "mode= " + currentMode);
-//			String isrec = pref.getString("isRecording", null);
 			switch (currentMode) {
 			case 3:
+				
 				//need to start location service
 				sendMessageToService(AntripService.MSG_INIT_LOCATION_THREAD, null);
 				break;
@@ -548,7 +559,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void setCookie(String key, String value) {
 			pref.edit().putString(key, String.valueOf(value)).commit();
-			//Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
+			Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 			//login action, send sid to service
 			if(key.equalsIgnoreCase("sid")){
 				sendMessageToService(AntripService.MSG_SET_USERID, value);
@@ -580,7 +591,7 @@ public class ANTripActivity extends Activity {
 		 */
 		public void removeCookie(String key) {
 			pref.edit().remove(key).commit();
-			//Log.w("removeCookie", "key= " + key);
+			Log.w("removeCookie", "key= " + key);
 		}
 		
 		public String getLocale() {
@@ -612,6 +623,14 @@ public class ANTripActivity extends Activity {
 			bufferedLoadURL("file:///android_asset/index.html");
 //			mWebView.loadUrl("file:///android_asset/index.html");
 		}
+		
+		public String isRecording(){
+			if(AntripService.isRecording()){
+				return "notnullstring";
+			} else{
+				return null;
+			}
+		}
 	}
 	
 	/**
@@ -633,7 +652,9 @@ public class ANTripActivity extends Activity {
 						// get a url from queue
 						String url = urlQueue.poll();
 						Log.d("queuedLoadURL", "url= " + url);
-						mWebView.loadUrl(url);
+						if(url != null){
+							mWebView.loadUrl(url);
+						}
 						// check if the queue is empty or not
 						if (urlQueue.peek() != null) {
 							// queue not empty, post self with delay
@@ -657,30 +678,47 @@ public class ANTripActivity extends Activity {
 		switch(keyCode){
 		case KeyEvent.KEYCODE_MENU:
 			Log.e("Activity", "onKeyDown: MENU MENU MENU");
-			
+			if(pref.contains("sid")){
+				startActivityForResult(new Intent(mContext, Settings.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP), REQUEST_CODE_DO_SETTINGS);
+			} else{
+				Toast.makeText(mContext, "please login first", Toast.LENGTH_LONG).show();
+			}
 			return true;
 		case KeyEvent.KEYCODE_BACK:
 			Log.e("Activity", "onKeyDown: BACK BACK BACK");
 			//show a warning window to the user
-			new AlertDialog.Builder(mContext)
-				.setCancelable(false)
-				.setMessage("are you sure you want to quit ANTRIP?")
-				.setPositiveButton("yeah", new OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						finish();
-					}
-				}).setNegativeButton("nah...", new OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				}).show();
+			if(pref.contains("sid")){
+				showThreat();
+			} else{
+				Log.e("antripActivity", "onkeydown: back not handled");
+				if(mWebView.getUrl().contains("FacebookLogin") && mWebView.canGoBack()){
+					bufferedLoadURL("file:///android_asset/index.html");
+				} else{
+					showThreat();
+				}
+			}
 			return true;
 		default:
 			//other keys we don't care about
-			return false;
+			return super.onKeyDown(keyCode, event);
 		}
+	}
+	
+	private void showThreat(){
+		new AlertDialog.Builder(mContext)
+		.setCancelable(false)
+		.setMessage("are you sure you want to quit ANTRIP?")
+		.setPositiveButton("yeah", new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				finish();
+			}
+		}).setNegativeButton("nah...", new OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+			}
+		}).show();
 	}
 	
 	@Override
@@ -692,6 +730,7 @@ public class ANTripActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
+		
 		try{
 			doUnbindService();
 		} catch(Throwable t){
@@ -701,6 +740,7 @@ public class ANTripActivity extends Activity {
 		// short circuit logic, if startService is not called, stop service will not be called
 		// if start service is called AND is not recording a trip, stop service will be called
 		if(AntripService.isStarted() && !AntripService.isRecording()){
+			Log.e("AntripActivity", "onPause: stopping service");
 			stopService(new Intent(getApplicationContext(), AntripService.class));
 		}
 	}
@@ -709,7 +749,8 @@ public class ANTripActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		final String noImageURL = "javascript:showPicture(-1)";
 		
-		if (requestCode == REQUEST_CODE_TAKE_PICTURE) {
+		switch(requestCode){
+		case REQUEST_CODE_TAKE_PICTURE:
 			switch (resultCode) {
 			case RESULT_OK:
 				// need to grab the generated filename plus filepath and return
@@ -746,6 +787,23 @@ public class ANTripActivity extends Activity {
 				bufferedLoadURL(noImageURL);
 				break;
 			}
+			break;
+		case REQUEST_CODE_DO_SETTINGS:
+			switch(resultCode){
+			case RESULT_OK:
+				//logout
+				Log.w("antripActivity", "onActivityResult: YES logout");
+				//these calls need to be placed AFTER onResume method...need to queue theom somehow
+				needToLogout = true;
+				break;
+			default:
+				//no logout
+				Log.w("antripActivity", "onActivityResult: no logout");
+				break;
+			}
+			break;
+		default:
+			break;
 		}
 	}
 }

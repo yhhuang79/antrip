@@ -259,25 +259,31 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public void saveTripStats(String userid, String tripid, TripStats stats){
+	synchronized public long saveTripStats(String userid, String tripid, TripStats stats){
 		if(db.isOpen()){
-			ContentValues cv = new ContentValues();
-			
-		} else{
-			return;
-		}
-	}
-	
-	synchronized public long createNewTripInfo(String userid, String tripid) {
-		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
 			cv.put("tripid", tripid);
 			cv.put("userid", userid);
+			cv.put("starttime", stats.getButtonStartTime());
+			cv.put("endtime", stats.getNonNullEndTime());
+			cv.put("length", stats.getTotalValidLength());
+			cv.put("count", stats.getTotalAccuratePointCount());
 			return db.insert(TRIP_INFO_TABLE, null, cv);
-		} else {
+		} else{
 			return -2;
 		}
 	}
+	
+//	synchronized public long createNewTripInfo(String userid, String tripid) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			cv.put("tripid", tripid);
+//			cv.put("userid", userid);
+//			return db.insert(TRIP_INFO_TABLE, null, cv);
+//		} else {
+//			return -2;
+//		}
+//	}
 	
 //	synchronized public long createNewTripInfo(String userid, String tripid, String starttime) {
 //		if (db.isOpen()) {
@@ -291,17 +297,17 @@ public class DBHelper128 {
 //		}
 //	}
 	
-	synchronized public long setStartTime(String userid, String tripid, String starttime) {
-		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			cv.put("tripid", tripid);
-			cv.put("userid", userid);
-			cv.put("starttime", starttime);
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-		} else {
-			return -2;
-		}
-	}
+//	synchronized public long setStartTime(String userid, String tripid, String starttime) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			cv.put("tripid", tripid);
+//			cv.put("userid", userid);
+//			cv.put("starttime", starttime);
+//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+//		} else {
+//			return -2;
+//		}
+//	}
 	
 	/**
 	 * Insert starting address from the first non-null location report
@@ -356,41 +362,41 @@ public class DBHelper128 {
 	 * @param length
 	 * @return
 	 */
-	synchronized public long setEndInfo(String userid, String tripid, String name, String endtime, Double length) {
-		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			// pop up screen asking for user input
-			cv.put("name", name);
-			cv.put("endtime", endtime);
-			cv.put("length", length);
-			// count the number of points directly from DB
-			int count = (int) getNumberofPoints(userid, tripid);
-			cv.put("count", count);
-			
-			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-		} else {
-			return -2;
-		}
-	}
-	
-	synchronized public long setEndInfo(String userid, String tripid, String name, TripStats stats) {
-		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			// pop up screen asking for user input
-			cv.put("name", name);
+//	synchronized public long setEndInfo(String userid, String tripid, String name, String endtime, Double length) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			// pop up screen asking for user input
+//			cv.put("name", name);
 //			cv.put("endtime", endtime);
 //			cv.put("length", length);
-			// count the number of points directly from DB
-			int count = (int) getNumberofPoints(userid, tripid);
-			cv.put("count", count);
-			
-			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-		} else {
-			return -2;
-		}
-	}
+//			// count the number of points directly from DB
+//			int count = (int) getNumberofPoints(userid, tripid);
+//			cv.put("count", count);
+//			
+//			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
+//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+//		} else {
+//			return -2;
+//		}
+//	}
+	
+//	synchronized public long setEndInfo(String userid, String tripid, String name, TripStats stats) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			// pop up screen asking for user input
+//			cv.put("name", name);
+////			cv.put("endtime", endtime);
+////			cv.put("length", length);
+//			// count the number of points directly from DB
+//			int count = (int) getNumberofPoints(userid, tripid);
+//			cv.put("count", count);
+//			
+//			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
+//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+//		} else {
+//			return -2;
+//		}
+//	}
 	
 	synchronized public long setTripName(String userid, String tripid, String name) {
 		if (db.isOpen()) {
