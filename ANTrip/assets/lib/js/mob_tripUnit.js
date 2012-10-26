@@ -441,15 +441,13 @@
 						var data = result;
 						var tripurl = "#tripmap?userid="+ share_userid +"&trip_id="+ trip_data+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=false";
 						var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
-						div_data[index] ="<li id='collaps_div_"+share_userid+data.trip_id+"' ><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>";
+						div_data[index] ="<li id='collaps_div_"+share_userid+data.trip_id+"' ><input type='button' style='display:none;' value='" +tripurl+"' /><a class='listview'  href='" + tripurl  + "' rel='external' id='collaps_a_"+share_userid+data.trip_id+"' ><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>";
 						if(index==trip_list.length-1){
 							if(appendToObj!=null && appendToObj!="undefined"){
 								appendToObj.append(div_data.join('')).listview();
-								appendToObj.find('li').each(function() {
-									$(this).click(function(e){
-										 event.stopImmediatePropagation();
-										$(this).find('a').trigger('click');
-									});
+								$("li[id*=collaps_div_]").click(function() {
+										location.hash =  $(this).find('input').attr('value');
+										return false;
 								});
 								$.mobile.hidePageLoadingMsg();
 							}
