@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>
+        </title>
+        <link rel="stylesheet" href="lib/css/jquery.mobile-1.1.0.min.css" />
+		<link rel="stylesheet" type="text/css" href="lib/css/bootstrap.css" /> 
+		<link rel="stylesheet" type="text/css" href="lib/css/mob_antrip.css" />
+        <style>
+            /* App custom styles */
+			.ui-icon-facebook {
+				background-image: url(icons/facebook.png);
+				background-repeat: no-repeat;
+				background-position: 0 50%;
+				background-size: 18px 18px;
+			}
+        </style>
+        <script type="text/javascript" src="lib/jq_includes/jquery.min.js"></script>
+        <script type="text/javascript" src="lib/jq_includes/jquery.mobile-1.1.0.min.js"></script>
+		<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=true&libraries=weather"></script>
+		<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.js"></script>
+		<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.extensions.js"></script>
+		<script type="text/javascript" src="lib/gmap_includes/jquery.ui.map.overlays.js"></script>
+		<script type="text/javascript" src="lib/js/jquery.cookie.js"></script>
+		<script type="text/javascript" src="lib/js/basicParameter.js"></script>
+		<script type="text/javascript" src="lib/lang/lang_Chinese.js"></script>
+		<script type="text/javascript" src="lib/lang/lang_English.js"></script>
+		<script type="text/javascript" src="lib/js/markerclusterer.js"></script>
+		<script type="text/javascript" src="lib/js/md5.js"></script>
+        <script type="text/javascript">
+			// main page
+			function Logout(){
+				if($.cookie("facebookid")){
+					FB.logout(function(response) {
+						$.cookie("facebookid", null);
+					}); 
+				}
+				$.cookie("sid", null);
+				$.cookie("trip_id", null);
+				$.mobile.changePage("#login");	
+			}						
+			// map page
+			var tripRecorder;
+			function getLocation(){
+				if (navigator.geolocation){
+					navigator.geolocation.getCurrentPosition(uploadPosition);
+				} else {
+					alert("Geolocation is not supported by this browser.");
+				}
+			}
+			function uploadPosition(position){
+				Date.prototype.Timestamp = function() {
+   					var yyyy = this.getFullYear().toString();
+   					var mm = (this.getMonth()+1).toString(); // getMonth() is zero-based
+   					var dd  = this.getDate().toString();
+					var h = this.getHours().toString();
+					var m = this.getMinutes().toString();
+					var s = this.getSeconds().toString();
+					var ms = this.getUTCMilliseconds().toString();
+   					return yyyy+"-"+(mm[1]?mm:"0"+mm[0])+"-"+(dd[1]?dd:"0"+dd[0])+"%20"+(h[1]?h:"0"+h[0])+":"+(m[1]?m:"0"+m[0])+":"+(s[1]?s:"0"+s[0])+"."+ms; // padding
+  				};
+				var sid = $.cookie("sid"); 
+				var trip_id = $.cookie("trip_id");
+				var d = new Date();				
+				var timestamp = d.Timestamp();
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/Input.php',
+					data:{userid: sid, trip_id: trip_id, lat: position.coords.latitude, lng: position.coords.longitude, accu: position.coords.accuracy, timestamp: timestamp},							 
+					type: 'GET', dataType: 'json', cache: false,
+					success:function(result){
+					}
+				});
+			}
+			function startRecordTrip(){
+				var isRecording = $.cookie("isRecording");
+				$('#RecordButton').attr('data-theme','b').removeClass('ui-btn-up-e').removeClass('ui-btn-hover-e').addClass('ui-btn-up-b').trigger('create');
+				if(isRecording == null){
+					$.cookie("isRecording", "true");
+					var sid = $.cookie("sid"); 
+					$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetNewTripId.php',
+						data:{userid: sid},							 
+						type: 'GET', dataType: 'jsonp', cache: false,
+						success:function(result){
+							$.cookie("trip_id",result.newTripId);
+							tripRecorder = setInterval(function(){getLocation()},5000);
+							$('#RecordButton').attr('data-theme','e').removeClass('ui-btn-up-b').addClass('ui-btn-up-e').trigger('create');
+							alert("Start Recording Trip");
+						}
+					});
+
+				} else {
+					$.cookie("isRecording", null);
+					trip = [];
+					$('#map_canvas_2').gmap('clear', 'Polyline');
+					$('#map_canvas_2').gmap('refresh');
+					clearInterval(tripRecorder);
+					alert("Stop Recording Trip");
+				}
+			}
+			function showPicture(path){
+				if(path == "-1"){ 
+					alert("No picture");
+				}else{
+					$('#imgView').append("<img width='200' src='file://" + path.toString() +  "' />");					
+				}
+			}
+			function addFriend(userid, friendname){
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/FriendRequest.php',
+					data:{user_id : userid, friend_name : friendname},
+					type: 'GET', dataType: 'jsonp', cache: false,
+					success:function(result){
+						alert(g_str_addFriend+" - " + friendname);
+					}
+				});			
+			}
+			function confirmFriend(fid, friendname, passcode){
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/ConfirmFriendRequest.php',
+					data:{fid : fid, friendname : friendname, passcode : passcode},
+					type: 'GET', dataType: 'jsonp', cache: false,
+					success:function(result){
+						$.mobile.changePage($('#friendrequest'), {reload : true});
+					}
+				});			
+			}
+			// ....
+		</script>
+		<script type="text/javascript">
+			// Global 
+			var sid;
+			$.urlParam = function(name){
+    			var results = new RegExp('[\\?&]' + name + '=([^&#]*)').exec(window.location.href);
+    			return results[1] || 0;
+			}
+			$(document).delegate('div:jqmData(role="page")', 'pagecreate', function(){ 
+				if(window.antrip){
+					sid = window.antrip.getCookie("sid");
+				} else {
+					sid = $.cookie("sid");
+				}
+				if(sid==null){
+					if($(this).attr('id')!='registerpage'){
+						$.mobile.changePage("#login");
+					}
+				}
+			});
+			// map page
+			var mobileDemo = { 'center': '57.7973333,12.0502107', 'zoom': 6 };
+			var trip = [];
+			$('#map').live('pageshow', function() {
+				//var sid = $.cookie("sid");
+				//alert("map pageshow");
+				$('#map_canvas_1').height($(window).height());
+				$('#map_canvas_1').gmap({'center': mobileDemo.center, 'zoom': mobileDemo.zoom, 'callback': function(map) {
+					var self = this;
+					self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
+
+					var weatherLayer = new google.maps.weather.WeatherLayer({
+						temperatureUnits: google.maps.weather.TemperatureUnit.CELSIUS
+					});
+					weatherLayer.setMap(map);
+
+					var cloudLayer = new google.maps.weather.CloudLayer();
+					cloudLayer.setMap(map);	
+				}});
+				initRecorderMap();
+				$('#map_canvas_1').gmap('refresh');			
+			});
+			// friend list 
+			$('#friendlist').live('pagebeforeshow', function(){
+				//var sid = $.cookie("sid");
+				var div_data = [];
+				$("#listview_2").html("");
+				$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendList.php',
+					data:{sid : sid},
+					type: 'GET', dataType: 'jsonp', cache: false,
+					success:function(result){
+						$.each(result.friend_list, function(i,data){
+							//var trip_list = g_trip_list;
+							//alert(trip_list);
+							function callback(trip_list){
+								var length =0;
+								if(trip_list!=null){
+									length = trip_list.length;
+								}
+								div_data[i] ="<div id='li_listview_"+data.id+"' data-role='collapsible'  data-theme='e' data-collapsed='false'><h3><img src='" + data.image + "'/>" + data.name  + "<br/>" +g_str_sharenumberoftrip+":"+length +"</h3><ul id='div_listview_"+data.id+"' data-role='listview'></ul></div>";
+								$("#listview_2").append(div_data[i]);
+								$("#li_listview_"+data.id).collapsible({refresh:true});
+								$("#li_listview_"+data.id).click(function(e) {
+										event.stopImmediatePropagation();
+										if(length>0 && $("#div_listview_"+data.id).html()==""){
+											showTripListDetails(trip_list, data.id, data.name, $("#div_listview_"+data.id));
+										}
+										return false;
+								});
+							}
+							getShareTripListbyFriend(data.id, callback);
+						});
+						$.mobile.hidePageLoadingMsg();
+					}
+				});
+			});
+			$('#friendlist').live('pageshow', function() {
+				$("#listview_2").listview();
+			});
+			// find friend 
+			$('#findfriend').ready(function(){
+			});
+			$('#findfriend').live('pageshow', function() {
+				$("#searchFriend").keyup(
+					function() {
+						var name = $('#searchFriend').val();
+						var div_data = [];
+						$.mobile.showPageLoadingMsg("b", "Loading User List ...", true);
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetAllUserList.php',
+							data:{userid : sid, name : name},
+							type: 'GET', dataType: 'jsonp', cache: false,
+							success:function(result){
+								$.each(result.user_list, function(i,data){
+									var requestUrl = "javascript:addFriend(" + sid + " ,\"" + data.name + "\")";
+									div_data[i] ="<li><a class='listview' href='" + requestUrl + "'><img src='" + data.image + "'/><h3>" + data.name  + "</h3></a><a href='" + requestUrl + "' data-icon='plus'><h3>"+g_str_addFriend+"</h3></a></li>";
+								});
+								$("#userlistview").html(div_data.join('')).listview('refresh');
+								$.mobile.hidePageLoadingMsg();
+							}	
+						});
+				});
+			});
+			// friend request list 
+			$('#friendrequest').live('pageinit', function(){
+				//var sid = $.cookie("sid");
+				var div_data = [];
+				$.mobile.showPageLoadingMsg("b", "Loading Friend Request List ...", true);
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendRequestList.php',
+					data:{sid : sid},
+					type: 'GET', dataType: 'jsonp', cache: false,
+					success:function(result){
+						$.each(result.friendrequest_list, function(i,data){
+							//var requestUrl = "http://plash2.iis.sinica.edu.tw/api/ConfirmFriendRequest.php?fid=" + data.fid + "&friendname=" + data.name + "&passcode=" + data.passcode;
+							var requestUrl = "javascript:confirmFriend(" + data.fid + ",\"" + data.name + "\",\"" + data.passcode + "\")";
+							div_data[i] ="<li><a href='" + requestUrl + "'><img src='" + data.image + "'/><h3>" + data.name  + "</h3></a><a href='" + requestUrl + "' data-icon='plus'><h3>"+g_str_addFriend+"</h3></a></li>";
+						});
+						$("#requestlistview").append(div_data.join('')).listview('refresh');
+						$.mobile.hidePageLoadingMsg();
+					}
+				});
+			});
+			$('#friendrequest').live('pageshow', function() {
+				$("#requestlistview").listview('refresh');
+			});			
+			// trip list
+			$('#triplist').live('pageshow', function() {
+				$("#listview_3").listview('refresh');
+			});
+			// trip map 
+			$('#tripmap').live('pageshow', function(){
+				var userid = $.urlParam('userid');
+				var trip_id = $.urlParam('trip_id');
+				var local = $.urlParam('local');				
+				var trip_1 =[];
+
+				$('#map_canvas_2').height($(window).height());
+				if(local=="true"){
+					showLocalTripData(trip_id);
+				}
+				else{
+					GetTripPointfromID(userid, trip_id);
+				}
+			});
+			$('#tripmap').live('pagehide', function() {
+				$('#map_canvas_2').gmap('destroy');
+			});
+			// Check in dialog
+			$('#checkin').live('pageshow', function() {
+				$('#camera').click(function(){
+					if (window.android){
+						window.android.startCamera();
+					}					
+				});
+			});
+			// Facebook Login
+			$('#facebooklogin').live('pageinit', function() {
+				 $.mobile.loadPage("http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php");
+			});
+		</script>
+		<script type="text/javascript">
+			window.fbAsyncInit = function() {
+				FB.init({
+				  appId      : '314048998686760', // App ID
+				  status     : true, // check login status
+				  cookie     : true, // enable cookies to allow the server to access the session
+				  xfbml      : true  // parse XFBML
+				});
+
+				// Additional initialization code here
+			};
+
+		  // Load the SDK Asynchronously
+		  (function(d){
+			 var js, id = 'facebook-jssdk', ref = d.getElementsByTagName('script')[0];
+			 if (d.getElementById(id)) {return;}
+			 js = d.createElement('script'); js.id = id; js.async = true;
+			 js.src = "//connect.facebook.net/en_US/all.js";
+			 ref.parentNode.insertBefore(js, ref);
+		   }(document));
+		   
+		   function LoginFacebook(){
+				FB.login(function(response) {
+					if (response.authResponse) {
+						FB.api('/me', function(response) {
+							var username = response.username.toString();
+							var email = response.email.toString();
+							var facebookid = response.id.toString();
+							$.cookie("facebookid", facebookid);
+							$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookLogin.php',
+								data:{email: email, facebookid: facebookid},							 
+								type: 'GET', dataType: 'jsonp', cache: false,
+								success:function(result){
+									if(result.sid != "0"){ 
+										$.cookie("sid", result.sid);
+										$.mobile.changePage("#mainpage");
+									} else { 
+										$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/lib/php/FacebookRegister.php',
+											data:{username: username, email: email, facebookid: facebookid},							 
+											type: 'GET', dataType: 'json', cache: false,
+											success:function(result){
+												if(result.sid != "0"){ 
+													var body = 'Reading Connect JS documentation';
+													FB.api('/me/feed', 'post', {body: body, link: 'http://antrip.plash.tw', message: 'ANTrip 雲水途誌 好好玩!!!', picture: 'http://plash2.iis.sinica.edu.tw/antrip_icon.jpg'}, function(response) {});
+													$.cookie("sid", result.sid);
+													$.mobile.changePage("#mainpage");
+												}
+											}
+										});
+									}
+								}
+							});
+						});
+					}
+				},{scope: 'email, publish_stream'});
+		   }
+		</script>
+		<script type="text/javascript" src="lib/js/basicFunction.js"></script>
+		<script type="text/javascript" src="lib/js/mob_tripUnit.js"></script>
+		<script type="text/javascript" src="lib/js/externalAPI.js"></script>
+		<script type="text/javascript" src="lib/js/mob_tripRecorder.js"></script>
+		<script type="text/javascript" src="lib/js/mob_login_out.js"></script>
+		<script type="text/javascript" src="lib/js/mob_antrip.js"></script>
+    </head>
+    <body>
+	<!-- login page start-->
+        <div data-role="page" id="login">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+                <h4>
+                    AnTrip lite
+                </h4>
+            </div>
+            <div data-role="content" id='login_bk' style="background-image: url('images/background.png');">
+                <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup">
+                        <label for="textinput1">
+                        </label>
+                        <input id="username" placeholder="" value="" type="text" />
+                    </fieldset>
+                </div>
+                <div data-role="fieldcontain">
+                    <fieldset data-role="controlgroup">
+                        <label for="textinput2">
+                        </label>
+                        <input id="password" placeholder="" value="" type="password" />
+                    </fieldset>
+                </div>
+					<a data-role="button" data-transition="fade" data-theme="e" href="#login" id="blogin">
+					</a>
+					<a data-role="button" data-transition="fade" data-theme="b" data-icon="facebook" href="" onClick="window.open('http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php','Facebook OAuth認證','toolbar=no,resizable=no,scrollbars=auto');return false"  id='fblogin'>
+					</a>
+					<a href="#registerpage" id="register_btn" data-icon="check" data-rel="dialog">
+					</a>
+				<!--<a href="http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php" data-rel="dialog">Login with Facebook</a>-->
+            </div>
+        </div>
+	<!-- login page end-->
+	<!-- Registration Dialog -->
+		<div data-role="page" id="registerpage">	
+			<div data-role="header" data-theme="e" data-position="inline">
+				<h1></h1>
+			</div>
+			<div data-role="content" data-theme="e" id='register_bk'>
+				<form action>
+					<p style="text-align:center"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput1'></label><input id='reg_username' placeholder='USERNAME' value='' type='text' /></fieldset></div>
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput2'></label><input id='reg_email' placeholder='EMAIL' value='' type='text' /></fieldset></div>
+					<sup id="email_forgotten"></sup><br/><br/>
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput3'></label><input id='reg_password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
+					<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput4'></label><input id='reg_re_password' placeholder='Re-Enter PASSWORD' value='' type='password' /></fieldset></div> 
+					</p>
+					<div class="ui-block-b"><a href="javascript:verifyRegister();" data-role="button" data-icon="check" data-theme="e"  id='register_yes'></a></div>
+					<div class="ui-block-b"><a href="#login" data-role="button" data-icon="check" data-theme="e" id='register_cancel'></a></div>
+				</form>
+			</div>
+		</div>
+	<!-- Registration Dialog end -->	
+	<!-- main page start-->		
+        <div data-role="page" id="mainpage">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+                <h4>
+                    AnTrip lite
+                </h4>
+				<a href="javascript:Logout()" data-icon="arrow-r" data-iconpos="right" class="ui-btn-right">Logout</a>
+            </div>
+            <div data-role="content">
+                <ul data-role="listview" data-inset="true">
+				<li><a href="#map" data-prefetch data-transition="flip">Trip Recorder</a></li>
+				<li><a href="#friendlist" data-prefetch data-transition="flip">Friend List</a></li>
+				<li><a href="#triplist" data-prefetch data-transition="flip">Trip List</a></li>
+				</ul>
+            </div>
+        </div>
+	<!-- main page end -->
+	<!-- map recorder page start -->
+		<div data-role="page" id="map">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+				<a href="#mainpage" data-icon="home" data-iconpos="left" data-transition="flip" id="page_back">Back</a>
+                <h4>
+                    AnTrip lite
+                </h4>
+				<a href="javascript:startRecordTrip()" data-icon="gear" id="RecordButton">Record</a>
+            </div>
+            <div data-role="content" style="padding:0em;">		
+				<div class="ui-bar-c ui-corner-all ui-shadow" style="padding:0em;">
+					<div id="map_canvas_1" style="height:400px;"></div>
+				</div>
+			</div>
+			<div data-role="navbar" data-iconpos="left" data-position="fixed">
+				<ul>
+				<li><a href="#checkin" data-icon="check" id="CheckinButton" data-rel="dialog">Checkin</a></li>
+				</ul>
+			</div>
+        </div>
+	<!-- map recorder page end -->
+	<!-- friend list start -->
+	    <div data-role="page" id="friendlist">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
+                <h4>AnTrip lite</h4>
+				<a href="#findfriend" data-icon="search" id="findfriend" data-prefetch data-transition="pop"></a>
+            </div>
+			<div data-role="content">
+					<div data-role="collapsible-set"  id="listview_2">
+						
+					</div>
+            </div>
+        </div>
+	<!-- friend list end -->
+	<!-- find friend start -->
+	    <div data-role="page" id="findfriend">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+				<a href="#friendlist" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
+                <h4>AnTrip lite</h4>
+				<a href="#friendrequest" data-icon="info" id="friendrequest"></a>
+            </div>
+			<div data-role="content">
+				<div class="content-primary" id="content-primary_3">
+					<ul style='padding:0px 0px 30px 0px;text-align:center;' data-role="fieldcontain">
+						<input type="search" name="search" id="searchFriend" value=""  />
+					</ul>
+					<ul data-role="listview" id="userlistview"></ul>
+				</div>
+            </div>
+        </div>
+	<!-- find friend end -->
+	<!-- friend request start -->
+	    <div data-role="page" id="friendrequest">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+				<a href="#findfriend" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
+                <h4>AnTrip lite</h4>
+            </div>
+			<div data-role="content">
+				<div class="content-primary" id="content-primary_4">	
+					<ul data-role="listview" id="requestlistview">
+					</ul>
+				</div>
+            </div>
+        </div>
+	<!-- friend request end -->		
+	<!-- trip list start -->
+        <div data-role="page" id="triplist">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="slide" id="page_back">Back</a>
+                <h4>AnTrip lite</h4>
+            </div>
+            <div data-role="content">
+				<div class="content-primary" id="content-primary_2">	
+					<ul data-role="listview" id="listview_3">
+					</ul>
+				</div>
+            </div>
+        </div>	
+	<!-- trip list end -->
+	<!-- trip map start -->
+	    <div data-role="page" id="tripmap">
+            <div data-theme="e" data-role="header" data-position="fixed" >
+				<a href="#triplist" data-icon="home" data-iconpos="left" data-transition="turn" id="page_back">Back</a>
+                <h4>
+                    AnTrip lite
+                </h4>
+				<a href="#friendCheckDialog" id="share_trip" data-icon="check" data-rel="dialog">Share this trip to friends</a>
+            </div>
+            <div data-role="content" style="padding:0em;">		
+				<div class="ui-bar-c ui-corner-all ui-shadow" style="padding:0em;">
+					<div id="map_canvas_2" style="height:400px;"></div>
+				</div>
+			</div>
+        </div>
+	<!-- trip map end -->
+	<!-- friend list check dialog start -->
+	    <div data-role="page" id="friendCheckDialog">
+            <div data-role="header" data-theme="e" data-position="inline">
+                <h4>AnTrip lite</h4>
+            </div>
+			<div data-role="content" data-theme="e" id='friendCheck_bk'>
+				<form action>
+					<div data-role="fieldcontain" id='shareFriend_contain'>
+							<fieldset data-role="controlgroup" id="listview_5">
+							</fieldset>
+					</div>
+					<div class="ui-block-b"><a href="#tripmap" data-role="button" data-icon="check" data-theme="e"  id='shareFriend_yes'></a></div>
+					<div class="ui-block-b"><a href="#tripmap" data-role="button" data-icon="check" data-theme="e" id='shareFriend_cancel'></a></div>
+				</form>
+            </div>
+        </div>
+	<!-- friend list check dialog end -->
+	<!-- Check in Dialog -->
+		<div data-role="page" id="checkin">	
+			<div data-role="header" data-theme="e" data-position="inline">
+				<h1>Check in</h1>
+			</div>
+			<div data-role="content" data-theme="e" id='chechin_bk'>
+				<form action>
+					<div data-role="fieldcontain" id='chechin_message_bk'>
+						<textarea name="textarea" id="message" placeholder='' class="linedivclass"  onChange="SetText(this.value);"></textarea>
+					</div>
+					<div data-role="fieldcontain" id='checkin_emotion'>
+						<label for="select-choice-1" class="select" id='checkin_feeling'></label>
+						<ul id="menu-right" data-role="menu">
+							<li>
+								<span data-role="button" data-icon="arrow-d" data-iconpos="right" id="emotion-sel"  class='fixedBK'><img class='' id='selected-emotion' src='./images/pleased.png'  alt='3' /><label for="labeltip" class="notip" id="selected-emotion-tip"></label></span>
+								<ul data-role="listview" data-inset="true" id="emotion-sel_option" class='fixedBK'>
+									<a class='class_top_bt'><img class='' id='' src='./images/pleased.png' alt='3' /><span class='notip' id='pleased_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/happy.png'  alt='2' /><span class='notip' id='happy_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/excited.png' alt='1' /><span class='notip' id='excited_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/angry.png'  alt='10' /><span class='notip' id='angry_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/nervous.png' alt='9' /><span class='notip' id='nervous_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/calm.png' alt='11' /><span class='notip' id='calm_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/bored.png' alt='8' /><span class='notip' id='bored_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/sad.png' alt='7' /><span class='notip' id='sad_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/sleepy.png' alt='6' /><span class='notip' id='sleepy_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/peaceful.png' alt='5' /><span class='notip' id='peaceful_tip'></span></a>
+									<a class='class_top_bt'><img class='' id='' src='./images/relaxed.png' alt='4' /><span class='notip' id='relaxed_tip'></span></a>
+								</ul>
+							</li>
+						</ul> 
+					</div>
+ 
+					<div class="ui-grid-a">
+						<div class="ui-block-a" id='checkin_camera'>
+							<div><div  data-role="button" data-icon="star" data-theme="e" id="camera_btn"></div><img id='takepicture' src=''/></div>
+						</div>
+						<div class="ui-block-b"><a href="#map" data-role="button" data-icon="check" data-theme="e"  id='check-in_yes'></a></div>
+						<div class="ui-block-b"><a href="#map" data-role="button" data-icon="check" data-theme="e" id='check-in_cancel'></a></div>
+					</div>
+				</form>
+			</div>
+		</div>
+	<!-- Check in Dialog end -->	
+		<div data-role="page" id="facebooklogin">
+		</div>
+    </body>
+</html>
+
