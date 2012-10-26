@@ -187,7 +187,7 @@ public class UploadThread extends AsyncTask<Void, Void, Integer>{
 			})
 			.show();
 		} else{
-			Toast.makeText(mContext, "upload comeplete~~", Toast.LENGTH_LONG).show();
+			Toast.makeText(mContext, R.string.upload_complete, Toast.LENGTH_LONG).show();
 		}
 		cleanup();
 	}
