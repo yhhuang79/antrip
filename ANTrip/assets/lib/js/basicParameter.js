@@ -21,6 +21,20 @@
 			"friendlist": "#tb_friend"
 		};
 
+		var emotionMapping = {	
+			"1": "excited",
+			"2": "happy",
+			"3": "pleased",
+			"4": "relaxed",
+			"5": "peaceful",
+			"6": "sleepy",
+			"7": "sad",
+			"8": "bored",
+			"9": "nervous",
+			"10": "angry",
+			"11": "calm"
+		};
+
 		var g_zoom=17;
 		var g_startLatLng = new google.maps.LatLng(25.04752,121.614189);
 		var g_tripRecorderPath =  im+'tripRecorder.png';

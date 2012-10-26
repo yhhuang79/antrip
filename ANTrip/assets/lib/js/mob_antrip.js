@@ -298,6 +298,9 @@
 			if(window.antrip){
 				window.antrip.startCheckin();
 			}
+			$("#selected-emotion").attr("src","./images/pleased.png");
+			$("#selected-emotion").attr("alt","3");
+			$("#takepicture").attr("src","");
 		});
 
 		$(document).delegate('div:jqmData(role="page")', 'pagebeforeshow', function(){ 

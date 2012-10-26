@@ -12,20 +12,6 @@
 	var g_bounds = new google.maps.LatLngBounds();
 
 	var g_markerCluster=null;
-
-	var emotionMapping = {	
-		"1": "excited",
-		"2": "happy",
-		"3": "pleased",
-		"4": "relaxed",
-		"5": "peaceful",
-		"6": "sleepy",
-		"7": "sad",
-		"8": "bored",
-		"9": "nervous",
-		"10": "angry",
-		"11": "calm"
-	};
 	
 	var g_intval=-1;
 	var g_clockintval=-1;
@@ -447,7 +433,7 @@
 			zIndex:1009
 		});
 		google.maps.event.addListener(g_currentmarker, 'click', function() {
-			isRecording = $.cookie("isRecording");
+			var isRecording = $.cookie("isRecording");
 			if(window.antrip){
 				isRecording = window.antrip.isRecording();
 			}
@@ -527,9 +513,9 @@
 		}
 
 		g_emotion_html = "<img src='"+$("#selected-emotion").attr("src")+"' />"+$('#selected-emotion-tip').html();
-	
+		//alert($("#selected-emotion").attr("alt"));
 		if(window.antrip){
-			window.antrip.setEmotion( $("#selected-emotion").attr("alt"));
+			window.antrip.setEmotion(eval($("#selected-emotion").attr("alt")));
 		}
 		else{
 			var self =  $('#map_canvas_1').gmap('get','map');
