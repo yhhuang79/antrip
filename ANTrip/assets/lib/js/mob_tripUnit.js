@@ -360,8 +360,6 @@
 
 	function shareTripToFriends(trip_id){
 		var friend_list="";
-		//alert(sid);
-		//alert($(this).attr("name"));
 		$("input[id*='checkbox_']").each(function() {
 			if($(this).attr("checked")=="checked"){
 				if(friend_list!=""){
@@ -377,14 +375,14 @@
 							//alert(result.delAuthFriend);
 						},
 						error: function(xhr) {
-							//alert('Ajax request errors');
+							alert('Ajax request errors');
 						}
 				});
 			}
 		});
 		if(friend_list!=""){
 			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/SetAuthFriendComponent.php',
-				data:{userid : sid, trip_id:g_trip, friend_id:friend_list},
+				data:{userid : sid, trip_id:trip_id, friend_id:friend_list},
 				type: 'GET', dataType: 'jsonp', cache: false,
 				success:function(result){
 					//alert('success');

@@ -280,12 +280,20 @@
 								if(result.isShareTrip=="1"){
 									checkbox_str = "<input type='checkbox' checked='checked' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
 								}
-								div_data[i] ="<li><a class='listview' id='list_"+sid+data.id+"' >"+checkbox_str+"<img src='" + data.image + "'/><h3>"+g_str_id+":" + data.name  + "</h3></a></li>";
-								$("#listview_5").append(div_data[i]).listview('refresh');
-								$("#list_"+sid+data.id).click(function(e) {
+								div_data[i] = "<li><img src='" + data.image + "' /> "+checkbox_str+"<label for='checkbox_"+sid+data.id+"'>"+g_str_id+":" + data.name  + "</label></li>";
+								$("#listview_5").append(div_data[i]);
+								$("#checkbox_"+sid+data.id).checkboxradio();
+
+								if(result.isShareTrip=="1"){
+									$("#checkbox_"+sid+data.id).attr("checked",true).checkboxradio("refresh");
+								}
+								else{
+									$("#checkbox_"+sid+data.id).checkboxradio("refresh");
+								}
+								/*$("#checkbox_"+sid+data.id).click(function(e) {
 								   event.stopImmediatePropagation();
 									$("checkbox_"+sid+data.id).trigger('click');
-								});
+								});*/
 							}
 						});
 					});
