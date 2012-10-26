@@ -72,7 +72,7 @@
 						$.each(result.tripInfoList, function(i,data){
 							var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.trip_id+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=false";;
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
-							div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.trip_id+"' ></div><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.id+", false);event.stopImmediatePropagation();return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"
+							div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.trip_id+"' ></div><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.trip_id+", false);event.stopImmediatePropagation();return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"
 						});
 						$("#listview_3").append(div_data.join('')).listview('refresh');
 					}
@@ -256,7 +256,7 @@
 			data:{userid : sid, trip_id: id},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
-				
+				reloadTripList();
 			},
 			error: function(xhr) {
 				alert("Error!");
