@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.security.KeyStore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -59,26 +60,21 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class UploadThread extends AsyncTask<Void, Void, Integer>{
+public class UnfinishedUploadThread extends AsyncTask<Void, Void, Void>{
 	
 	private Context mContext;
 	private DBHelper128 dh;
-	private String uniqueid;
 	private String userid;
-	private String oldTripid;
 	private String newTripid;
-	
-	private ProgressDialog diag;
 	
 	private TripListReloader reloader;
 	
 	final Address nullAddr = new Address(Locale.getDefault());
 	final ArrayList<Address> nulladdrlist = new ArrayList<Address>();
 	
-	public UploadThread(Context c, String id, TripListReloader tlr) {
+	public UnfinishedUploadThread(Context c, TripListReloader tlr) {
 		mContext = c;
 		dh = new DBHelper128(mContext);
-		uniqueid = id;
 		userid = PreferenceManager.getDefaultSharedPreferences(mContext).getString("sid", null);
 		reloader = tlr;
 		nulladdrlist.add(nullAddr);
@@ -87,108 +83,51 @@ public class UploadThread extends AsyncTask<Void, Void, Integer>{
 	@Override
 	protected void onPreExecute() {
 		super.onPreExecute();
-		if(uniqueid == null || userid == null || !isNetworkAvailable()){
+		if(userid == null || !isNetworkAvailable()){
 			cancel(false);
-		} else{
-			diag = new ProgressDialog(mContext);
-			diag.setTitle("Uploading...");
-			diag.setCancelable(true);
-			diag.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			diag.setMax(100);
-			diag.setProgress(0);
-			diag.setOnCancelListener(new OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface dialog) {
-					Log.e("uploadthread", "progressdiag: canceled");
-				}
-			});
-			diag.show();
 		}
 	}
 	
 	@Override
-	protected void onProgressUpdate(Void... values) {
-		super.onProgressUpdate(values);
-		diag.setProgress((diag.getProgress() + 10));
-	}
-	
-	@Override
-	protected Integer doInBackground(Void... params) {
-		//XXX unique id -> old trip id
-		oldTripid = getOldTripId();
-		Log.e("uploadthread", "doinbg: 1");
-		publishProgress();
-		//XXX old trip id -> new trip id
-		newTripid = getNewTripId();
-		Log.e("uploadthread", "doinbg: 2");
-		publishProgress();
-		//XXX get start/end address
-		List<Address> startAddr = getaddress(userid, oldTripid, true);
-		Log.e("uploadthread", "doinbg: 3");
-		publishProgress();
-		List<Address> endAddr = getaddress(userid, oldTripid, false);
-		Log.e("uploadthread", "doinbg: 4");
-		publishProgress();
-		//XXX commit all to DB
-		if(newTripid != null){
-			//all good, commit everything to DB, and  save new upload stage
-			if(startAddr == null){
-				startAddr = nulladdrlist;
-			}
-			if(endAddr == null){
-				endAddr = nulladdrlist;
-			}
-			commitAlltoDB(startAddr, endAddr);
-			Log.e("uploadthread", "doinbg: 5~~~~");
-			publishProgress();
-			//XXX upload info
-			if(uploadtripinfo()){
-				dh.updateUploadStage(userid, newTripid, 2);
-				Log.e("uploadthread", "doinbg: 6");
-				publishProgress();
-				if(uploadtripdata()){
-					//XXX upload data
-					dh.updateUploadStage(userid, newTripid, 3);
-					Log.e("uploadthread", "doinbg: 7");
-					publishProgress();
-					if(uploadpictures()){
-						//XXX upload pictures
-						dh.updateUploadStage(userid, newTripid, 4);
-						Log.e("uploadthread", "doinbg: 8");
-						publishProgress();
-						publishProgress();
-						publishProgress();
-						
+	protected Void doInBackground(Void... params) {
+		HashMap<String, Integer> tmp = dh.getAllUnfinishedUploads(userid);
+		if(tmp != null && !tmp.isEmpty()){
+			for(String key : tmp.keySet()){
+				newTripid = key;
+				switch(tmp.get(newTripid)){
+				case 1:
+					if(uploadtripinfo()){
+						dh.updateUploadStage(userid, newTripid, 2);
+						Log.e("uploadthread", "unfinished: done with info");
 					} else{
-						return null;
+						break;
 					}
-				} else{
-					return null;
+				case 2:
+					if(uploadtripdata()){
+						dh.updateUploadStage(userid, newTripid, 3);
+						Log.e("uploadthread", "unfinished: done with data");
+					} else{
+						break;
+					}
+				case 3:
+					if (uploadpictures()) {
+						dh.updateUploadStage(userid, newTripid, 4);
+						Log.e("uploadthread", "unfinished: done with photos");
+					} else {
+						break;
+					}
+				default:
+					//nothing to do here...
+					break;
 				}
-			} else{
-				return null;
 			}
-		}else{
-			return null;
 		}
-		return 1;
+		return null;
 	}
 	
 	@Override
-	protected void onPostExecute(Integer result) {
+	protected void onPostExecute(Void result) {
 		super.onPostExecute(result);
-		if(result == null){
-			new AlertDialog.Builder(mContext)
-			.setTitle("error")
-			.setMessage("upload failed, please try again later")
-			.setNeutralButton("okay...", new OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {}
-			})
-			.show();
-		} else{
-			Toast.makeText(mContext, "upload comeplete~~", Toast.LENGTH_LONG).show();
-		}
 		cleanup();
 	}
 	
@@ -196,86 +135,6 @@ public class UploadThread extends AsyncTask<Void, Void, Integer>{
 	protected void onCancelled() {
 		super.onCancelled();
 		cleanup();
-	}
-	
-	private String getOldTripId(){
-		return dh.getTripid(uniqueid);
-	}
-	
-	private String getNewTripId(){
-		try{
-			// the client to handle sending/receiving requests
-			HttpClient httpsClient = getHttpClient();
-			//first, update trip info and data with the correct tripid
-			String newTripidUrl = "https://plash.iis.sinica.edu.tw:8080/GetNewTripId?userid=" + userid;
-			//Log.w("newTripidUrl", newTripidUrl);
-			HttpGet getRequest = new HttpGet();
-			getRequest.setURI(new URI(correctURLEncoder(newTripidUrl)));
-			HttpResponse response = httpsClient.execute(getRequest);
-			
-			Integer statusCode = response.getStatusLine().getStatusCode();
-			if(statusCode == 200){
-				BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-				JSONObject result = new JSONObject(new JSONTokener(in.readLine()));
-				in.close();
-				String newTripid = result.getString("newTripId");
-				if(newTripid != null){
-					//Log.w("update tripid", "rows= " + num);
-					httpsClient.getConnectionManager().shutdown();
-					return newTripid;
-				} else{
-					//did not received a new tripid, abort
-					//Log.e("upload service", "getnewrtipid error: new trip id = null");
-					httpsClient.getConnectionManager().shutdown();
-					return null;
-				}
-			} else{
-				//connection failed, abort
-				//Log.e("upload service", "getnewrtipid error: status code=" + statusCode);
-				httpsClient.getConnectionManager().shutdown();
-				return null;
-			}
-		} catch(IOException e){
-			e.printStackTrace();
-		} catch(URISyntaxException e){
-			e.printStackTrace();
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		//Log.e("upload service", "getnewrtipid error: exception");
-		return null;
-	}
-	
-	private List<Address> getaddress(String uid, String tid, boolean start){
-		try{
-			CachedPoints point = dh.getOnePoint(uid, tid, start);
-			Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
-			List<Address> addr = geocoder.getFromLocation(point.latitude, point.longitude, 1);
-			if(addr != null && !addr.isEmpty()){
-				//Log.w("upload service", "first address: \nadmin:" + firstAddr.get(0).getAdminArea() + "\ncountry code:" + firstAddr.get(0).getCountryCode() + "\ncountru name:" + firstAddr.get(0).getCountryName() + "\nfeature name:" + firstAddr.get(0).getFeatureName() + "\nlocale:" + firstAddr.get(0).getLocale() + "\nlocality:" + firstAddr.get(0).getLocality() + "\npostal code:" + firstAddr.get(0).getPostalCode() + "\npremises:" + firstAddr.get(0).getPremises() + "\nsubadmin:" + firstAddr.get(0).getSubAdminArea() + "\nsublocality:" + firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" + firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" + firstAddr.get(0).getThoroughfare());
-//				dh.setStartaddr(
-//						uid, 
-//						tid, 
-//						(addr.get(0).getCountryName() != null?addr.get(0).getCountryName():"NULL"), 
-//						(addr.get(0).getAdminArea() != null?addr.get(0).getAdminArea():"NULL"), 
-//						(addr.get(0).getLocality() != null?addr.get(0).getLocality():"NULL"), 
-//						(addr.get(0).getSubLocality() != null?addr.get(0).getSubLocality():"NULL"), 
-//						(addr.get(0).getThoroughfare() != null?addr.get(0).getThoroughfare():"NULL"));
-				//Log.w("upload service", "getstartaddress result: good");
-				return addr;
-			}
-		} catch (IOException e) {
-			//Log.e("upload service", "getstartaddress error: exception");
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	private void commitAlltoDB(List<Address> startaddr, List<Address> endaddr){
-		dh.updateTripid(oldTripid, newTripid);
-		dh.setStartaddr(userid, newTripid, startaddr);
-		dh.setEndaddr(userid, newTripid, endaddr);
-		dh.updateUploadStage(userid, newTripid, 1);
 	}
 	
 	private boolean uploadtripinfo(){
@@ -493,8 +352,7 @@ public class UploadThread extends AsyncTask<Void, Void, Integer>{
 	}
 	
 	private void cleanup(){
-		Log.e("uploadthread", "cleanup~");
-		diag.dismiss();
+		Log.e("uploadthread", "unfinished cleanup~");
 		if(dh != null){
 			dh.closeDB();
 			dh = null;

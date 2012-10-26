@@ -23,6 +23,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
+import android.location.Address;
 import android.location.Location;
 import android.util.Log;
 
@@ -33,7 +34,7 @@ import android.util.Log;
 public class DBHelper128 {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
-	private static final int DATABASE_VERSION = 4; // required by SQLite tool
+	private static final int DATABASE_VERSION = 6; // required by SQLite tool
 	
 	private static final String TRIP_DATA_TABLE = "tripdatatable";
 	private static final String TRIP_INFO_TABLE = "tripinfotable";
@@ -77,8 +78,7 @@ public class DBHelper128 {
 			+ "endaddrpt3 TEXT, " 
 			+ "endaddrpt4 TEXT, " 
 			+ "endaddrpt5 TEXT, "
-			+ "uploadstage INTEGER default 0, "
-			+ "infoiscomplete INTEGER default 0)";
+			+ "uploadstage INTEGER default 0)";
 	
 	/**
 	 * Extends SQLiteOpenHelper, this subclass is only good for creating a
@@ -320,15 +320,30 @@ public class DBHelper128 {
 	 * @param startaddrpt5
 	 * @return
 	 */
-	synchronized public long setStartaddr(String userid, String tripid, String startaddrpt1, String startaddrpt2,
-			String startaddrpt3, String startaddrpt4, String startaddrpt5) {
+//	synchronized public long setStartaddr(String userid, String tripid, String startaddrpt1, String startaddrpt2,
+//			String startaddrpt3, String startaddrpt4, String startaddrpt5) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			cv.put("startaddrpt1", startaddrpt1);
+//			cv.put("startaddrpt2", startaddrpt2);
+//			cv.put("startaddrpt3", startaddrpt3);
+//			cv.put("startaddrpt4", startaddrpt4);
+//			cv.put("startaddrpt5", startaddrpt5);
+////			Log.e("dbhelper", "insert start address: " + cv.toString());
+//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+//		} else {
+//			return -2;
+//		}
+//	}
+	
+	synchronized public long setStartaddr(String userid, String tripid, List<Address> startaddr) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
-			cv.put("startaddrpt1", startaddrpt1);
-			cv.put("startaddrpt2", startaddrpt2);
-			cv.put("startaddrpt3", startaddrpt3);
-			cv.put("startaddrpt4", startaddrpt4);
-			cv.put("startaddrpt5", startaddrpt5);
+			cv.put("startaddrpt1", (startaddr.get(0).getCountryName() != null?startaddr.get(0).getCountryName():"NULL"));
+			cv.put("startaddrpt2", (startaddr.get(0).getAdminArea() != null?startaddr.get(0).getAdminArea():"NULL"));
+			cv.put("startaddrpt3", (startaddr.get(0).getLocality() != null?startaddr.get(0).getLocality():"NULL"));
+			cv.put("startaddrpt4", (startaddr.get(0).getSubLocality() != null?startaddr.get(0).getSubLocality():"NULL"));
+			cv.put("startaddrpt5", (startaddr.get(0).getThoroughfare() != null?startaddr.get(0).getThoroughfare():"NULL"));
 //			Log.e("dbhelper", "insert start address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
@@ -336,15 +351,30 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long setEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
-			String endaddrpt3, String endaddrpt4, String endaddrpt5) {
+//	synchronized public long setEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
+//			String endaddrpt3, String endaddrpt4, String endaddrpt5) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			cv.put("endaddrpt1", endaddrpt1);
+//			cv.put("endaddrpt2", endaddrpt2);
+//			cv.put("endaddrpt3", endaddrpt3);
+//			cv.put("endaddrpt4", endaddrpt4);
+//			cv.put("endaddrpt5", endaddrpt5);
+////			Log.e("dbhelper", "insert end address: " + cv.toString());
+//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+//		} else {
+//			return -2;
+//		}
+//	}
+	
+	synchronized public long setEndaddr(String userid, String tripid, List<Address> endaddr) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
-			cv.put("endaddrpt1", endaddrpt1);
-			cv.put("endaddrpt2", endaddrpt2);
-			cv.put("endaddrpt3", endaddrpt3);
-			cv.put("endaddrpt4", endaddrpt4);
-			cv.put("endaddrpt5", endaddrpt5);
+			cv.put("endaddrpt1", (endaddr.get(0).getCountryName() != null?endaddr.get(0).getCountryName():"NULL"));
+			cv.put("endaddrpt2", (endaddr.get(0).getAdminArea() != null?endaddr.get(0).getAdminArea():"NULL"));
+			cv.put("endaddrpt3", (endaddr.get(0).getLocality() != null?endaddr.get(0).getLocality():"NULL"));
+			cv.put("endaddrpt4", (endaddr.get(0).getSubLocality() != null?endaddr.get(0).getSubLocality():"NULL"));
+			cv.put("endaddrpt5", (endaddr.get(0).getThoroughfare() != null?endaddr.get(0).getThoroughfare():"NULL"));
 //			Log.e("dbhelper", "insert end address: " + cv.toString());
 			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
 		} else {
@@ -397,6 +427,16 @@ public class DBHelper128 {
 //			return -2;
 //		}
 //	}
+	
+	synchronized public long updateUploadStage(String userid, String tripid, int stage){
+		if(db.isOpen()){
+			ContentValues cv = new ContentValues();
+			cv.put("uploadstage", stage);
+			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+		} else{
+			return -2;
+		}
+	}
 	
 	synchronized public long setTripName(String userid, String tripid, String name) {
 		if (db.isOpen()) {
@@ -543,6 +583,7 @@ public class DBHelper128 {
 					if (!mCursor.isClosed()) {
 						mCursor.close();
 					}
+					Log.e("dbhelper", "getonepoint: " + cp.latitude + ", " + cp.longitude);
 					return cp;
 				} else {
 					if (!mCursor.isClosed()) {

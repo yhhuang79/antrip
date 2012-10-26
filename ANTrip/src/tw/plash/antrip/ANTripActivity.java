@@ -31,6 +31,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.ConsoleMessage;
+import android.webkit.CookieManager;
 import android.webkit.JsResult;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
@@ -40,7 +41,7 @@ import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
-public class ANTripActivity extends Activity {
+public class ANTripActivity extends Activity implements TripListReloader{
 	
 	private Context mContext;
 	private WebView mWebView = null;
@@ -115,7 +116,7 @@ public class ANTripActivity extends Activity {
 						if(cco != null){
 							cco.setLocation((Location) msg.obj);
 							Log.w("antripActivity", "IncomingHandler: update check-in loc: " + ((Location) msg.obj).toString());
-//							doUnbindService();
+							doUnbindService();
 						} else{
 							Log.e("Activity", "Check-in object error: check-in object is null, cannot set location");
 						}
@@ -159,32 +160,10 @@ public class ANTripActivity extends Activity {
 		if(mIsBound){
 			if(outMessenger != null){
 				try {
-					switch(msgType){
-					//set mode = map view
-					case AntripService.MSG_INIT_LOCATION_THREAD:
-						outMessenger.send(Message.obtain(null, msgType));
-						break;
-					//set mode != map view
-					case AntripService.MSG_STOP_LOCATION_THREAD:
-						outMessenger.send(Message.obtain(null, msgType));
-						break;
-					case AntripService.MSG_STOP_RECORDING_PRE:
-						outMessenger.send(Message.obtain(null, msgType));
-						break;
-					case AntripService.MSG_STOP_RECORDING_ACTUAL:
+					if(payload != null){
 						outMessenger.send(Message.obtain(null, msgType, payload));
-						break;
-					case AntripService.MSG_GET_CHECKIN_LOCATION:
+					} else{
 						outMessenger.send(Message.obtain(null, msgType));
-						break;
-					case AntripService.MSG_SAVE_CHECKIN_LOCATION:
-						outMessenger.send(Message.obtain(null, msgType, payload));
-						break;
-					case AntripService.MSG_SET_USERID:
-						outMessenger.send(Message.obtain(null, msgType, payload));
-						break;
-					default:
-						break;
 					}
 				} catch (RemoteException e) {
 					e.printStackTrace();
@@ -243,6 +222,7 @@ public class ANTripActivity extends Activity {
 			Log.e("Activity", "initUI: webview being init");
 			//init a new webview object
 			mWebView = new WebView(mContext);
+			
 			//some settings need to be changed in the webview
 			WebSettings mWebSettings = mWebView.getSettings();
 			// javascript must be enabled, of course
@@ -250,6 +230,8 @@ public class ANTripActivity extends Activity {
 			//render/cache settings are supposed to speed up webpage rendering speed
 			mWebSettings.setRenderPriority(RenderPriority.HIGH);
 			mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+			mWebSettings.setSaveFormData(false);
+			mWebSettings.setSavePassword(false);
 			//make sure no javascript is called before webpage finished loading
 			mWebView.setWebViewClient(new WebViewClient(){
 				@Override
@@ -257,7 +239,6 @@ public class ANTripActivity extends Activity {
 					Log.w("acvitivy", "webview: page finished");
 					canCallJavaScript = true;
 				}
-				
 			});
 			
 			mWebView.setWebChromeClient(new WebChromeClient() {
@@ -383,15 +364,14 @@ public class ANTripActivity extends Activity {
 		public void logout() {
 			// remove sid and stop stuffs
 			Log.w("logged", "out");
-//			sendMessageToService(AntripService.MSG_LOGOUT_EVENT, null);
+			CookieManager cm = CookieManager.getInstance();
+			cm.removeAllCookie();
 		}
 		
 		// need a function to provide detailed trip data(reviewing historic
 		// trip)
 		public String getLocalTripList() {
 			//Log.w("activity", "getlocaltriplist called");
-			// Toast.makeText(mContext, "getLocalTripList",
-			// Toast.LENGTH_SHORT).show();
 			JSONObject result = null;
 			
 			result = new GetLocalTrip(mContext).Info();
@@ -444,6 +424,7 @@ public class ANTripActivity extends Activity {
 			//XXX
 			//the recording should already be stopped, just save the name and we're all done
 			sendMessageToService(AntripService.MSG_STOP_RECORDING_ACTUAL, tripname);
+			bufferedLoadURL("javascript:reloadTripList()");
 		}
 		
 		/**
@@ -452,6 +433,7 @@ public class ANTripActivity extends Activity {
 		public void prepareStopRecording(){
 			//basically just stop the recording here, calculate the trip statistics
 			sendMessageToService(AntripService.MSG_STOP_RECORDING_PRE, null);
+			bufferedLoadURL("javascript:reloadTripList()");
 		}
 		
 		/*
@@ -463,12 +445,13 @@ public class ANTripActivity extends Activity {
 			//Log.w("setMode", "mode= " + currentMode);
 			switch (currentMode) {
 			case 3:
-				
 				//need to start location service
 				sendMessageToService(AntripService.MSG_INIT_LOCATION_THREAD, null);
 				break;
-			case 1:
 			case 2:
+				//trip list, check for unfinished uploads
+				new UnfinishedUploadThread(mContext, ANTripActivity.this).execute();
+			case 1:
 			case 4:
 			default:
 				// stop location service if not recording
@@ -544,7 +527,6 @@ public class ANTripActivity extends Activity {
 			// send cco to service via startService call with action and extras
 			Log.w("activity", "end check-in, cco.emotion= " + cco.getEmotionID() + ", cco.text= " + cco.getCheckinText());
 			sendMessageToService(AntripService.MSG_SAVE_CHECKIN_LOCATION, cco);
-//			duringCheckin = false;
 		}
 		
 		/**
@@ -556,7 +538,6 @@ public class ANTripActivity extends Activity {
 			doBindService();
 			cco = null;
 			Log.e("activity", "cancel check-in");
-//			duringCheckin = false;
 		}
 		
 		/**
@@ -613,8 +594,10 @@ public class ANTripActivity extends Activity {
 		 * @param id unique id in the DB table
 		 */
 		public void uploadTrip(String id) {
-			//Log.w("activity", "upload trip: " + id);
+			Log.w("activity", "upload trip: " + id);
 //			startService(new Intent(mContext, UploadService.class).setAction("ACTION_UPLOAD_TRIP").putExtra("id", id));
+//			sendMessageToService(AntripService.MSG_START_UPLOAD, id);
+			new UploadThread(mContext, id, ANTripActivity.this).execute();
 		}
 		
 		/**
@@ -629,6 +612,7 @@ public class ANTripActivity extends Activity {
 		}
 		
 		public void reloadIndex(){
+			Log.w("antripActivity", "jsinterface: reloadindex");
 			bufferedLoadURL("file:///android_asset/index.html");
 //			mWebView.loadUrl("file:///android_asset/index.html");
 		}
@@ -690,7 +674,7 @@ public class ANTripActivity extends Activity {
 			if(pref.contains("sid")){
 				startActivityForResult(new Intent(mContext, Settings.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP), REQUEST_CODE_DO_SETTINGS);
 			} else{
-				Toast.makeText(mContext, "please login first", Toast.LENGTH_LONG).show();
+				Toast.makeText(mContext, R.string.login_warning, Toast.LENGTH_LONG).show();
 			}
 			return true;
 		case KeyEvent.KEYCODE_BACK:
@@ -716,13 +700,13 @@ public class ANTripActivity extends Activity {
 	private void showThreat(){
 		new AlertDialog.Builder(mContext)
 		.setCancelable(false)
-		.setMessage("are you sure you want to quit ANTRIP?")
-		.setPositiveButton("yeah", new OnClickListener() {
+		.setMessage(R.string.alertdiag_threat_title)
+		.setPositiveButton(R.string.okay, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				finish();
 			}
-		}).setNegativeButton("nah...", new OnClickListener() {
+		}).setNegativeButton(R.string.nope, new OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				dialog.dismiss();
@@ -814,5 +798,10 @@ public class ANTripActivity extends Activity {
 		default:
 			break;
 		}
+	}
+
+	@Override
+	public void shouldReloadTripList() {
+		bufferedLoadURL("javascript:reloadTripList()");
 	}
 }

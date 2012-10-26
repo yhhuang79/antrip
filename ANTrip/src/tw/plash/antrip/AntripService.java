@@ -9,6 +9,7 @@ import org.json.JSONObject;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -44,7 +45,7 @@ public class AntripService extends Service implements LocationPublisher{
 	static final int MSG_PAUSE_RECORDING = 6;
 	static final int MSG_STOP_RECORDING_PRE = 7;
 	static final int MSG_STOP_RECORDING_ACTUAL = 13;
-	static final int MSG_START_UPLOAD = 8;
+//	static final int MSG_START_UPLOAD = 8;
 	static final int MSG_GET_CHECKIN_LOCATION = 9;
 	static final int MSG_SAVE_CHECKIN_LOCATION = 10;
 	static final int MSG_SET_USERID = 11;
@@ -155,10 +156,13 @@ public class AntripService extends Service implements LocationPublisher{
 					Log.e("AntripService", "IncomingHandler: save cco called when dh is null/DB is closed");
 				}
 				break;
-			case MSG_START_UPLOAD:
-				Log.i("AntripService", "IncomingHandler: case-MSG_START_UPLOAD");
-				//XXX
-				break;
+//			case MSG_START_UPLOAD:
+//				Log.i("AntripService", "IncomingHandler: case-MSG_START_UPLOAD");
+//				//XXX
+//				if(msg.obj instanceof String){
+//					new UploadThread(ANTripActivity.this, (String)msg.obj).execute();
+//				}
+//				break;
 			case MSG_SET_USERID:
 				Log.i("AntripService", "IncomingHandler: case-MSG_SET_USERID");
 				if(msg.obj instanceof String){
@@ -341,9 +345,9 @@ public class AntripService extends Service implements LocationPublisher{
 	}
 	
 	private void showNotification(){
-		Notification notification = new Notification(R.drawable.ant_24, "LOL ANTRIP WUT", System.currentTimeMillis());
+		Notification notification = new Notification(R.drawable.ant_24, getResources().getString(R.string.notification_new_trip_started), System.currentTimeMillis());
 		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), ANTripActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-		notification.setLatestEventInfo(getApplicationContext(), "Antrip", "is recording...", pendingIntent);
+		notification.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name), getResources().getString(R.string.notification_is_recording_a_trip), pendingIntent);
 		startForeground(1337, notification);
 	}
 	

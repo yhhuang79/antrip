@@ -18,15 +18,15 @@ public class Settings extends PreferenceActivity{
 		addPreferencesFromResource(R.xml.antrip_settings);
 		Preference usrname = findPreference("usrname");
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		usrname.setTitle("Logged in as: " + pref.getString("usrname", "NULL"));
+		usrname.setTitle(getResources().getString(R.string.login_title) + pref.getString("usrname", "NULL"));
 		usrname.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
 				if(AntripService.isRecording()){
 					//ask if user wants to logout even a trip is still recording
 					new AlertDialog.Builder(Settings.this)
-						.setMessage("still recording, logout anyway?")
-						.setNegativeButton("not really", new OnClickListener() {
+						.setMessage(R.string.logout_warning)
+						.setNegativeButton(R.string.nope, new OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								//
@@ -34,7 +34,7 @@ public class Settings extends PreferenceActivity{
 //								finish();
 							}
 						})
-						.setPositiveButton("for sure", new OnClickListener() {
+						.setPositiveButton(R.string.okay, new OnClickListener() {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								//call logout function
