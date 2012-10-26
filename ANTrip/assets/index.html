@@ -167,7 +167,7 @@
 				$('#map_canvas_1').gmap('refresh');			
 			});
 			// friend list 
-			$('#friendlist').live('pageinit', function(){
+			$('#friendlist').live('pagebeforeshow', function(){
 				//var sid = $.cookie("sid");
 				var div_data = [];
 				$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
