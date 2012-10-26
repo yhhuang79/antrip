@@ -176,15 +176,27 @@
 					type: 'GET', dataType: 'jsonp', cache: false,
 					success:function(result){
 						$.each(result.friend_list, function(i,data){
-							div_data[i] ="<li><a class='listview' href='#'><img src='" + data.image + "'/><h3>" + data.name  + "</h3></a></li>";
+							var trip_list = getShareTripListbyFriend(data.id);
+							var length =0;
+							if(trip_list!=null){
+								length = trip_list.length;
+							}
+							div_data[i] ="<div id='li_listview_"+data.id+"' data-role='collapsible' data-collapsed='false'><h3><img src='" + data.image + "'/>" + data.name  + "<br/>" +g_str_sharenumberoftrip+":"+length +"</h3><ul id='div_listview_"+data.id+"' data-role='listview'></ul></div>";
+							$("#listview_2").append(div_data[i]);
+							$("#li_listview_"+data.id).collapsible({refresh:true});
+							$("#li_listview_"+data.id).click(function(e) {
+									event.stopImmediatePropagation();
+									if(length>0 && $("#div_listview_"+data.id).html()==""){
+										showTripListDetails(trip_list, data.id, data.name, $("#div_listview_"+data.id));
+									}
+							});
 						});
-						$("#listview_2").append(div_data.join('')).listview('refresh');
 						$.mobile.hidePageLoadingMsg();
 					}
 				});
 			});
 			$('#friendlist').live('pageshow', function() {
-				$("#listview_2").listview('refresh');
+				$("#listview_2").listview();
 			});
 			// find friend 
 			$('#findfriend').ready(function(){
@@ -243,12 +255,10 @@
 				var trip_1 =[];
 
 				$('#map_canvas_2').height($(window).height());
-				g_showtripmap = true;
 				if(local=="true"){
 					showLocalTripData(trip_id);
 				}
 				else{
-					$("#share_trip").attr("href", "#friendCheckDialog?trip_id="+trip_id);
 					GetTripPointfromID(userid, trip_id);
 				}
 			});
@@ -405,7 +415,7 @@
 	<!-- map recorder page start -->
 		<div data-role="page" id="map">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#mainpage" data-icon="home" data-iconpos="left" data-transition="flip" id="page_back">Back</a>
+				<a href="javascript:history.back();" data-icon="home" data-iconpos="left" data-transition="flip" id="page_back">Back</a>
                 <h4>
                     AnTrip lite
                 </h4>
@@ -426,22 +436,21 @@
 	<!-- friend list start -->
 	    <div data-role="page" id="friendlist">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
+				<a href="javascript:history.back();" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
 				<a href="#findfriend" data-icon="search" id="findfriend" data-prefetch data-transition="pop"></a>
             </div>
 			<div data-role="content">
-				<div class="content-primary" id="content-primary_1">	
-					<ul data-role="listview" id="listview_2">
-					</ul>
-				</div>
+					<div data-role="collapsible-set"  id="listview_2">
+						
+					</div>
             </div>
         </div>
 	<!-- friend list end -->
 	<!-- find friend start -->
 	    <div data-role="page" id="findfriend">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#friendlist" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
+				<a href="javascript:history.back();" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
 				<a href="#friendrequest" data-icon="info" id="friendrequest"></a>
             </div>
@@ -458,7 +467,7 @@
 	<!-- friend request start -->
 	    <div data-role="page" id="friendrequest">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#findfriend" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
+				<a href="javascript:history.back();" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
             </div>
 			<div data-role="content">
@@ -472,7 +481,7 @@
 	<!-- trip list start -->
         <div data-role="page" id="triplist">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="slide" id="page_back">Back</a>
+				<a href="javascript:history.back();" data-icon="arrow-l" data-iconpos="left" data-transition="slide" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
             </div>
             <div data-role="content">
@@ -486,7 +495,7 @@
 	<!-- trip map start -->
 	    <div data-role="page" id="tripmap">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#triplist" data-icon="home" data-iconpos="left" data-transition="turn" id="page_back">Back</a>
+				<a href="javascript:history.back();" data-icon="home" data-iconpos="left" data-transition="turn" id="page_back">Back</a>
                 <h4>
                     AnTrip lite
                 </h4>

@@ -109,6 +109,7 @@
 
 		var g_str_share = "Share";
 		var g_str_shareTriptoWhom = "Please choose who you want to share this trip with?";
+		var g_str_sharenumberoftrip = "the total number of shared trips";
 
 		var g_str_inputsomething ="please input something!";
 		var g_str_notrip = "You have no trip!"

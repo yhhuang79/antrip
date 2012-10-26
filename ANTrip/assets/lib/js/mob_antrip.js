@@ -290,10 +290,6 @@
 								else{
 									$("#checkbox_"+sid+data.id).checkboxradio("refresh");
 								}
-								/*$("#checkbox_"+sid+data.id).click(function(e) {
-								   event.stopImmediatePropagation();
-									$("checkbox_"+sid+data.id).trigger('click');
-								});*/
 							}
 						});
 					});
@@ -388,6 +384,27 @@
 					var trip_name = decodeURIComponent($.urlParam('trip_name'));
 					$(this).find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + trip_name + "</"+g_titleSize+">");
 					$(this).find('div:jqmData(role="header")').find(g_titleSize).html( trip_name);
+					var userid = $.urlParam('userid');
+					var trip_id = $.urlParam('trip_id');
+					var local = $.urlParam('local');	
+
+					g_showtripmap = true;
+					if(local=="true"){
+						$("#share_trip").hide();
+					}
+					else{
+						var sid = $.cookie("sid");
+						if(window.antrip){
+							sid = window.antrip.getCookie("sid");
+						}
+						if(userid!=sid){
+							$("#share_trip").hide();
+						}
+						else{
+							$("#share_trip").show();
+							$("#share_trip").attr("href", "#friendCheckDialog?trip_id="+trip_id);
+						}
+					}
 				}
 			}
 		});

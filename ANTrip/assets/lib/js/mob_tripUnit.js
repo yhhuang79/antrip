@@ -275,7 +275,7 @@
 			tripPointMarkerArray = new Array(0);
 			self.addControl('control', google.maps.ControlPosition.LEFT_TOP);
 			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php',
-			data:{userid: sid, trip_id: trip_id},
+			data:{userid: userid, trip_id: trip_id},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
 				if(g_showtripmap==false){
@@ -392,6 +392,58 @@
 				}
 			});
 		}
+	}
+
+	function getShareTripListbyFriend(friend_id){
+		var trip_list = null;
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetAuthTripInfoComponent.php',
+			data:{userid : sid, friend_id:friend_id},
+			type: 'GET', dataType: 'jsonp', cache: false, async: false,
+			success:function(result){
+				if(result.getAuthTrip.toString()!='undefined' && result.getAuthTrip.toString()!=""){
+					trip_list=result.getAuthTrip.toString().split(",");
+					//tripnum = trip_list.length;
+					$("#overlay").css("display","none");
+				}
+			},
+			error: function(xhr) {
+				alert('Ajax request errors');
+				$("#overlay").css("display","none");
+			}
+		});
+		return trip_list;
+	}
+	function showTripListDetails(trip_list, share_userid, share_username, appendToObj){
+		$.mobile.showPageLoadingMsg("b", "Loading Trip List ...");
+		var div_data = [];
+		for(var index=0;index<trip_list.length;index++)
+		{
+			var trip_data = trip_list[index].toString();
+			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php',
+				data:{userid: share_userid, trip_id:trip_data},
+				type: 'GET', dataType: 'jsonp', cache: false, async: false,
+				success:function(result){
+					if(result == null  || result.length==0){
+						;
+					}
+					else{
+						g_trip = trip_data;
+						g_tripname = result.trip_name.toString();
+						g_tripLength = result.length;
+
+						var width="100%";
+						var data = result;
+						var tripurl = "#tripmap?userid="+ share_userid +"&trip_id="+ trip_data+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=false";
+						var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
+						div_data[index] ="<li id='collaps_div_"+share_userid+data.trip_id+"' ><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>";
+					}
+				}
+			});
+		}
+		if(appendToObj!=null && appendToObj!="undefined"){
+			appendToObj.append(div_data.join('')).listview();
+		}
+		$.mobile.hidePageLoadingMsg();
 	}
 
 //-->
