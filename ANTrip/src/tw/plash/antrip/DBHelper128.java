@@ -955,11 +955,11 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public long deleteTrip(String sid, String tid){
+	synchronized public long deleteTrip(String sid, String id){
 		if(db.isOpen()){
-			long rows = db.delete(TRIP_INFO_TABLE, "userid=" + sid + " AND tripid=" + tid, null);
+			long rows = db.delete(TRIP_INFO_TABLE, "userid=" + sid + " AND id=" + id, null);
 			//also need to delete all pictures
-			ArrayList<String> tmp = getOneTripPicturePaths(sid, tid, true);
+			ArrayList<String> tmp = getOneTripPicturePaths(sid, id, true);
 			if(tmp != null){
 				if(tmp.size() > 0){
 					Iterator<String> it = tmp.iterator();
@@ -969,7 +969,7 @@ public class DBHelper128 {
 					}
 				}
 			}
-			rows += db.delete(TRIP_DATA_TABLE, "userid=" + sid + " AND tripid=" + tid, null);
+			rows += db.delete(TRIP_DATA_TABLE, "userid=" + sid + " AND id=" + id, null);
 			
 			return rows;
 		} else{

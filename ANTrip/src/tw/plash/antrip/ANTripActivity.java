@@ -606,7 +606,10 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		 */
 		public void deleteTrip(String id){
 			//Log.w("activity", "delete trip: " + id);
-			DBHelper128 dh = new DBHelper128(mContext);
+			DBHelper128 dhh = new DBHelper128(mContext);
+			dhh.deleteTrip(pref.getString("sid", null), id);
+			dhh.closeDB();
+			dhh = null;
 			//Log.w("activity", "rows deleted=" + dh.deleteTrip(id));
 			bufferedLoadURL("javascript:reloadTripList()");
 		}
