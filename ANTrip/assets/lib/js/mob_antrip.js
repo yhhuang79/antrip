@@ -153,13 +153,11 @@
 			});
 			$("#check-in_yes").click(function(e) {
 			   CheckIn();
-			   event.stopImmediatePropagation();
 			});
 			$("#check-in_cancel").click(function(e) {
 			   if(window.antrip){
 				   window.antrip.cancelCheckin();
 				}
-				event.stopImmediatePropagation();
 			});
 			$("#shareFriend_yes").click(function(e) {
 				var trip_id = $.urlParam('trip_id');
