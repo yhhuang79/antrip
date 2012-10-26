@@ -100,6 +100,7 @@ public class UploadThread extends AsyncTask<Void, Void, Integer>{
 				@Override
 				public void onCancel(DialogInterface dialog) {
 					Log.e("uploadthread", "progressdiag: canceled");
+					cancel(false);
 				}
 			});
 			diag.show();
