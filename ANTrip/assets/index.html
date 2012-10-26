@@ -248,6 +248,7 @@
 					showLocalTripData(trip_id);
 				}
 				else{
+					$("#share_trip").attr("href", "#friendCheckDialog?trip_id="+trip_id);
 					GetTripPointfromID(userid, trip_id);
 				}
 			});
@@ -404,7 +405,7 @@
 	<!-- map recorder page start -->
 		<div data-role="page" id="map">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#mainpage" data-icon="home" data-iconpos="left" data-transition="flip">Back</a>
+				<a href="#mainpage" data-icon="home" data-iconpos="left" data-transition="flip" id="page_back">Back</a>
                 <h4>
                     AnTrip lite
                 </h4>
@@ -425,7 +426,7 @@
 	<!-- friend list start -->
 	    <div data-role="page" id="friendlist">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="pop">Back</a>
+				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="pop" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
 				<a href="#findfriend" data-icon="search" id="findfriend" data-prefetch data-transition="pop"></a>
             </div>
@@ -471,7 +472,7 @@
 	<!-- trip list start -->
         <div data-role="page" id="triplist">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="slide">Back</a>
+				<a href="#mainpage" data-icon="arrow-l" data-iconpos="left" data-transition="slide" id="page_back">Back</a>
                 <h4>AnTrip lite</h4>
             </div>
             <div data-role="content">
@@ -485,10 +486,11 @@
 	<!-- trip map start -->
 	    <div data-role="page" id="tripmap">
             <div data-theme="a" data-role="header" data-position="fixed" >
-				<a href="#triplist" data-icon="home" data-iconpos="left" data-transition="turn">Back</a>
+				<a href="#triplist" data-icon="home" data-iconpos="left" data-transition="turn" id="page_back">Back</a>
                 <h4>
                     AnTrip lite
                 </h4>
+				<a href="#friendCheckDialog" id="share_trip" data-icon="check" data-rel="dialog">Share this trip to friends</a>
             </div>
             <div data-role="content" style="padding:0em;">		
 				<div class="ui-bar-c ui-corner-all ui-shadow" style="padding:0em;">
@@ -497,6 +499,25 @@
 			</div>
         </div>
 	<!-- trip map end -->
+	<!-- friend list check dialog start -->
+	    <div data-role="page" id="friendCheckDialog">
+            <div data-role="header" data-theme="b" data-position="inline">
+                <h4>AnTrip lite</h4>
+            </div>
+			<div data-role="content" data-theme="b" id='friendCheck_bk'>
+				<form action>
+					<div data-role="fieldcontain" id='shareFriend_contain'>
+						<div class="content-primary" id="content-primary_5">	
+							<ul data-role="listview" id="listview_5">
+							</ul>
+						</div>
+					</div>
+					<div class="ui-block-b"><a href="#tripmap" data-role="button" data-icon="check" data-theme="b"  id='shareFriend_yes'></a></div>
+					<div class="ui-block-b"><a href="#tripmap" data-role="button" data-icon="check" data-theme="b" id='shareFriend_cancel'></a></div>
+				</form>
+            </div>
+        </div>
+	<!-- friend list check dialog end -->
 	<!-- Check in Dialog -->
 		<div data-role="page" id="checkin">	
 			<div data-role="header" data-theme="b" data-position="inline">

@@ -206,7 +206,7 @@
 		var isRecording = null;
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){
-			isRecording = window.antrip.getCookie("isRecording");
+			isRecording = window.antrip.isRecording();
 		}
 		if(isRecording == null){
 			var sid = null;
@@ -214,7 +214,7 @@
 			$.cookie("isRecording", true);
 			initRecorderMap();
 			if(window.antrip){
-				isRecording = window.antrip.setCookie("isRecording", "true");
+				//isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
 				window.antrip.setCookie("trip_id", window.antrip.startRecording().toString());
 			}
@@ -243,7 +243,7 @@
 			$.cookie("isRecording", null);
 			if(window.antrip){
 				window.antrip.stopRecording(y);
-				window.antrip.removeCookie("isRecording");
+//				window.antrip.removeCookie("isRecording");
 				window.antrip.removeCookie("trip_id");
 			}
 			else{
@@ -449,7 +449,7 @@
 		google.maps.event.addListener(g_currentmarker, 'click', function() {
 			isRecording = $.cookie("isRecording");
 			if(window.antrip){
-				isRecording = window.antrip.getCookie("isRecording");
+				isRecording = window.antrip.isRecording();
 			}
 			if(isRecording == null){
 				g_currentmarker.openInfoWindow();
@@ -484,7 +484,7 @@
 		var isRecording = null;
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){
-			isRecording = window.antrip.getCookie("isRecording");
+			isRecording = window.antrip.isRecording();
 		}
 
 		$('#LocateButton').find('.tip').html(g_str_locating);

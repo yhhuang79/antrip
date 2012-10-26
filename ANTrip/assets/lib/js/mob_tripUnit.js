@@ -2,7 +2,7 @@
 	// trip list
 	var g_tripPage=1;
 	var g_tripname = null;
-	var g_numsofpage=5;// get trip amount each time
+	var g_numsofpage=10;// get trip amount each time
 	var g_tripnum=0;
 	var g_tripIndex=0;
 	var g_tripLength = 0;
@@ -356,6 +356,44 @@
 			}
 			});				
 		}});
+	}
+
+	function shareTripToFriends(trip_id){
+		var friend_list="";
+		//alert(sid);
+		//alert($(this).attr("name"));
+		$("input[id*='checkbox_']").each(function() {
+			if($(this).attr("checked")=="checked"){
+				if(friend_list!=""){
+					friend_list +=",";
+				}
+				friend_list += $(this).attr("name");
+			}
+			else{
+				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/DelAuthFriend.php',
+						data:{userid : sid, trip_id:trip_id, friend_id:$(this).attr("name")},
+						type: 'GET', dataType: 'jsonp', cache: false,
+						success:function(result){
+							//alert(result.delAuthFriend);
+						},
+						error: function(xhr) {
+							//alert('Ajax request errors');
+						}
+				});
+			}
+		});
+		if(friend_list!=""){
+			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/SetAuthFriendComponent.php',
+				data:{userid : sid, trip_id:g_trip, friend_id:friend_list},
+				type: 'GET', dataType: 'jsonp', cache: false,
+				success:function(result){
+					//alert('success');
+				},
+				error: function(xhr) {
+					alert('Ajax request errors');
+				}
+			});
+		}
 	}
 
 //-->

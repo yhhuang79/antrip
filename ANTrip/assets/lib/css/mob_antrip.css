@@ -8,9 +8,14 @@
 	}
 	
 	a.listview:link{text-decoration: none; color:#000000; } 
-	a.listview:visited{text-decoration: none; color:#e60000; } 
+	a.listview:visited{text-decoration: none; color:#000000; } 
 	a.listview:active{text-decoration: none ; color:#e60000; } 
 	a.listview:hover{text-decoration: none ; color:#e60000;}
+
+	div.listview:link{text-decoration: none; color:#000000; } 
+	div.listview:visited{text-decoration: none; color:#000000; } 
+	div.listview:active{text-decoration: none ; color:#e60000; } 
+	div.listview:hover{text-decoration: none ; color:#e60000;}
 
 	a:link{text-decoration: none; } 
 	a:visited{text-decoration: none; } 
@@ -159,4 +164,8 @@
 	#takepicture{
 		width:240px;
 		height:180px;
+	}
+
+	input.custom{
+		float:right;
 	}

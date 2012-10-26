@@ -161,6 +161,10 @@
 				}
 				event.stopImmediatePropagation();
 			});
+			$("#shareFriend_yes").click(function(e) {
+				var trip_id = $.urlParam('trip_id');
+			   shareTripToFriends(trip_id);
+			});
 
 			// set multiple language string
 			var backlogo_img = im+g_str_bkpath;
@@ -181,6 +185,10 @@
 			$("#register_yes .ui-btn-text").text(g_str_reg);
 			$('#register_cancel').html("<span class=\"ui-btn-text\"></span>");
 			$("#register_cancel .ui-btn-text").text(g_str_cancel);
+			$('#shareFriend_yes').html("<span class=\"ui-btn-text\"></span>");
+			$("#shareFriend_yes .ui-btn-text").text(g_str_share);
+			$('#shareFriend_cancel').html("<span class=\"ui-btn-text\"></span>");
+			$("#shareFriend_cancel .ui-btn-text").text(g_str_cancel);
 			$('#camera_btn').html("<span class=\"ui-btn-text\"></span>");
 			$('#camera_btn .ui-btn-text').html(g_str_takepicture);
 			$('#checkin_feeling').html(g_str_checkin_feeling);
@@ -215,6 +223,7 @@
 			$('#fblogin .ui-btn-text').text(g_str_fblogin);
 			$('#register_btn').html("<span class=\"ui-btn-inner ui-btn-corner-all\"><span class=\"ui-btn-text\"></span></span>");
 			$('#register_btn .ui-btn-text').text(g_str_register);
+			$('#share_trip').text(g_str_shareTrip);
 
 			initRegisterDialog();
 
@@ -247,6 +256,50 @@
 
 		$('#registerpage').live('pageshow',function(){
 			initRegisterDialog();
+		});
+
+		// friend list 
+		$('#friendCheckDialog').live('pagebeforeshow', function(){
+			$(this).find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + g_str_shareTriptoWhom + "</"+g_titleSize+">");
+			var trip_id = $.urlParam('trip_id');
+			var div_data = [];
+			$("#listview_5").html("");
+			$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
+			$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendList.php',
+				data:{sid : sid},
+				type: 'GET', dataType: 'jsonp', cache: false,
+				success:function(result){
+					if(result.friend_list.length==0){
+						$.mobile.hidePageLoadingMsg();
+						return false;
+					}
+					$.each(result.friend_list, function(i,data){
+						var checkbox_str = "<input type='checkbox' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripShareUser.php',
+							data:{userid : sid, trip_id:trip_id, friend_id:data.id},
+							type: 'GET', dataType: 'jsonp', cache: false, async: false,
+							success:function(result){
+								if(result.isShareTrip=="1"){
+									checkbox_str = "<input type='checkbox' checked='checked' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
+								}
+								div_data[i] ="<li><a class='listview' id='list_"+sid+data.id+"' >"+checkbox_str+"<img src='" + data.image + "'/><h3>"+g_str_id+":" + data.name  + "</h3></a></li>";
+								$("#listview_5").append(div_data[i]).listview('refresh');
+								$("#list_"+sid+data.id).click(function(e) {
+								   event.stopImmediatePropagation();
+									$("checkbox_"+sid+data.id).trigger('click');
+								});
+							}
+						});
+					});
+					$.mobile.hidePageLoadingMsg();
+				}
+			});
+		});
+
+		$('#checkin').live('pagebeforeshow', function(){
+			if(window.antrip){
+				window.antrip.startCheckin();
+			}
 		});
 
 		$(document).delegate('div:jqmData(role="page")', 'pagebeforeshow', function(){ 

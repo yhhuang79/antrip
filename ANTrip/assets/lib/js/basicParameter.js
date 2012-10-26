@@ -91,6 +91,10 @@
 		var g_str_nowrecording= "Now recording...";
 		var g_str_checkin = "check in";
 		var g_str_cancel = "cancel";
+		var g_str_shareTrip = "Share this trip to friends";
+
+		var g_str_share = "Share";
+		var g_str_shareTriptoWhom = "Please choose who you want to share this trip with?";
 
 		var g_str_inputsomething ="please input something!";
 		var g_str_notrip = "You have no trip!"
