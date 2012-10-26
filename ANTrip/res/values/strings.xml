@@ -10,6 +10,7 @@
     <string name="login_title">Logged in as:</string>
     <string name="pref_logout_sum">Click to logout</string>
     <string name="upload_failed_warning">Upload failed, ANTrip will automatically re-upload later!</string>
+    <string name="upload_complete">Upload complete!</string>
     
     <string name="notification_new_trip_started">A NEW RECORDING HAS BEGUN</string>
     <string name="notification_is_recording_a_trip">is recording your trip...</string>
