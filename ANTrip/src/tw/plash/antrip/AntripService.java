@@ -116,7 +116,7 @@ public class AntripService extends Service implements LocationPublisher{
 					//need to finalize trip stats
 					stopForeground(true);
 					isRecording = false;
-					isStarted = false;
+//					isStarted = false;
 					stats.setButtonEndTime(new Timestamp(new Date().getTime()).toString());
 					dh.saveTripStats(currentUid, currentTid.toString(), stats);
 					dh.closeDB();
