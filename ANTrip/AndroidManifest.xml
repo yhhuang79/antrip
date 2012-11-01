@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tw.plash.antrip"
-    android:versionCode="8"
+    android:versionCode="9"
     android:versionName="1.5" >
 
     <uses-sdk android:minSdkVersion="10" />
 
     <!-- CAMERA PERMISSIONS -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <!-- SKYHOOK PERMISSIONS -->
     <!-- used to communicate with Skyhook's servers -->
