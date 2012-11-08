@@ -8,8 +8,10 @@ import java.io.OutputStreamWriter;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -833,6 +835,67 @@ public class DBHelper128 {
 				return null;
 			}
 		} else {
+			return null;
+		}
+	}
+	
+	synchronized public HashSet<String> getTripIdsFromTripData(String sid, String excludeThisTid){
+		if(db.isOpen()){
+			Cursor mCursor = null;
+			if(excludeThisTid != null){
+				mCursor = db.query(TRIP_DATA_TABLE, new String[]{"tripid"}, "userid=" + sid + " AND tripid !=" + excludeThisTid, null, null, null, null);
+			} else{
+				mCursor = db.query(TRIP_DATA_TABLE, new String[]{"tripid"}, "userid=" + sid, null, null, null, null);
+			}
+			if(mCursor != null){
+				if(mCursor.moveToFirst()){
+					HashSet<String> result = new HashSet<String>();
+					do{
+						//there should be plenty of duplicated trip IDs, but hashset does not allow duplicate entries, so this will not be an issue
+						result.add(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
+					} while(mCursor.moveToNext());
+					mCursor.close();
+					mCursor = null;
+					return result;
+				} else{
+					mCursor.close();
+					mCursor = null;
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
+			return null;
+		}
+	}
+	
+	synchronized public HashSet<String> getTripIdsFromTripInfo(String sid, String excludeThisTid){
+		if(db.isOpen()){
+			Cursor mCursor = null;
+			if(excludeThisTid != null){
+				mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid"}, "userid=" + sid + " AND tripid !=" + excludeThisTid, null, null, null, null);
+			} else{
+				mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid"}, "userid=" + sid, null, null, null, null);
+			}
+			if(mCursor != null){
+				if(mCursor.moveToFirst()){
+					HashSet<String> result = new HashSet<String>();
+					do{
+						result.add(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
+					} while(mCursor.moveToNext());
+					mCursor.close();
+					mCursor = null;
+					return result;
+				} else{
+					mCursor.close();
+					mCursor = null;
+					return null;
+				}
+			} else{
+				return null;
+			}
+		} else{
 			return null;
 		}
 	}

@@ -30,6 +30,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.JsResult;
@@ -38,7 +39,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class ANTripActivity extends Activity implements TripListReloader{
@@ -339,6 +343,14 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		
 		locationQueue = new LinkedBlockingQueue<Location>();
 		
+//		ImageView btn = (ImageView) findViewById(R.id.btn_locate);
+//		btn.setOnClickListener(new View.OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				Toast.makeText(mContext, "LOCATE", Toast.LENGTH_SHORT).show();
+//			}
+//		});
+		
 		initUI();
 	}
 	
@@ -359,7 +371,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		// TODO:
 		// cannot assume getExtFilesDir will always return the path, might be
 		// null, need to check before proceeding
-		private final String imagepath = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES).getAbsolutePath();
+		private final String imagepath = mContext.getExternalFilesDir(null).getAbsolutePath();
 		
 		public void logout() {
 			// remove sid and stop stuffs
@@ -731,6 +743,18 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			doUnbindService();
 		} catch(Throwable t){
 			Log.e("AntripActivity", "Failed to unbind from AntripService");
+		}
+		
+		if(AntripService.isStarted()){
+			Log.e("AntripActicity", "isstarted: true"); 
+		} else{
+			Log.e("AntripActicity", "isstarted: false");
+		}
+		
+		if(AntripService.isRecording()){
+			Log.e("AntripActicity", "isrecording: true");
+		} else{
+			Log.e("AntripActicity", "isrecording: false");
 		}
 		
 		// short circuit logic, if startService is not called, stop service will not be called

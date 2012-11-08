@@ -9,7 +9,6 @@ import org.json.JSONObject;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -31,7 +30,7 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	private DBHelper128 dh;
 	
-	private Long currentTid;
+	private static Long currentTid;
 	private String currentUid;
 	private SharedPreferences pref;
 	private TripStats stats;
@@ -292,8 +291,6 @@ public class AntripService extends Service implements LocationPublisher{
 		
 		locationQueue = new LinkedBlockingQueue<Location>();
 		
-//		stopRecordingActionUnfinished = false;
-		
 		isRunning = true;
 		isRecording = false;
 		isStarted = false;
@@ -309,6 +306,10 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	public static boolean isRecording(){
 		return isRecording;
+	}
+	
+	public static Long getCurrentTid(){
+		return currentTid;
 	}
 	
 	@Override
