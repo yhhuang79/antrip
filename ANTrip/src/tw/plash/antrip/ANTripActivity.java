@@ -16,6 +16,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
@@ -30,7 +31,6 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.JsResult;
@@ -39,11 +39,10 @@ import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.crittercism.app.Crittercism;
 
 public class ANTripActivity extends Activity implements TripListReloader{
 	
@@ -236,6 +235,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 			mWebSettings.setSaveFormData(false);
 			mWebSettings.setSavePassword(false);
+			mWebSettings.setDomStorageEnabled(true);
 			//make sure no javascript is called before webpage finished loading
 			mWebView.setWebViewClient(new WebViewClient(){
 				@Override
@@ -330,6 +330,8 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
+		Crittercism.init(getApplicationContext(), "50a0662801ed852ced000002");
+		
 		setContentView(R.layout.main);
 		
 		mContext = this;
@@ -350,7 +352,6 @@ public class ANTripActivity extends Activity implements TripListReloader{
 //				Toast.makeText(mContext, "LOCATE", Toast.LENGTH_SHORT).show();
 //			}
 //		});
-		
 		initUI();
 	}
 	
@@ -371,13 +372,14 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		// TODO:
 		// cannot assume getExtFilesDir will always return the path, might be
 		// null, need to check before proceeding
-		private final String imagepath = mContext.getExternalFilesDir(null).getAbsolutePath();
+		private final String imagepath = mContext.getApplicationInfo().dataDir;
 		
 		public void logout() {
 			// remove sid and stop stuffs
 			Log.w("logged", "out");
 			CookieManager cm = CookieManager.getInstance();
 			cm.removeAllCookie();
+			
 		}
 		
 		// need a function to provide detailed trip data(reviewing historic
@@ -478,17 +480,52 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		 */
 		public void startCamera() {
 			// file name for pictures
-			String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
-			// complete file path for picture
-			imageUri = Uri.fromFile(new File(imagepath, imagename));
-			pref.edit().putString("imguri", imageUri.getPath()).commit();
-			//Log.w("startcamera", "imageUri= " + imageUri.getPath());
-			// intent to launch Android camera app to take pictures
-			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-			// input the desired filepath + filename
-			intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-			// launch the intent with code
-			startActivityForResult(intent, REQUEST_CODE_TAKE_PICTURE);
+			File imagefile = null;
+			
+			{
+				String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
+				String path = "/mnt/sdcard/DCIM/";
+				File tester = new File(path);
+				if (tester.exists() && tester.isDirectory()) {
+					Log.w("sdcard/dcim", "exists");
+					File dir = new File(path + "antrip");
+					dir.mkdir();
+					if (dir.exists() && dir.isDirectory()) {
+						Log.w("sdcard/dcim", "antrip dir created");
+						imagefile = new File(path + "antrip", imagename);
+					} else{
+						Log.w("sdcard/dcim", "cannot create antrip/not a dir");
+						imagefile = null;
+					}
+					
+				} else {
+					path = "/mnt/emmc/DCIM/";
+					tester = new File(path);
+					if (tester.exists() && tester.isDirectory()) {
+						Log.w("emmc/dcim", "exists");
+						File dir = new File(path + "antrip");
+						dir.mkdirs();
+						if (dir.exists() && dir.isDirectory()) {
+							Log.w("emmc/dcim", "antrip dir created");
+							imagefile = new File(path + "antrip", imagename);
+						} else{
+							Log.w("emmc/dcim", "cannot create antrip/not a dir");
+							imagefile = null;
+						}
+					}
+				}
+			}
+			if(imagefile != null){
+				imageUri = Uri.fromFile(imagefile);
+				pref.edit().putString("imguri", imageUri.getPath()).commit();
+				Log.w("startcamera", "imageUri= " + imageUri.getPath());
+				// intent to launch Android camera app to take pictures
+				Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				// input the desired filepath + filename
+				intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+				// launch the intent with code
+				startActivityForResult(intent, REQUEST_CODE_TAKE_PICTURE);
+			}
 		}
 		
 		/**
@@ -560,6 +597,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		 * @param value
 		 */
 		public void setCookie(String key, String value) {
+			Log.e("imagepath", ": " + imagepath);
 			pref.edit().putString(key, String.valueOf(value)).commit();
 			Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 			//login action, send sid to service
@@ -583,6 +621,8 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		public String getCookie(String key) {
 			//Log.w("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
 			//
+			Log.e("PATH", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
+			Log.e("imagepath", ": " + imagepath);
 			return pref.getString(key, null);
 		}
 		
