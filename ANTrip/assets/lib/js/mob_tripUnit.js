@@ -59,7 +59,7 @@
 				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null) ){
 					var str_noTrip = g_str_notrip;
 					div_data[i] ="<div class='class_friend_bt' style='text-align:center;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
-					$("#listview_3").html(div_data.join('')).listview('refresh');
+					$("#listview_3").append(div_data.join('')).listview('refresh');
 				}
 				else{
 					if(result != null && result.tripInfoList != null && result.tripInfoList.length>0){
@@ -306,11 +306,11 @@
 								var CheckInInfo="";
 								var title="";
 								if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
-									title = 'http://plash2.iis.sinica.edu.tw/picture/'+sid+"/"+trip_id+"/"+point.CheckIn.picture_uri;
-									CheckInInfo +="<p><img src=" + title + " height='300' /></p>";
+									title = 'http://plash2.iis.sinica.edu.tw/picture/'+userid+"/"+trip_id+"/thumb/"+point.CheckIn.picture_uri;
+									CheckInInfo +="<p><img src=" + title + " height='150' /></p>";
 								}
 								if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
-									CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
+									CheckInInfo +="<p><img width='54px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
 								}
 								if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
 									CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";

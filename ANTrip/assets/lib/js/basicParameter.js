@@ -150,4 +150,6 @@
 			angry: g_str_angry,
 			calm: g_str_calm
 		};
+
+		var sid;
 //-->
