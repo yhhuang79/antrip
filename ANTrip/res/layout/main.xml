@@ -6,6 +6,17 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"/>
     
+    <ImageView 
+        android:id="@+id/btn_locate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dip"
+        android:scaleType="fitCenter"
+        android:src="@drawable/locating"
+        android:adjustViewBounds="true"
+        android:layout_gravity="center_vertical|right"
+        android:visibility="gone"/>
+    
     <!-- <WebView
         android:id="@+id/webview"
         android:layout_width="fill_parent"
