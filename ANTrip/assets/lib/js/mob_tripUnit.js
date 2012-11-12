@@ -27,7 +27,7 @@
 				$.each(localresult.tripInfoList, function(i,data){
 					var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.id+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=true";
 					var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
-					div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.id+"' ></div><a class='listview' href='" + tripurl  + "'  rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img onClick=\"if(window.antrip){window.antrip.uploadTrip("+data.id+"); $('#des_close_class_"+sid+"_"+data.id+"').hide('slow');return false;}\" src='" + uploadicon_img + "'  /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.id+", true);return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"		
+					div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.id+"' ></div><a class='listview' href='" + tripurl  + "'  rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img onClick=\"if(window.antrip){ $('.des_close_class_"+sid+"_"+data.id+"').parent().remove();window.antrip.uploadTrip("+data.id+");return false;}\" src='" + uploadicon_img + "'  /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.id+", true);return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"		
 
 				});
 				$("#listview_3").append(div_data.join('')).listview('refresh');
@@ -238,8 +238,8 @@
 	function confirmDelete(sid, id, bIsLocal){
 		var r=confirm(g_str_delete);
 		if (r==true){
-			$("#des_close_class_"+sid+"_"+id).fadeOut('slow', function() {
-				$("#des_close_class_"+sid+"_"+id).hide();
+			$(".des_close_class_"+sid+"_"+id).parent().fadeOut('slow', function() {
+				$(".des_close_class_"+sid+"_"+id).parent().hide();
 			});
 			if(bIsLocal==true && window.antrip){
 				window.antrip.deleteTrip(id);
