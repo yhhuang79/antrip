@@ -9,7 +9,7 @@
     <string name="account_info">帳號資訊</string>
     <string name="login_title">您是:</string>
     <string name="pref_logout_sum">點擊以登出</string>
-    <string name="upload_failed_warning">上傳失敗，雲水途誌會自動重新上傳!</string>
+    <string name="upload_failed_warning">上傳失敗，請稍後重試!</string>
     <string name="upload_complete">上傳完成!</string>
     
 	<string name="notification_new_trip_started">一個新的旅程開始了</string>
