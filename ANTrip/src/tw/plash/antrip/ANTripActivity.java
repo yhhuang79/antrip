@@ -464,7 +464,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 				break;
 			case 2:
 				//trip list, check for unfinished uploads
-				new UnfinishedUploadThread(mContext, ANTripActivity.this).execute();
+//				new UnfinishedUploadThread(mContext, ANTripActivity.this).execute();
 			case 1:
 			case 4:
 			default:

@@ -36,7 +36,7 @@ import android.util.Log;
 public class DBHelper128 {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
-	private static final int DATABASE_VERSION = 6; // required by SQLite tool
+	private static final int DATABASE_VERSION = 8; // required by SQLite tool
 	
 	private static final String TRIP_DATA_TABLE = "tripdatatable";
 	private static final String TRIP_INFO_TABLE = "tripinfotable";
@@ -68,19 +68,20 @@ public class DBHelper128 {
 			+ "name TEXT default 'Untitled Trip', " 
 			+ "starttime TEXT, "
 			+ "endtime TEXT, " 
-			+ "length REAL, " 
+			+ "length INTEGER, " 
 			+ "count INTEGER, " 
-			+ "startaddrpt1 TEXT, " 
-			+ "startaddrpt2 TEXT, "
-			+ "startaddrpt3 TEXT, " 
-			+ "startaddrpt4 TEXT, " 
-			+ "startaddrpt5 TEXT, " 
-			+ "endaddrpt1 TEXT, "
-			+ "endaddrpt2 TEXT, " 
-			+ "endaddrpt3 TEXT, " 
-			+ "endaddrpt4 TEXT, " 
-			+ "endaddrpt5 TEXT, "
-			+ "uploadstage INTEGER default 0)";
+			+ "startaddrpt1 TEXT default 'NULL', " 
+			+ "startaddrpt2 TEXT default 'NULL', "
+			+ "startaddrpt3 TEXT default 'NULL', " 
+			+ "startaddrpt4 TEXT default 'NULL', " 
+			+ "startaddrpt5 TEXT default 'NULL', " 
+			+ "endaddrpt1 TEXT default 'NULL', "
+			+ "endaddrpt2 TEXT default 'NULL', " 
+			+ "endaddrpt3 TEXT default 'NULL', " 
+			+ "endaddrpt4 TEXT default 'NULL', " 
+			+ "endaddrpt5 TEXT default 'NULL', "
+			+ "uploadstage INTEGER default 0, "
+			+ "servertripid TEXT)";
 	
 	/**
 	 * Extends SQLiteOpenHelper, this subclass is only good for creating a
@@ -215,29 +216,6 @@ public class DBHelper128 {
 		}
 	}
 	
-//	synchronized public long insert(Location location, String userid, String tripid, CandidateCheckinObject cco) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			locationStringConverter l2s = new locationStringConverter(location);
-//			cv.put("latitude", l2s.getLatitude());
-//			cv.put("longitude", l2s.getLongitude());
-//			cv.put("timestamp", new Timestamp(Long.valueOf(l2s.getTime())).toString());
-//			cv.put("altitude", l2s.getAltitude());
-//			cv.put("speed", l2s.getSpeed());
-//			cv.put("bearing", l2s.getBearing());
-//			cv.put("accuracy", l2s.getAccuracy());
-//			cv.put("userID", userid);
-//			cv.put("tripID", tripid);
-//			// cco fields
-//			cv.put("picture", cco.getPicturePath());
-//			cv.put("emotion", cco.getEmotionID());
-//			cv.put("note", cco.getCheckinText());
-//			return db.insert(TRIP_DATA_TABLE, null, cv);
-//		} else {
-//			return -2;
-//		}
-//	}
-	
 	synchronized public long insert(CandidateCheckinObject cco, String userid, String tripid) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
@@ -268,7 +246,7 @@ public class DBHelper128 {
 			cv.put("userid", userid);
 			cv.put("starttime", stats.getButtonStartTime());
 			cv.put("endtime", stats.getNonNullEndTime());
-			cv.put("length", stats.getTotalValidLength());
+			cv.put("length", stats.getTotalValidLength().intValue());
 			cv.put("count", stats.getTotalAccuratePointCount());
 			return db.insert(TRIP_INFO_TABLE, null, cv);
 		} else{
@@ -276,159 +254,45 @@ public class DBHelper128 {
 		}
 	}
 	
-//	synchronized public long createNewTripInfo(String userid, String tripid) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			cv.put("tripid", tripid);
-//			cv.put("userid", userid);
-//			return db.insert(TRIP_INFO_TABLE, null, cv);
-//		} else {
-//			return -2;
-//		}
-//	}
-	
-//	synchronized public long createNewTripInfo(String userid, String tripid, String starttime) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			cv.put("tripid", tripid);
-//			cv.put("userid", userid);
-//			cv.put("starttime", starttime);
-//			return db.insert(TRIP_INFO_TABLE, null, cv);
-//		} else {
-//			return -2;
-//		}
-//	}
-	
-//	synchronized public long setStartTime(String userid, String tripid, String starttime) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			cv.put("tripid", tripid);
-//			cv.put("userid", userid);
-//			cv.put("starttime", starttime);
-//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-//		} else {
-//			return -2;
-//		}
-//	}
-	
-	/**
-	 * Insert starting address from the first non-null location report
-	 * 
-	 * @param tripid
-	 * @param startaddrpt1
-	 * @param startaddrpt2
-	 * @param startaddrpt3
-	 * @param startaddrpt4
-	 * @param startaddrpt5
-	 * @return
-	 */
-//	synchronized public long setStartaddr(String userid, String tripid, String startaddrpt1, String startaddrpt2,
-//			String startaddrpt3, String startaddrpt4, String startaddrpt5) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			cv.put("startaddrpt1", startaddrpt1);
-//			cv.put("startaddrpt2", startaddrpt2);
-//			cv.put("startaddrpt3", startaddrpt3);
-//			cv.put("startaddrpt4", startaddrpt4);
-//			cv.put("startaddrpt5", startaddrpt5);
-////			Log.e("dbhelper", "insert start address: " + cv.toString());
-//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-//		} else {
-//			return -2;
-//		}
-//	}
-	
 	synchronized public long setStartaddr(String userid, String tripid, List<Address> startaddr) {
 		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			cv.put("startaddrpt1", (startaddr.get(0).getCountryName() != null?startaddr.get(0).getCountryName():"NULL"));
-			cv.put("startaddrpt2", (startaddr.get(0).getAdminArea() != null?startaddr.get(0).getAdminArea():"NULL"));
-			cv.put("startaddrpt3", (startaddr.get(0).getLocality() != null?startaddr.get(0).getLocality():"NULL"));
-			cv.put("startaddrpt4", (startaddr.get(0).getSubLocality() != null?startaddr.get(0).getSubLocality():"NULL"));
-			cv.put("startaddrpt5", (startaddr.get(0).getThoroughfare() != null?startaddr.get(0).getThoroughfare():"NULL"));
-//			Log.e("dbhelper", "insert start address: " + cv.toString());
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+			if(startaddr != null){
+				ContentValues cv = new ContentValues();
+				cv.put("startaddrpt1", (startaddr.get(0).getCountryName() != null?startaddr.get(0).getCountryName():"NULL"));
+				cv.put("startaddrpt2", (startaddr.get(0).getAdminArea() != null?startaddr.get(0).getAdminArea():"NULL"));
+				cv.put("startaddrpt3", (startaddr.get(0).getLocality() != null?startaddr.get(0).getLocality():"NULL"));
+				cv.put("startaddrpt4", (startaddr.get(0).getSubLocality() != null?startaddr.get(0).getSubLocality():"NULL"));
+				cv.put("startaddrpt5", (startaddr.get(0).getThoroughfare() != null?startaddr.get(0).getThoroughfare():"NULL"));
+//				Log.e("dbhelper", "insert start address: " + cv.toString());
+				return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+			} else{
+				return -1;
+			}
+			
 		} else {
 			return -2;
 		}
 	}
-	
-//	synchronized public long setEndaddr(String userid, String tripid, String endaddrpt1, String endaddrpt2,
-//			String endaddrpt3, String endaddrpt4, String endaddrpt5) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			cv.put("endaddrpt1", endaddrpt1);
-//			cv.put("endaddrpt2", endaddrpt2);
-//			cv.put("endaddrpt3", endaddrpt3);
-//			cv.put("endaddrpt4", endaddrpt4);
-//			cv.put("endaddrpt5", endaddrpt5);
-////			Log.e("dbhelper", "insert end address: " + cv.toString());
-//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-//		} else {
-//			return -2;
-//		}
-//	}
 	
 	synchronized public long setEndaddr(String userid, String tripid, List<Address> endaddr) {
 		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			cv.put("endaddrpt1", (endaddr.get(0).getCountryName() != null?endaddr.get(0).getCountryName():"NULL"));
-			cv.put("endaddrpt2", (endaddr.get(0).getAdminArea() != null?endaddr.get(0).getAdminArea():"NULL"));
-			cv.put("endaddrpt3", (endaddr.get(0).getLocality() != null?endaddr.get(0).getLocality():"NULL"));
-			cv.put("endaddrpt4", (endaddr.get(0).getSubLocality() != null?endaddr.get(0).getSubLocality():"NULL"));
-			cv.put("endaddrpt5", (endaddr.get(0).getThoroughfare() != null?endaddr.get(0).getThoroughfare():"NULL"));
-//			Log.e("dbhelper", "insert end address: " + cv.toString());
-			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+			if(endaddr != null){
+				ContentValues cv = new ContentValues();
+				cv.put("endaddrpt1", (endaddr.get(0).getCountryName() != null?endaddr.get(0).getCountryName():"NULL"));
+				cv.put("endaddrpt2", (endaddr.get(0).getAdminArea() != null?endaddr.get(0).getAdminArea():"NULL"));
+				cv.put("endaddrpt3", (endaddr.get(0).getLocality() != null?endaddr.get(0).getLocality():"NULL"));
+				cv.put("endaddrpt4", (endaddr.get(0).getSubLocality() != null?endaddr.get(0).getSubLocality():"NULL"));
+				cv.put("endaddrpt5", (endaddr.get(0).getThoroughfare() != null?endaddr.get(0).getThoroughfare():"NULL"));
+//				Log.e("dbhelper", "insert end address: " + cv.toString());
+				return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
+			} else{
+				return -1;
+			}
+			
 		} else {
 			return -2;
 		}
 	}
-	
-	/**
-	 * Insert user inputed trip name, and the calculated trip length, also the
-	 * time from last location report
-	 * 
-	 * @param tripid
-	 * @param name
-	 * @param endtime
-	 * @param length
-	 * @return
-	 */
-//	synchronized public long setEndInfo(String userid, String tripid, String name, String endtime, Double length) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			// pop up screen asking for user input
-//			cv.put("name", name);
-//			cv.put("endtime", endtime);
-//			cv.put("length", length);
-//			// count the number of points directly from DB
-//			int count = (int) getNumberofPoints(userid, tripid);
-//			cv.put("count", count);
-//			
-//			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
-//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-//		} else {
-//			return -2;
-//		}
-//	}
-	
-//	synchronized public long setEndInfo(String userid, String tripid, String name, TripStats stats) {
-//		if (db.isOpen()) {
-//			ContentValues cv = new ContentValues();
-//			// pop up screen asking for user input
-//			cv.put("name", name);
-////			cv.put("endtime", endtime);
-////			cv.put("length", length);
-//			// count the number of points directly from DB
-//			int count = (int) getNumberofPoints(userid, tripid);
-//			cv.put("count", count);
-//			
-//			//Log.e("insertEndInfo", "name=" + name + ", endtime=" + endtime + ", length=" + length + ", count=" + count);
-//			return db.update(TRIP_INFO_TABLE, cv, "tripid=" + tripid + " AND userid=" + userid, null);
-//		} else {
-//			return -2;
-//		}
-//	}
 	
 	synchronized public long updateUploadStage(String userid, String tripid, int stage){
 		if(db.isOpen()){
@@ -440,6 +304,25 @@ public class DBHelper128 {
 		}
 	}
 	
+	synchronized public int getUploadStage(String userid, String tripid) {
+		if (db.isOpen()) {
+			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[] { "uploadstage" }, "userid=" + userid
+					+ " AND tripid=" + tripid, null, null, null, null);
+			if (mCursor != null) {
+				if (mCursor.moveToFirst()) {
+					int status = mCursor.getInt(mCursor.getColumnIndexOrThrow("uploadstage"));
+					mCursor.close();
+					mCursor = null;
+					return status;
+				} else {
+					mCursor.close();
+					mCursor = null;
+				}
+			}
+		}
+		return -2;
+	}
+
 	synchronized public long setTripName(String userid, String tripid, String name) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
@@ -515,16 +398,16 @@ public class DBHelper128 {
 	 * @return number of rows updated, info + data, or -1 when anything goes
 	 *         wrong
 	 */
-	synchronized public int updateTripid(String oldTripid, String newTripid) {
-		if (db.isOpen()) {
-			ContentValues cv = new ContentValues();
-			cv.put("tripid", newTripid);
-			int info = db.update(TRIP_INFO_TABLE, cv, "tripid=" + oldTripid, null);
-			return info + db.update(TRIP_DATA_TABLE, cv, "tripid=" + oldTripid, null);
-		} else {
-			return -1;
-		}
-	}
+//	synchronized public int updateTripid(String oldTripid, String newTripid) {
+//		if (db.isOpen()) {
+//			ContentValues cv = new ContentValues();
+//			cv.put("tripid", newTripid);
+//			int info = db.update(TRIP_INFO_TABLE, cv, "tripid=" + oldTripid, null);
+//			return info + db.update(TRIP_DATA_TABLE, cv, "tripid=" + oldTripid, null);
+//		} else {
+//			return -1;
+//		}
+//	}
 	
 	/**
 	 * to mark the upload status of a certain record or an entire trip, depending on the input
@@ -539,19 +422,19 @@ public class DBHelper128 {
 	 * @param imagepath, the image to mark uploaded, null if no image was uploaded
 	 * @return number of rows updated, or -2 if any error occurs
 	 */
-	synchronized public int markUploaded(String userid, String actualTripid, int table, int code, String imagepath) {
+	synchronized public int markUploaded(String userid, String localTripid, int table, int code, String imagepath) {
 		if (db.isOpen()) {
 			ContentValues cv = new ContentValues();
 			switch(table){
 			case 0:
 				cv.put("uploadstage", code);
-				return db.update(TRIP_INFO_TABLE, cv, "userid=" + userid + " AND tripid=" + actualTripid, null);
+				return db.update(TRIP_INFO_TABLE, cv, "userid=" + userid + " AND tripid=" + localTripid, null);
 			case 1:
 				cv.put("uploadstatus", code);
 				if(imagepath != null){
-					return db.update(TRIP_DATA_TABLE, cv, "userid=" + userid + " AND tripid=" + actualTripid + " AND picture LIKE '%" + imagepath.substring(imagepath.lastIndexOf("/") + 1) + "'", null);
+					return db.update(TRIP_DATA_TABLE, cv, "userid=" + userid + " AND tripid=" + localTripid + " AND picture LIKE '%" + imagepath.substring(imagepath.lastIndexOf("/") + 1) + "'", null);
 				} else{
-					return db.update(TRIP_DATA_TABLE, cv, "userid=" + userid + " AND tripid=" + actualTripid, null);
+					return db.update(TRIP_DATA_TABLE, cv, "userid=" + userid + " AND tripid=" + localTripid, null);
 				}
 			default:
 				return -3;
@@ -559,6 +442,16 @@ public class DBHelper128 {
 		} else {
 			//db is not opened
 			return -2;
+		}
+	}
+	
+	synchronized public long setServerTripid(String userid, String localTripid, String serverTripid){
+		if(db.isOpen()){
+			ContentValues cv = new ContentValues();
+			cv.put("servertripid", serverTripid);
+			return db.update(TRIP_INFO_TABLE, cv, "userid=" + userid + " AND tripid=" + localTripid, null);
+		} else{
+			return -1;
 		}
 	}
 	
@@ -609,7 +502,11 @@ public class DBHelper128 {
 				if (mCursor.moveToFirst()) {
 					JSONObject tmp = new JSONObject();
 					try {
-						tmp.put("trip_length", mCursor.getDouble(mCursor.getColumnIndexOrThrow("length")));
+						tmp.put("userid", userid);
+//						tmp.put("trip_id", tripid);
+						tmp.put("update_status", "3");
+						
+						tmp.put("trip_length", mCursor.getInt(mCursor.getColumnIndexOrThrow("length")));
 						tmp.put("trip_et", mCursor.getString(mCursor.getColumnIndexOrThrow("endtime")));
 						tmp.put("trip_st", mCursor.getString(mCursor.getColumnIndexOrThrow("starttime")));
 						tmp.put("trip_name", mCursor.getString(mCursor.getColumnIndexOrThrow("name")));
@@ -695,7 +592,7 @@ public class DBHelper128 {
 					JSONObject result = new JSONObject();
 					try {
 						result.put("userid", userid);
-						result.put("trip_id", tripid);
+//						result.put("trip_id", tripid);
 						JSONArray cidl = new JSONArray();
 						do {
 							JSONObject tmp = new JSONObject();
@@ -900,30 +797,30 @@ public class DBHelper128 {
 		}
 	}
 	
-	synchronized public HashMap<String, Integer> getAllUnfinishedUploads(String sid){
-		if(db.isOpen()){
-			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid", "uploadstage"}, "userid=" + sid + " AND uploadstage!=0", null, null, null, null);
-			if(mCursor != null){
-				if(mCursor.moveToFirst()){
-					HashMap<String, Integer> result = new HashMap<String, Integer>();
-					do{
-						result.put(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")), mCursor.getInt(mCursor.getColumnIndexOrThrow("uploadstage")));
-					} while(mCursor.moveToNext());
-					mCursor.close();
-					return result;
-				} else{
-					if(!mCursor.isClosed()){
-						mCursor.close();
-					}
-					return null;
-				}
-			} else{
-				return null;
-			}
-		} else{
-			return null;
-		}
-	}
+//	synchronized public HashMap<String, Integer> getAllUnfinishedUploads(String sid){
+//		if(db.isOpen()){
+//			Cursor mCursor = db.query(TRIP_INFO_TABLE, new String[]{"tripid", "uploadstage"}, "userid=" + sid + " AND uploadstage!=0", null, null, null, null);
+//			if(mCursor != null){
+//				if(mCursor.moveToFirst()){
+//					HashMap<String, Integer> result = new HashMap<String, Integer>();
+//					do{
+//						result.put(mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")), mCursor.getInt(mCursor.getColumnIndexOrThrow("uploadstage")));
+//					} while(mCursor.moveToNext());
+//					mCursor.close();
+//					return result;
+//				} else{
+//					if(!mCursor.isClosed()){
+//						mCursor.close();
+//					}
+//					return null;
+//				}
+//			} else{
+//				return null;
+//			}
+//		} else{
+//			return null;
+//		}
+//	}
 	
 	/**
 	 * Get all trip info formatted to yu-hsiang's php component with the given
@@ -942,13 +839,12 @@ public class DBHelper128 {
 			if (currentTripid != null) {
 				//there is a on going trip, don't show it in the trip list
 				//Log.e("getalltripinfoforhtml", "tripid!=null");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid + " AND uploadstage=0", null,
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND tripid!=" + currentTripid, null,
 						null, null, "starttime DESC");
 			} else {
 				//there is no on going trip, show everything
 				//Log.e("getalltripinfoforhtml", "tripid=null");
-				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid + " AND uploadstage=0", null, null, null, "starttime DESC");
-//				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
+				mCursor = db.query(TRIP_INFO_TABLE, null, "userid=" + userid, null, null, null, "starttime DESC");
 			}
 			
 			if (mCursor != null) {
@@ -972,7 +868,7 @@ public class DBHelper128 {
 							// tmp.put("trip_id", "a" +
 							// mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
 							tmp.put("trip_id", mCursor.getString(mCursor.getColumnIndexOrThrow("tripid")));
-							tmp.put("trip_length", mCursor.getDouble(mCursor.getColumnIndexOrThrow("length")));
+							tmp.put("trip_length", mCursor.getInt(mCursor.getColumnIndexOrThrow("length")));
 							tmp.put("trip_et", mCursor.getString(mCursor.getColumnIndexOrThrow("endtime")));
 							tmp.put("trip_st", mCursor.getString(mCursor.getColumnIndexOrThrow("starttime")));
 							tmp.put("trip_name", mCursor.getString(mCursor.getColumnIndexOrThrow("name")));
@@ -1022,6 +918,8 @@ public class DBHelper128 {
 		if(db.isOpen()){
 			long rows = db.delete(TRIP_INFO_TABLE, "userid=" + sid + " AND id=" + id, null);
 			//also need to delete all pictures
+//			ArrayList<String> tmp = getOneTripPicturePaths(sid, id, true);
+			//need to write a delete pictures method that accept uniqueID also
 			ArrayList<String> tmp = getOneTripPicturePaths(sid, id, true);
 			if(tmp != null){
 				if(tmp.size() > 0){
@@ -1033,6 +931,28 @@ public class DBHelper128 {
 				}
 			}
 			rows += db.delete(TRIP_DATA_TABLE, "userid=" + sid + " AND id=" + id, null);
+			
+			return rows;
+		} else{
+			return -2;
+		}
+	}
+	
+	synchronized public long deleteLocalTrip(String sid, String tripid){
+		if(db.isOpen()){
+			long rows = db.delete(TRIP_INFO_TABLE, "userid=" + sid + " AND tripid=" + tripid, null);
+			//also need to delete all pictures
+			ArrayList<String> tmp = getOneTripPicturePaths(sid, tripid, true);
+			if(tmp != null){
+				if(tmp.size() > 0){
+					Iterator<String> it = tmp.iterator();
+					while(it.hasNext()){
+						File f = new File(it.next());
+						f.delete();
+					}
+				}
+			}
+			rows += db.delete(TRIP_DATA_TABLE, "userid=" + sid + " AND tripid=" + tripid, null);
 			
 			return rows;
 		} else{
@@ -1099,7 +1019,7 @@ public class DBHelper128 {
 								tmp.put("trip_name", mCursor.getString(mCursor.getColumnIndexOrThrow("name")));
 								tmp.put("trip_st", mCursor.getString(mCursor.getColumnIndexOrThrow("starttime")));
 								tmp.put("trip_et", mCursor.getString(mCursor.getColumnIndexOrThrow("endtime")));
-								tmp.put("trip_length", mCursor.getDouble(mCursor.getColumnIndexOrThrow("length")));
+								tmp.put("trip_length", mCursor.getInt(mCursor.getColumnIndexOrThrow("length")));
 								tmp.put("num_of_pts", mCursor.getInt(mCursor.getColumnIndexOrThrow("count")));
 								tmp.put("et_addr_prt1", mCursor.getString(mCursor.getColumnIndexOrThrow("endaddrpt1")));
 								tmp.put("et_addr_prt2", mCursor.getString(mCursor.getColumnIndexOrThrow("endaddrpt2")));

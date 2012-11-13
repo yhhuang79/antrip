@@ -82,7 +82,7 @@ public class AntripService extends Service implements LocationPublisher{
 				} else{
 					if(pref.contains("sid")){
 						skyhookLocation = new SkyhookLocation(getApplicationContext(), AntripService.this);
-						skyhookLocation.run(10);
+						skyhookLocation.run(15);
 					} else{
 						Log.w("AntripService", "IncomingHandler: init location thread call without sid");
 					}
@@ -323,7 +323,7 @@ public class AntripService extends Service implements LocationPublisher{
 				if(dh != null){
 					//dh is not null, a trip is probably recording now...
 					Log.e("AntripService", "onStartCommand: dh not null, possibly already recording...");
-				} else if(!isStarted){
+				} else{
 					dh = new DBHelper128(getApplicationContext());
 					currentTid = intent.getLongExtra("tid", -1);
 					Log.e("AntripService", "onStartCommand: starting to record, tid= " + currentTid.toString());
@@ -333,8 +333,6 @@ public class AntripService extends Service implements LocationPublisher{
 					isRecording = true;
 					//should start foreground here, with a notification of course
 					showNotification();
-				} else{
-					//is already started, why is this being called again?
 				}
 			} else{
 				//not sure what case this is, called by Android system?
