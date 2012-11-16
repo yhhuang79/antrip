@@ -140,10 +140,10 @@
 									var CheckInInfo="";
 									if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
 										var title = 'http://plash2.iis.sinica.edu.tw/picture/'+sid+"/"+trip_id+"/"+point.CheckIn.picture_uri;
-										CheckInInfo +="<p><img src='"+title+ "' height='300' /></p>";
+										CheckInInfo +="<p><img src='"+title+ "' height='150' /></p>";
 									}
 									if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
-										CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion.toString()]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion.toString()]]+"</img></p>";
+										CheckInInfo +="<p><img width='54px' src='"+im+emotionMapping[point.CheckIn.emotion.toString()]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion.toString()]]+"</img></p>";
 									}
 									if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
 										CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
