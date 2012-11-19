@@ -38,6 +38,9 @@
 			//SIMPLIFIED_CHINESE
 			//TAIWAN
 			//TRADITIONAL_CHINESE
+			if(window.antrip){
+				g_lang = window.antrip.getLocale();
+			}
 			g_lang = g_lang.toUpperCase();
 			var filename;
 			if(g_lang=="ZH" ||g_lang=="CHINA" || g_lang=="CHINESE" || g_lang=="PRC" || g_lang=="SIMPLIFIED_CHINESE" || g_lang=="TAIWAN" || g_lang=="TRADITIONAL_CHINESE"){

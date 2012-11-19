@@ -223,7 +223,7 @@
 			}
 
 			var y = window.prompt(g_str_typetripname);
-			if(y==null || y=='undefined'){
+			if(y==null || y=='undefined' || y==''){
 				y = g_str_untitledtrip;
 			}
 
@@ -281,10 +281,10 @@
 					});
 					var CheckInInfo="";
 					if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
-						CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='300' /></p>";
+						CheckInInfo +="<p><img src='"+point.CheckIn.picture_uri + "' height='150' /></p>";
 					}
 					if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
-						CheckInInfo +="<p><img width='72px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
+						CheckInInfo +="<p><img width='54px' src='"+im+emotionMapping[point.CheckIn.emotion]+".png'>"+g_Tooltip[emotionMapping[point.CheckIn.emotion]]+"</img></p>";
 					}
 					if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
 						CheckInInfo += "<p>"+ point.CheckIn.message +"</p>";
