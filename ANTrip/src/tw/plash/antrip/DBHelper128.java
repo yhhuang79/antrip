@@ -36,7 +36,7 @@ import android.util.Log;
 public class DBHelper128 {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
-	private static final int DATABASE_VERSION = 10; // required by SQLite tool
+	private static final int DATABASE_VERSION = 11; // required by SQLite tool
 	
 	private static final String TRIP_DATA_TABLE = "tripdatatable";
 	private static final String TRIP_INFO_TABLE = "tripinfotable";
