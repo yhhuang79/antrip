@@ -190,6 +190,8 @@
 					});
 					g_mapPath.setMap(_map);
 					self.set('MarkerClusterer', new MarkerClusterer(_map, self.get('markers')));
+					$('#map_canvas_2').show();
+					$('#map_canvas_2').gmap('refresh');
 				}});
 			}
 		}
@@ -361,6 +363,7 @@
 					map.fitBounds(bounds);
 				}
 				self.set('MarkerClusterer', new MarkerClusterer(map, tripPointMarkerArray));
+				$('#map_canvas_2').show();
 				$('#map_canvas_2').gmap('refresh');
 			}
 			});				

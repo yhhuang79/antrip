@@ -383,6 +383,7 @@
 			}
 			else{
 				if($(this).attr('id')=='tripmap'){
+					$('#map_canvas_2').hide();
 					//var trip_name = decodeURIComponent($.urlParam('trip_name'));
 					$(this).find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + "" + "</"+g_titleSize+">");
 					$(this).find('div:jqmData(role="header")').find(g_titleSize).html( "");
