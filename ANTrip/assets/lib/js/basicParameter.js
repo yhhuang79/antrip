@@ -35,13 +35,14 @@
 			"11": "calm"
 		};
 
-		var g_zoom=17;
+		var g_zoom=12;
 		var g_startLatLng = new google.maps.LatLng(25.04752,121.614189);
 		var g_tripRecorderPath =  im+'tripRecorder.png';
 		var g_locatingPath =  im+'locating.png';
 		var g_checkin_invalid_imgPath = im + "check-in_invalid.png";
 		var g_checkin_imgPath = im + "check-in.png";
 		var g_antMarker = im+'ant_48.png';
+		var g_xpath = im+'xMarker.png';
 
 		// multi-language parameter
 		var g_str_numberoftrip = "Total number of trips:";

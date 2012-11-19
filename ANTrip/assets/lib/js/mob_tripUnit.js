@@ -25,7 +25,7 @@
 			{
 				g_tripLength += localresult.tripInfoList.length;
 				$.each(localresult.tripInfoList, function(i,data){
-					var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.id+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=true";
+					var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.id+"&local=true";
 					var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
 					div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.id+"' ></div><a class='listview' href='" + tripurl  + "'  rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img onClick=\"if(window.antrip){ $('.des_close_class_"+sid+"_"+data.id+"').parent().remove();window.antrip.uploadTrip("+data.id+");return false;}\" src='" + uploadicon_img + "'  /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.id+", true);return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"		
 
@@ -70,7 +70,7 @@
 						
 						var width="100%";
 						$.each(result.tripInfoList, function(i,data){
-							var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.trip_id+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=false";;
+							var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.trip_id+"&local=false";
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
 							div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.trip_id+"' ></div><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.trip_id+", false);event.stopImmediatePropagation();return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"
 						});
@@ -103,6 +103,11 @@
 					g_mapPath = null;
 				}
 				localtripdata = eval("("+localresult+")");
+
+				// change trip name
+				$('#tripmap').find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + localtripdata.trip_name + "</"+g_titleSize+">");
+				$('#tripmap').find('div:jqmData(role="header")').find(g_titleSize).html( localtripdata.trip_name);
+
 				$('#map_canvas_2').gmap({ 'zoom':g_zoom, 'callback': function(map) {
 					var self = this;
 					g_tripPointArray = new Array(0);
@@ -139,7 +144,7 @@
 								}).click(function(){
 									var CheckInInfo="";
 									if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
-										var title = 'http://plash2.iis.sinica.edu.tw/picture/'+sid+"/"+trip_id+"/"+point.CheckIn.picture_uri;
+										var title = point.CheckIn.picture_uri;
 										CheckInInfo +="<p><img src='"+title+ "' height='150' /></p>";
 									}
 									if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
@@ -278,6 +283,10 @@
 			data:{userid: userid, trip_id: trip_id},
 			type: 'GET', dataType: 'jsonp', cache: false,
 			success:function(result){
+				// change trip name
+				$('#tripmap').find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + result.tripName + "</"+g_titleSize+">");
+				$('#tripmap').find('div:jqmData(role="header")').find(g_titleSize).html( result.tripName);
+
 				if(g_showtripmap==false){
 					return;
 				}
@@ -439,7 +448,7 @@
 
 						var width="100%";
 						var data = result;
-						var tripurl = "#tripmap?userid="+ share_userid +"&trip_id="+ trip_data+"&trip_name="+ encodeURIComponent(data.trip_name) +"&local=false";
+						var tripurl = "#tripmap?userid="+ share_userid +"&trip_id="+ trip_data+"&local=false";
 						var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
 						div_data[index] ="<li id='collaps_div_"+share_userid+data.trip_id+"' ><input type='button' style='display:none;' value='" +tripurl+"' /><a class='listview'  href='" + tripurl  + "' rel='external' id='collaps_a_"+share_userid+data.trip_id+"' ><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>";
 						if(index==trip_list.length-1){

@@ -8,6 +8,7 @@
 	var g_tripPointObjArray_2 = new Array(0);
 
 	var g_currentmarker = null;
+	var g_xmarker = null;
 	var latlng_undefined_value=-999;
 	var g_bounds = new google.maps.LatLngBounds();
 
@@ -409,6 +410,7 @@
 	function drawCurrentPosition(latlng){
 		var self =  $('#map_canvas_1').gmap('get','map');
 		var iconpath = g_antMarker;
+		var xpath = g_xpath;
 		var accuracy=null;
 		if(accuracy!='undefined' && accuracy!=null){
 			drawCircle(latlng, accuracy);
@@ -418,13 +420,24 @@
 			g_currentmarker.setMap(null);
 			g_currentmarker = null;
 		}
+		if(g_xmarker!=null){
+			g_xmarker.setMap(null);
+			g_xmarker = null;
+		}
 		g_currentmarker =  new google.maps.Marker({ 
 				'animation': google.maps.Animation.BOUNCE,
 				'position': latlng, 
 				'bounds': true,
 				'icon': iconpath,
 		});
+		g_xmarker=  new google.maps.Marker({ 
+				'animation': google.maps.Animation.DROP,
+				'position': latlng, 
+				'bounds': true,
+				'icon': xpath,
+		});
 		g_currentmarker.setMap(self);
+		g_xmarker.setMap(self);
 		var infowindow = new google.maps.InfoWindow(
 		{ 
 			'content': g_str_iamhere,
@@ -492,6 +505,10 @@
 		if(g_currentmarker!=null){
 			g_currentmarker.setMap(null);
 			g_currentmarker = null;
+		}
+		if(g_xmarker!=null){
+			g_xmarker.setMap(null);
+			g_xmarker = null;
 		}
 
 		$('#map_canvas_1').gmap('watchPosition', function (position, status) {

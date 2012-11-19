@@ -149,7 +149,9 @@
 			   if(window.antrip){
 				   window.antrip.startCamera();
 				}
-				event.stopImmediatePropagation();
+				if(typeof event.stopImmediatePropagation=='function'){
+					event.stopImmediatePropagation();
+				}
 			});
 			$("#check-in_yes").click(function(e) {
 			   CheckIn();
@@ -340,7 +342,7 @@
 						;
 					}
 					else{
-						replaceHtml += "<a href='javascript:Logout()' data-role='button' data-transition='fade' data-theme='a' data-icon='arrow-r' data-iconpos='right'>Logout</a>";
+						//replaceHtml += "<a href='javascript:Logout()' data-role='button' data-transition='fade' data-theme='a' data-icon='arrow-r' data-iconpos='right'>Logout</a>";
 					}
 
 					replaceHtml += "</li>";
@@ -381,9 +383,9 @@
 			}
 			else{
 				if($(this).attr('id')=='tripmap'){
-					var trip_name = decodeURIComponent($.urlParam('trip_name'));
-					$(this).find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + trip_name + "</"+g_titleSize+">");
-					$(this).find('div:jqmData(role="header")').find(g_titleSize).html( trip_name);
+					//var trip_name = decodeURIComponent($.urlParam('trip_name'));
+					$(this).find('div:jqmData(role="header")').find('h4').replaceWith("<"+g_titleSize+" style='text-align:center'>" + "" + "</"+g_titleSize+">");
+					$(this).find('div:jqmData(role="header")').find(g_titleSize).html( "");
 					var userid = $.urlParam('userid');
 					var trip_id = $.urlParam('trip_id');
 					var local = $.urlParam('local');	
