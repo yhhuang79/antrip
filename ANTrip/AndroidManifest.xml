@@ -1,6 +1,6 @@
 <manifest package="tw.plash.antrip"
-    android:versionCode="9"
-    android:versionName="1.5" xmlns:android="http://schemas.android.com/apk/res/android">
+    android:versionCode="10"
+    android:versionName="1.5.1119.1" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk android:minSdkVersion="10" />
 
@@ -20,7 +20,6 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<uses-permission android:name="android.permission.CONTROL_LOCATION_UPDATES" />
     <!-- crittercism required -->
 	<uses-permission android:name="android.permission.READ_LOGS"/>
 	<uses-permission android:name="android.permission.GET_TASKS"/>

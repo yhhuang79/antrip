@@ -7,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketTimeoutException;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -239,23 +241,39 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 			// GET DATA FROM DB
 			JSONObject data = dh.getOneTripData(userid, localTripid, true);
 			// pair our data with corresponding name
-			List<NameValuePair> param = new ArrayList<NameValuePair>();
-			param.add(new BasicNameValuePair("trip", data.toString()));
+//			List<NameValuePair> param = new ArrayList<NameValuePair>();
+//			param.add(new BasicNameValuePair("trip", data.toString()));
 			
 			JSONObject tripinfo = dh.getOneTripInfo(userid, localTripid);
 			// Log.e("UploadThread", "uploadtripdata2: tripinfo= " +
 			// tripinfo.toString());
-			param.add(new BasicNameValuePair("tripinfo", tripinfo.toString()));
+//			param.add(new BasicNameValuePair("tripinfo", tripinfo.toString()));
 			
-			for (NameValuePair item : param) {
-				Log.e("UploadThread", "uploadtripdata2: param.item= " + item.toString());
-			}
+//			for (NameValuePair item : param) {
+//				Log.e("UploadThread", "uploadtripdata2: param.item= " + item.toString());
+//			}
 			
 			// encode our data with UTF8
-			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(param, HTTP.UTF_8);
+//			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(param, HTTP.UTF_8);
+			
+			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+			entity.addPart("trip", new StringBody(data.toString()));
+			entity.addPart("tripinfo", new StringBody(tripinfo.toString()));
+			
 			// put our data in the method object
 			postRequest.setEntity(entity);
-			HttpClient httpClient = new DefaultHttpClient();
+			
+			HttpParams httpParameters = new BasicHttpParams();
+			// Set the timeout in milliseconds until a connection is established.
+			// The default value is zero, that means the timeout is not used. 
+			int timeoutConnection = 3000;
+			HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+			// Set the default socket timeout (SO_TIMEOUT) 
+			// in milliseconds which is the timeout for waiting for data.
+			int timeoutSocket = 5000;
+			HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+			
+			HttpClient httpClient = new DefaultHttpClient(httpParameters);
 			// execute the request and catch the response
 			HttpResponse response = httpClient.execute(postRequest);
 			
@@ -266,7 +284,7 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 				BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 				String msg = in.readLine();
 				in.close();
-				if (msg.contains("Ok")) {
+				if (msg != null && msg.contains("Ok")) {
 					Log.w("upload service", "uplaodtripdata result: good");
 					dh.markUploaded(userid, localTripid, 1, 1, null);
 					try {
@@ -292,7 +310,13 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+			new AlertDialog.Builder(mContext)
+				.setTitle("error")
+				.setMessage("internet problem, try again later")
+				.setNeutralButton("okay", null)
+				.show();
 		}
+		
 		Log.e("upload service", "uplaodtripdata error: exception");
 		return false;
 	}
@@ -322,26 +346,31 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 					
 					postRequest.setEntity(mentity);
 					
-					HttpClient httpClient = new DefaultHttpClient();
+					HttpParams httpParameters = new BasicHttpParams();
+					// Set the timeout in milliseconds until a connection is established.
+					// The default value is zero, that means the timeout is not used. 
+					int timeoutConnection = 3000;
+					HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+					// Set the default socket timeout (SO_TIMEOUT) 
+					// in milliseconds which is the timeout for waiting for data.
+					int timeoutSocket = 5000;
+					HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+					
+					HttpClient httpClient = new DefaultHttpClient(httpParameters);
 					HttpResponse response = httpClient.execute(postRequest);
 					Integer statusCode = response.getStatusLine().getStatusCode();
 					if (statusCode == 200) {
 						BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 						String msg = in.readLine();
 						in.close();
-						if (msg.contains("OK")) {
-							// Log.w("upload service", i +
-							// ") upload picture result: good");
+						if (msg != null && msg.contains("OK")) {
+							 Log.w("upload service", i + ") upload picture result: good");
 							dh.markUploaded(userid, localTripid, 1, 2, path);
 						} else {
-							// Log.e("upload service", i +
-							// ") upload pictures error: upload failed, messsage="
-							// + msg);
+							 Log.e("upload service", i + ") upload pictures error: upload failed, messsage=" + msg);
 						}
 					} else {
-						// Log.e("upload service", i +
-						// ") upload picture error: connection error, status code="
-						// + statusCode);
+						 Log.e("upload service", i + ") upload picture error: connection error, status code=" + statusCode);
 						dh.markUploaded(userid, localTripid, 1, 1, path);
 					}
 					httpClient.getConnectionManager().shutdown();

@@ -36,7 +36,7 @@ import android.util.Log;
 public class DBHelper128 {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
-	private static final int DATABASE_VERSION = 8; // required by SQLite tool
+	private static final int DATABASE_VERSION = 10; // required by SQLite tool
 	
 	private static final String TRIP_DATA_TABLE = "tripdatatable";
 	private static final String TRIP_INFO_TABLE = "tripinfotable";
@@ -1036,7 +1036,12 @@ public class DBHelper128 {
 										mCursor.getString(mCursor.getColumnIndexOrThrow("startaddrpt4")));
 								tmp.put("st_addr_prt5",
 										mCursor.getString(mCursor.getColumnIndexOrThrow("startaddrpt5")));
-								tmp.put("uploaded", mCursor.getInt(mCursor.getColumnIndexOrThrow("uploaded")));
+								if(mCursor.getColumnIndex("uploadstage") != -1){
+									tmp.put("uploadstage", mCursor.getInt(mCursor.getColumnIndex("uploadstage")));
+								}
+								if(mCursor.getColumnIndex("servertripid") != -1){
+									tmp.put("servertripid", mCursor.getString(mCursor.getColumnIndex("servertripid")));
+								}
 								// put the entry in the list
 								list.put(tmp);
 							} while (mCursor.moveToNext());
@@ -1105,6 +1110,9 @@ public class DBHelper128 {
 									// only put in the check-in objecty if it is not
 									// null
 									tmp.put("CheckIn", checkin);
+								}
+								if(mCursor.getColumnIndex("uploadstatus") != -1){
+									tmp.put("uploadstatus", mCursor.getInt(mCursor.getColumnIndex("uploadstatus")));
 								}
 								list.put(tmp);
 							} while (mCursor.moveToNext());
