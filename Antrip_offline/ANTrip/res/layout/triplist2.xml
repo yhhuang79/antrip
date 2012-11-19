@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <include
+        android:id="@+id/triplist_actionbar"
+        android:layout_alignParentTop="true"
+        layout="@layout/actionbar" />
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/triplist_actionbar" >
+
+        <com.emilsjolander.components.StickyListHeaders.StickyListHeadersListView
+            xmlns:slh="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/triplist2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:cacheColorHint="@android:color/transparent"
+            android:clipToPadding="false"
+            android:padding="2dip"
+            slh:areHeadersSticky="true" />
+
+        <TextView
+            android:id="@android:id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:gravity="center"
+            android:text="Loading..."
+            android:textColor="@android:color/darker_gray"
+            android:textSize="20sp" />
+    </FrameLayout>
+
+</RelativeLayout>

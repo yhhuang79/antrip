@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">雲水途誌</string>
+    <string name="okay">好的</string>
+    <string name="nope">算了</string>
+    <string name="error">錯誤</string>
+    
+    <string name="account_info">帳號資訊</string>
+    <string name="login_title">您是:</string>
+    <string name="pref_logout_sum">點擊以登出</string>
+    <string name="upload_failed_warning">上傳失敗，請稍後重試!</string>
+    <string name="upload_complete">上傳完成!</string>
+    
+	<string name="notification_new_trip_started">一個新的旅程開始了</string>
+    <string name="notification_is_recording_a_trip">正在紀錄你的旅程...</string>
+    <string name="toast_upload_done">雲水途誌:\n旅程上傳完成</string>
+    <string name="notification_upload_in_progress">正在上傳旅程...</string>
+    <string name="notification_starting_upload">開始上傳旅程</string>
+    <string name="alertdiag_threat_title">結束雲水途誌?</string>
+    
+    <string name="login_warning">請先登入!</string>
+    <string name="logout_warning">有旅誌仍在紀錄中，還是要登出嗎?</string>
+</resources>

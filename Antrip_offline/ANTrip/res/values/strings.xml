@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ANTrip</string>
+    <string name="okay">okay</string>
+    <string name="nope">nope</string>
+    <string name="error">error</string>
+    
+    <string name="account_info">Account Info</string>
+    <string name="login_title">Logged in as:</string>
+    <string name="pref_logout_sum">Click to logout</string>
+    <string name="upload_failed_warning">Upload failed, please try again later!</string>
+    <string name="upload_complete">Upload complete!</string>
+    
+    <string name="notification_new_trip_started">A NEW RECORDING HAS BEGUN</string>
+    <string name="notification_is_recording_a_trip">is recording your trip...</string>
+    <string name="toast_upload_done">ANTrip:\nall uploads complete</string>
+    <string name="notification_upload_in_progress">upload in progress...</string>
+    <string name="notification_starting_upload">start uploading trip(s)</string>
+    <string name="alertdiag_threat_title">Quit ANTrip?</string>
+    
+    <string name="login_warning">Please login first!</string>
+    <string name="logout_warning">A trip is still recording, logout anyway?</string>
+</resources>

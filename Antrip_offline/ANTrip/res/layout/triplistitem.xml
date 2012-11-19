@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dip" 
+    android:orientation="vertical">
+    
+    <TextView 
+        android:text="trip name"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"/>
+    <TextView 
+        android:id="@+id/triplistitem_name"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"/>
+    <TextView 
+        android:text="start time"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"/>
+    <TextView 
+        android:id="@+id/triplistitem_starttime"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"/>
+    
+</LinearLayout>

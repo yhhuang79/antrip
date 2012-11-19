@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="46dip"
+    android:background="#88ff0000">
+    
+    <ImageButton 
+        android:id="@+id/actionbar_activity_icon"
+        android:src="@drawable/dropdown_friendlist"
+        android:layout_width="50dip"
+        android:layout_height="45dip"
+        android:adjustViewBounds="true"
+        android:scaleType="fitEnd"
+        android:padding="3dip"
+        android:background="@color/button_state"/>
+    
+    <TextView 
+        android:id="@+id/actionbar_activity_title"
+        android:layout_width="wrap_content"
+        android:layout_height="45dip"
+        android:layout_toRightOf="@+id/actionbar_activity_icon"
+        android:gravity="center_vertical"
+        android:text="TEST TEXT"
+        android:textSize="20sp"
+        android:paddingLeft="3dip"
+        android:clickable="false"
+        android:focusable="false"
+        android:focusableInTouchMode="false"/>
+    
+    <ImageButton 
+        android:id="@+id/actionbar_action_button1"
+        android:src="@drawable/dropdown_recorder"
+        android:layout_width="45dip"
+        android:layout_height="45dip"
+        android:layout_toLeftOf="@+id/actionbar_action_button2"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:padding="3dip"
+        android:background="@color/button_state"/>
+    
+    <ImageButton 
+        android:id="@+id/actionbar_action_button2"
+        android:src="@drawable/dropdown_triplist"
+        android:layout_width="45dip"
+        android:layout_height="45dip"
+        android:layout_alignParentRight="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:padding="3dip"
+        android:background="@color/button_state"/>
+    
+	<View 
+	    android:layout_width="match_parent"
+	    android:layout_height="1dip"
+	    android:layout_alignParentBottom="true"
+	    android:background="#ff008800"
+	    android:clickable="false"
+	    android:longClickable="false"
+	    android:focusable="false"
+	    android:focusableInTouchMode="false"/>
+</RelativeLayout>
