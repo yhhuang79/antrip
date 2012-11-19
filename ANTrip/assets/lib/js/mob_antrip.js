@@ -407,6 +407,7 @@
 						if(userid!=sid){
 							$("#tripmap").find("#page_back").attr("href", "#friendlist");
 							$("#share_trip").hide();
+							$('#map_canvas_2').show();
 						}
 						else{
 							$("#share_trip").show();

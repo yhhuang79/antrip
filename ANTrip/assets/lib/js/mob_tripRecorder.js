@@ -222,7 +222,7 @@
 					window.antrip.prepareStopRecording();
 			}
 
-			var y = window.prompt(g_str_typetripname);
+			var y = window.prompt(g_str_typetripname, g_str_untitledtrip);
 			if(y==null || y=='undefined' || y==''){
 				y = g_str_untitledtrip;
 			}
