@@ -6,6 +6,7 @@
     <string name="nope">nope</string>
     <string name="error">error</string>
     
+    <string name="version">Version</string>
     <string name="account_info">Account Info</string>
     <string name="login_title">Logged in as:</string>
     <string name="pref_logout_sum">Click to logout</string>

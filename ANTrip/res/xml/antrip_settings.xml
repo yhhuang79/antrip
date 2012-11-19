@@ -7,5 +7,6 @@
             android:key="usrname"
             android:summary="@string/pref_logout_sum" />
     </PreferenceCategory>
+    <Preference android:key="version" android:title="@string/version"/>
 
 </PreferenceScreen>

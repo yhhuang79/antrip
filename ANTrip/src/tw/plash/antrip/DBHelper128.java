@@ -997,10 +997,23 @@ public class DBHelper128 {
 		}
 	}
 	
-	public void exportEverything() {
+	public String exportEverything() {
 		if (db.isOpen()) {
 			try {
-				FileOutputStream fos = new FileOutputStream("/sdcard/" + System.currentTimeMillis() + ".txt");
+				String testpath = "/mnt/sdcard/";
+				String fullpath = null;
+				File tester = new File(testpath);
+				if (tester.exists() && tester.isDirectory()) {
+					fullpath = testpath + System.currentTimeMillis() + ".txt";
+				} else {
+					testpath = "/mnt/emmc/";
+					tester = new File(testpath);
+					if (tester.exists() && tester.isDirectory()) {
+						fullpath = testpath + System.currentTimeMillis() + ".txt";
+					}
+				}
+				Log.e("export everything", "path= " + fullpath);
+				FileOutputStream fos = new FileOutputStream(fullpath);
 				OutputStreamWriter osw = new OutputStreamWriter(fos);
 				Cursor mCursor = db.query(TRIP_INFO_TABLE, null, null, null, null, null, null);
 				if (mCursor != null) {
@@ -1053,7 +1066,7 @@ public class DBHelper128 {
 							if (!mCursor.isClosed()) {
 								mCursor.close();
 							}
-							return;
+							return null;
 						}
 						// XXX save result to file
 						osw.write(result.toString());
@@ -1062,10 +1075,16 @@ public class DBHelper128 {
 						if (!mCursor.isClosed()) {
 							mCursor.close();
 						}
-						return;
+						if(osw != null){
+							osw.close();
+						}
+						return null;
 					}
 				} else {
-					return;
+					if(osw != null){
+						osw.close();
+					}
+					return null;
 				}
 				mCursor = null;
 				mCursor = db.query(TRIP_DATA_TABLE, null, null, null, null, null, null);
@@ -1117,14 +1136,14 @@ public class DBHelper128 {
 								list.put(tmp);
 							} while (mCursor.moveToNext());
 							// jsonarray all filled, put into result object
-							result.put("tripInfoList", list);
+							result.put("CheckInDataList", list);
 						} catch (JSONException e) {
 							e.printStackTrace();
 							// if anything goes wrong, return null
 							if (!mCursor.isClosed()) {
 								mCursor.close();
 							}
-							return;
+							return null;
 						}
 						// all is well
 						if (!mCursor.isClosed()) {
@@ -1134,7 +1153,7 @@ public class DBHelper128 {
 						osw.write(result.toString());
 						osw.flush();
 						osw.close();
-						return;
+						return fullpath;
 					} else {
 						if (!mCursor.isClosed()) {
 							mCursor.close();
@@ -1142,19 +1161,19 @@ public class DBHelper128 {
 						if(osw != null){
 							osw.close();
 						}
-						return;
+						return null;
 					}
 				} else {
 					if(osw != null){
 						osw.close();
 					}
-					return;
+					return null;
 				}
 			} catch (IOException e) {
-				return;
+				return null;
 			}
 		} else {
-			return;
+			return null;
 		}
 	}
 }

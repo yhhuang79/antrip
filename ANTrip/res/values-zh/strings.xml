@@ -6,6 +6,7 @@
     <string name="nope">算了</string>
     <string name="error">錯誤</string>
     
+    <string name="version">版本</string>
     <string name="account_info">帳號資訊</string>
     <string name="login_title">您是:</string>
     <string name="pref_logout_sum">點擊以登出</string>

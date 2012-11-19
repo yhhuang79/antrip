@@ -2,6 +2,7 @@ package tw.plash.antrip;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Timer;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONObject;
@@ -17,6 +18,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -25,6 +27,8 @@ public class AntripService extends Service implements LocationPublisher{
 	private static boolean isRunning;
 	private static boolean isStarted;
 	private static boolean isRecording;
+	
+	private Long firstcalltime = null;
 	
 	private LinkedBlockingQueue<Location> locationQueue;
 	
@@ -82,7 +86,7 @@ public class AntripService extends Service implements LocationPublisher{
 				} else{
 					if(pref.contains("sid")){
 						skyhookLocation = new SkyhookLocation(getApplicationContext(), AntripService.this);
-						skyhookLocation.run(15);
+						skyhookLocation.run(10);
 					} else{
 						Log.w("AntripService", "IncomingHandler: init location thread call without sid");
 					}
@@ -377,28 +381,65 @@ public class AntripService extends Service implements LocationPublisher{
 
 	@Override
 	public void newLocationUpdate(Location location) {
-		Log.w("AntripService", "newLocationUpdate: new location received");
-		//not recording, repost only valid and accurate opints to UI
-		if(LocationFilter.validityFilter(location)){
-			if(LocationFilter.accuracyFilter(location)){
-				//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
-				sendMessageToUI(MSG_LOCATION_UPDATE, location);
+		if(firstcalltime == null){
+			firstcalltime = System.nanoTime();
+			
+			Log.w("AntripService", "newLocationUpdate: new location received");
+			//not recording, repost only valid and accurate opints to UI
+			if(LocationFilter.validityFilter(location)){
+				if(LocationFilter.accuracyFilter(location)){
+					//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
+					sendMessageToUI(MSG_LOCATION_UPDATE, location);
+				} else{
+					//inaccurate points
+				}
 			} else{
-				//inaccurate points
+				//invalid points
+			}
+			//if 3 consecutive location updates failed the filter, show a warning banner on screen
+			
+			//if recording=true, save location update to DB
+			if(isRecording){
+				if(dh != null){
+					dh.insert(location, currentUid, currentTid.toString());
+					stats.addOnePoint(location, false);
+//					Log.e("antripService", "newLodationUpdate: length = " + stats.getTotalValidLength() + ", accu pts=" + stats.getTotalAccuratePointCount() + ", started@" + stats.getButtonStartTime());
+				} else{
+					//this should not happen
+				}
 			}
 		} else{
-			//invalid points
-		}
-		//if 3 consecutive location updates failed the filter, show a warning banner on screen
-		
-		//if recording=true, save location update to DB
-		if(isRecording){
-			if(dh != null){
-				dh.insert(location, currentUid, currentTid.toString());
-				stats.addOnePoint(location, false);
-//				Log.e("antripService", "newLodationUpdate: length = " + stats.getTotalValidLength() + ", accu pts=" + stats.getTotalAccuratePointCount() + ", started@" + stats.getButtonStartTime());
+			Long secondcalltime = System.nanoTime();
+			if((secondcalltime - firstcalltime) > 1E10){
+				
+				Log.w("AntripService", "newLocationUpdate: new location received");
+				//not recording, repost only valid and accurate opints to UI
+				if(LocationFilter.validityFilter(location)){
+					if(LocationFilter.accuracyFilter(location)){
+						//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
+						sendMessageToUI(MSG_LOCATION_UPDATE, location);
+					} else{
+						//inaccurate points
+					}
+				} else{
+					//invalid points
+				}
+				//if 3 consecutive location updates failed the filter, show a warning banner on screen
+				
+				//if recording=true, save location update to DB
+				if(isRecording){
+					if(dh != null){
+						dh.insert(location, currentUid, currentTid.toString());
+						stats.addOnePoint(location, false);
+//						Log.e("antripService", "newLodationUpdate: length = " + stats.getTotalValidLength() + ", accu pts=" + stats.getTotalAccuratePointCount() + ", started@" + stats.getButtonStartTime());
+					} else{
+						//this should not happen
+					}
+				}
+				
+				firstcalltime = secondcalltime;
 			} else{
-				//this should not happen
+				Log.d("antrip service", "location update method called less than 10 seconds apart!");
 			}
 		}
 	}

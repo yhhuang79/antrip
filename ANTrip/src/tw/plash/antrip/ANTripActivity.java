@@ -606,9 +606,10 @@ public class ANTripActivity extends Activity implements TripListReloader{
 				if(value.equals("206")){
 					Log.w("SECRETLY", "EXPORT ALL");
 					DBHelper128 ddd = new DBHelper128(mContext);
-					ddd.exportEverything();
+					String tmp = ddd.exportEverything();
 					ddd.closeDB();
 					ddd = null;
+					startActivity(new Intent(mContext, BackdoorActivity.class).putExtra("path", tmp));
 				}
 			}
 		}
