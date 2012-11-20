@@ -310,11 +310,6 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			new AlertDialog.Builder(mContext)
-				.setTitle("error")
-				.setMessage("internet problem, try again later")
-				.setNeutralButton("okay", null)
-				.show();
 		}
 		
 		Log.e("upload service", "uplaodtripdata error: exception");
