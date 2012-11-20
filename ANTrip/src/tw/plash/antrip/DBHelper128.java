@@ -670,7 +670,7 @@ public class DBHelper128 {
 			Cursor tmpCursor = db.query(TRIP_INFO_TABLE, null, "id=" + id, null, null, null, null);
 			String tripid = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("tripid"))
 					: "-1";
-			String tripname = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("trip_name")) : "-1";
+			String tripname = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("name")) : "-1";
 			JSONObject result = new JSONObject();
 			
 			Cursor mCursor = db.query(TRIP_DATA_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
