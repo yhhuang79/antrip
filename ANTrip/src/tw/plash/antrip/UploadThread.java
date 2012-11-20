@@ -7,7 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketTimeoutException;
+import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,13 +15,10 @@ import java.util.Locale;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -32,7 +29,6 @@ import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -201,24 +197,28 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 	private List<Address> getaddress(String uid, String tid, boolean start) {
 		try {
 			CachedPoints point = dh.getOnePoint(uid, tid, start);
-			Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
-			List<Address> addr = geocoder.getFromLocation(point.latitude, point.longitude, 1);
-			if (addr != null && !addr.isEmpty()) {
-				// Log.w("upload service", "first address: \nadmin:" +
-				// firstAddr.get(0).getAdminArea() + "\ncountry code:" +
-				// firstAddr.get(0).getCountryCode() + "\ncountru name:" +
-				// firstAddr.get(0).getCountryName() + "\nfeature name:" +
-				// firstAddr.get(0).getFeatureName() + "\nlocale:" +
-				// firstAddr.get(0).getLocale() + "\nlocality:" +
-				// firstAddr.get(0).getLocality() + "\npostal code:" +
-				// firstAddr.get(0).getPostalCode() + "\npremises:" +
-				// firstAddr.get(0).getPremises() + "\nsubadmin:" +
-				// firstAddr.get(0).getSubAdminArea() + "\nsublocality:" +
-				// firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" +
-				// firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" +
-				// firstAddr.get(0).getThoroughfare());
-				// Log.w("upload service", "getstartaddress result: good");
-				return addr;
+			if(point != null){
+				Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+				List<Address> addr = geocoder.getFromLocation(point.latitude, point.longitude, 1);
+				if (addr != null && !addr.isEmpty()) {
+					// Log.w("upload service", "first address: \nadmin:" +
+					// firstAddr.get(0).getAdminArea() + "\ncountry code:" +
+					// firstAddr.get(0).getCountryCode() + "\ncountru name:" +
+					// firstAddr.get(0).getCountryName() + "\nfeature name:" +
+					// firstAddr.get(0).getFeatureName() + "\nlocale:" +
+					// firstAddr.get(0).getLocale() + "\nlocality:" +
+					// firstAddr.get(0).getLocality() + "\npostal code:" +
+					// firstAddr.get(0).getPostalCode() + "\npremises:" +
+					// firstAddr.get(0).getPremises() + "\nsubadmin:" +
+					// firstAddr.get(0).getSubAdminArea() + "\nsublocality:" +
+					// firstAddr.get(0).getSubLocality() + "\nsubthroughfare:" +
+					// firstAddr.get(0).getSubThoroughfare() + "\nthroughfare:" +
+					// firstAddr.get(0).getThoroughfare());
+					// Log.w("upload service", "getstartaddress result: good");
+					return addr;
+				}
+			} else{
+				return null;
 			}
 		} catch (IOException e) {
 			// Log.e("upload service", "getstartaddress error: exception");
@@ -257,8 +257,8 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 //			UrlEncodedFormEntity entity = new UrlEncodedFormEntity(param, HTTP.UTF_8);
 			
 			MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
-			entity.addPart("trip", new StringBody(data.toString()));
-			entity.addPart("tripinfo", new StringBody(tripinfo.toString()));
+			entity.addPart("trip", new StringBody(data.toString(), Charset.forName("UTF-8")));
+			entity.addPart("tripinfo", new StringBody(tripinfo.toString(), Charset.forName("UTF-8")));
 			
 			// put our data in the method object
 			postRequest.setEntity(entity);
