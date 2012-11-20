@@ -1,6 +1,6 @@
 <manifest package="tw.plash.antrip"
     android:versionCode="10"
-    android:versionName="1.5.1119.2" xmlns:android="http://schemas.android.com/apk/res/android">
+    android:versionName="1.5.1120.1" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk android:minSdkVersion="10" />
 
