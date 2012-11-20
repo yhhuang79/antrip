@@ -663,20 +663,25 @@ public class DBHelper128 {
 			return null;
 		}
 	}
-	
+	//trip_name
 	synchronized public JSONObject getOneTripData(String userid, Integer id) {
 		//Log.e("getOneTripData", "userid=" + userid + ", id=" + id);
 		if (db.isOpen()) {
 			Cursor tmpCursor = db.query(TRIP_INFO_TABLE, null, "id=" + id, null, null, null, null);
 			String tripid = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("tripid"))
 					: "-1";
+			String tripname = tmpCursor.moveToFirst() ? tmpCursor.getString(tmpCursor.getColumnIndexOrThrow("trip_name")) : "-1";
+			JSONObject result = new JSONObject();
 			
 			Cursor mCursor = db.query(TRIP_DATA_TABLE, null, "userid=" + userid + " AND tripid=" + tripid, null, null,
 					null, "id ASC");
 			if (mCursor != null) {
 				if (mCursor.moveToFirst()) {
-					JSONObject result = new JSONObject();
+					
+					
+					
 					try {
+						result.put("trip_name", tripname);
 						result.put("userid", userid);
 						result.put("trip_id", tripid);
 						JSONArray cidl = new JSONArray();
