@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="46dip"
-    android:background="#88ff0000">
+    android:background="#ffaa0000">
     
     <ImageButton 
         android:id="@+id/actionbar_activity_icon"
@@ -53,7 +53,7 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="1dip"
 	    android:layout_alignParentBottom="true"
-	    android:background="#ff008800"
+	    android:background="#ff00ff00"
 	    android:clickable="false"
 	    android:longClickable="false"
 	    android:focusable="false"

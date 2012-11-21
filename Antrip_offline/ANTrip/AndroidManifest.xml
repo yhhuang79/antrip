@@ -1,6 +1,6 @@
 <manifest package="tw.plash.antrip.offline"
     android:versionCode="1"
-    android:versionName="1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    android:versionName="1.0.1120.1" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-sdk
         android:minSdkVersion="4"
@@ -31,6 +31,7 @@
         android:icon="@drawable/ant_logo"
         android:label="@string/app_name"
         android:theme="@android:style/Theme.NoTitleBar" >
+        <uses-library android:name="com.google.android.maps"/>
         <activity android:name="com.crittercism.NotificationActivity" />
         <activity
             android:name=".ANTripActivity"
@@ -53,6 +54,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="GMapRecorderActivity"></activity>
+        <activity android:name="OSMRecorderActivity"></activity>
+        <service android:name="LocationService"></service>
     </application>
 
 </manifest>

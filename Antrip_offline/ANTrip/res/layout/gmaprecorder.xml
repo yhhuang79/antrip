@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <include
+        android:id="@+id/gmapview_actionbar"
+        android:layout_alignParentTop="true"
+        layout="@layout/actionbar" />
+
+    <com.google.android.maps.MapView
+        android:id="@+id/gmapview"
+        android:layout_below="@+id/gmapview_actionbar"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:apiKey="0qyApPpS31itWfnph0AWE2Hyy8OnSpy3zD-BmYA"
+        android:clickable="true" />
+    
+</RelativeLayout>

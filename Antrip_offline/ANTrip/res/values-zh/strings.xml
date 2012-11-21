@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">雲水途誌</string>
+    <string name="app_name">雲水途誌 offline</string>
     <string name="okay">好的</string>
     <string name="nope">算了</string>
     <string name="error">錯誤</string>
