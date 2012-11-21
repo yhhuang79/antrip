@@ -49,7 +49,7 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 		
 		try {
 			data = new JSONArray(new JSONTokener(combine));
-			Log.i("triplistadapter2", "data= " + data.toString());
+//			Log.i("triplistadapter2", "data= " + data.toString());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

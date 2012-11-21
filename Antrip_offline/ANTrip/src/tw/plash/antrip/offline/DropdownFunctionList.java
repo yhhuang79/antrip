@@ -1,11 +1,12 @@
 package tw.plash.antrip.offline;
 
 import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -20,23 +21,16 @@ public class DropdownFunctionList extends BetterPopupWindow implements OnClickLi
 		// inflate layout
 		LayoutInflater inflater = (LayoutInflater) this.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		
-		ViewGroup root = (ViewGroup) inflater.inflate(R.layout.popup_moodgrid_layout, null);
+		ViewGroup root = (ViewGroup) inflater.inflate(R.layout.dropdown_activitylist, null);
 		
 		// setup button events
 		for (int i = 0, icount = root.getChildCount(); i < icount; i++) {
 			View v = root.getChildAt(i);
 			
-			if (v instanceof LinearLayout) {
-				LinearLayout col = (LinearLayout) v;
-				
-				for (int j = 0, jcount = col.getChildCount(); j < jcount; j++) {
-					
-					View item = col.getChildAt(j);
-					if (item instanceof Button) {
-						Button b = (Button) item;
-						b.setOnClickListener(this);
-					}
-				}
+			if(v instanceof LinearLayout){
+				((LinearLayout)v).setOnClickListener(this);
+			} else{
+				Log.e("dropdown list", "huh2");
 			}
 		}
 		
@@ -47,8 +41,23 @@ public class DropdownFunctionList extends BetterPopupWindow implements OnClickLi
 	@Override
 	public void onClick(View v) {
 		// we'll just display a simple toast on a button click
-		Button b = (Button) v;
-		Toast.makeText(this.anchor.getContext(), b.getText(), Toast.LENGTH_SHORT).show();
+		Context mContext = this.anchor.getContext();
+		
+		if (v instanceof LinearLayout){
+			LinearLayout b = (LinearLayout) v;
+			String tag = (String) b.getTag();
+			if(tag.equals("triplist")){
+				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
+				mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			} else if(tag.equals("recorder")){
+				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
+//				mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			} else if(tag.equals("friendlist")){
+				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
+//				mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			}
+		}
+		
 		this.dismiss();
 	}
 }
