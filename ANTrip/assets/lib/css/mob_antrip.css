@@ -122,8 +122,8 @@
 	.locating_class{
 		cursor: pointer;
 		float:right;
-		position: absolute;
-		z-index:2;
+		position: fixed;
+		z-index:50;
 		text-align:right;
 		width:100%;
 		margin:30px auto 0 -10px;
