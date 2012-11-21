@@ -389,7 +389,7 @@
 		g_current_latitude = latitude;
 		g_current_longitude =longitude;
 		var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-		g_bounds.extend(latlng);
+		//g_bounds.extend(latlng);
 
 		var self =  $('#map_canvas_1').gmap('get','map');
 		var curlatlng = null;
@@ -402,7 +402,7 @@
 			g_currentmarker.openInfoWindow(true);
 			self.setCenter(latlng);
 			self.setZoom(g_zoom);
-			self.fitBounds(g_bounds);
+		//	self.fitBounds(g_bounds);
 			$('#map_canvas_1').gmap('refresh');
 		}
 	}
@@ -427,13 +427,13 @@
 		g_currentmarker =  new google.maps.Marker({ 
 				'animation': google.maps.Animation.BOUNCE,
 				'position': latlng, 
-				'bounds': true,
+				//'bounds': true,
 				'icon': iconpath,
 		});
 		g_xmarker=  new google.maps.Marker({ 
 				'animation': google.maps.Animation.DROP,
 				'position': latlng, 
-				'bounds': true,
+				//'bounds': true,
 				'icon': xpath,
 		});
 		g_currentmarker.setMap(self);

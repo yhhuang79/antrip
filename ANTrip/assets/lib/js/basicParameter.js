@@ -35,7 +35,7 @@
 			"11": "calm"
 		};
 
-		var g_zoom=12;
+		var g_zoom=15;
 		var g_startLatLng = new google.maps.LatLng(25.04752,121.614189);
 		var g_tripRecorderPath =  im+'tripRecorder.png';
 		var g_locatingPath =  im+'locating.png';
@@ -106,7 +106,7 @@
 		var g_str_nowrecording= "Now recording...";
 		var g_str_checkin = "check in";
 		var g_str_cancel = "cancel";
-		var g_str_shareTrip = "Share this trip to friends";
+		var g_str_shareTrip = "Share";
 
 		var g_str_share = "Share";
 		var g_str_shareTriptoWhom = "Please choose who you want to share this trip with?";

@@ -26,7 +26,7 @@
 				g_tripLength += localresult.tripInfoList.length;
 				$.each(localresult.tripInfoList, function(i,data){
 					var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.id+"&local=true";
-					var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
+					var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
 					div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.id+"' ></div><a class='listview' href='" + tripurl  + "'  rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img onClick=\"if(window.antrip){ $('.des_close_class_"+sid+"_"+data.id+"').parent().remove();window.antrip.uploadTrip("+data.id+");return false;}\" src='" + uploadicon_img + "'  /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.id+", true);return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"		
 
 				});
@@ -71,7 +71,7 @@
 						var width="100%";
 						$.each(result.tripInfoList, function(i,data){
 							var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.trip_id+"&local=false";
-							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:S|size:mid|"+ data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 +"";
+							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
 							div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.trip_id+"' ></div><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.trip_id+", false);event.stopImmediatePropagation();return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"
 						});
 						$("#listview_3").append(div_data.join('')).listview('refresh');
@@ -110,6 +110,7 @@
 
 				$('#map_canvas_2').gmap({ 'zoom':g_zoom, 'callback': function(map) {
 					var self = this;
+					var bounds=new google.maps.LatLngBounds();
 					g_tripPointArray = new Array(0);
 					g_tripMarkerArray = new Array(0);
 					var tripPointObjArray = new Array(0);
@@ -129,6 +130,13 @@
 								'strokeWeight': 4, 
 								'path': g_tripPointArray
 							});
+							g_mapPath.setMap(_map);
+							self.set('MarkerClusterer', new MarkerClusterer(_map, self.get('markers')));
+							$('#map_canvas_2').show();
+							if(bounds!=null){
+								_map.fitBounds(bounds);
+							}
+							$('#map_canvas_2').gmap('refresh');
 							return;
 						}
 						else if(point.lat != latlng_undefined_value && point.lng !=latlng_undefined_value){
@@ -136,6 +144,7 @@
 							var lng = point.lng;
 							var latlng = new google.maps.LatLng(lat, lng);
 							g_tripPointArray.push(latlng);
+							bounds.extend(latlng);
 							if (typeof point.CheckIn != 'undefined'){
 								var placemarker = self.addMarker({ 
 									'position': latlng, 
@@ -191,6 +200,9 @@
 					g_mapPath.setMap(_map);
 					self.set('MarkerClusterer', new MarkerClusterer(_map, self.get('markers')));
 					$('#map_canvas_2').show();
+					if(bounds!=null){
+						_map.fitBounds(bounds);
+					}
 					$('#map_canvas_2').gmap('refresh');
 				}});
 			}
@@ -359,11 +371,11 @@
 					'strokeWeight': 4, 
 					'path': g_tripPointArray
 				});
+				self.set('MarkerClusterer', new MarkerClusterer(map, tripPointMarkerArray));
+				$('#map_canvas_2').show();
 				if(bounds!=null){
 					map.fitBounds(bounds);
 				}
-				self.set('MarkerClusterer', new MarkerClusterer(map, tripPointMarkerArray));
-				$('#map_canvas_2').show();
 				$('#map_canvas_2').gmap('refresh');
 			}
 			});				
