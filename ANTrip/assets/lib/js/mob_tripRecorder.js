@@ -441,6 +441,7 @@
 		var infowindow = new google.maps.InfoWindow(
 		{ 
 			'content': g_str_iamhere,
+			'maxWidth': '50px',
 			size: new google.maps.Size(50,50),
 			'position':latlng,
 			zIndex:1009

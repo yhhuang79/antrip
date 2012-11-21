@@ -372,6 +372,7 @@
 					'path': g_tripPointArray
 				});
 				self.set('MarkerClusterer', new MarkerClusterer(map, tripPointMarkerArray));
+				showNote(userid, trip_id);
 				$('#map_canvas_2').show();
 				if(bounds!=null){
 					map.fitBounds(bounds);
@@ -380,6 +381,58 @@
 			}
 			});				
 		}});
+	}
+
+	function showNote(userid, trip){
+		//init Note
+		sid = userid;
+		g_trip = trip;
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/antrip/php/getNote.php',
+			data:{sid : userid, trip_id:trip},
+			type: 'GET', dataType: 'json', cache: false,
+			success:function(result){
+				$.each(result, function(i,data){
+					var position = new google.maps.LatLng(data.latitude, data.longitude);
+					setNoteMarker(data.text, data.uri, position, data.record_id);
+				});
+			},
+			error: function(xhr) {
+				alert('Ajax request errors');
+			}
+		});
+	}
+
+	function setNoteMarker(value, picturePath, position, id){
+		var map = $('#map_canvas_2').gmap('get','map');
+		var CheckInInfo = "";
+		if(picturePath){
+			var title = 'http://plash2.iis.sinica.edu.tw/picture/'+sid+"/"+g_trip+"/"+picturePath;
+			CheckInInfo +="<p><img style='display:block;' src=" + title + " height='150' /></p>";
+		}
+		CheckInInfo += value;
+
+		var notemarker = new google.maps.Marker({
+				'title': value,
+				'id': id,
+				'position': position,
+				'animation': google.maps.Animation.DROP,
+				'bounds': true,
+				'icon': im+"placemarker_text.png"
+		});
+		var infowindow = new google.maps.InfoWindow(
+		{ 
+				content: CheckInInfo
+		});
+		google.maps.event.addListener(notemarker, 'click', function() {
+			if (infowindow.getMap()==null){
+				infowindow.open(map,notemarker);
+			}
+			else{
+				infowindow.close();
+			}
+		});
+
+		notemarker.setMap(map);
 	}
 
 	function shareTripToFriends(trip_id){
