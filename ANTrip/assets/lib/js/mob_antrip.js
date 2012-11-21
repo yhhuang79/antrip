@@ -362,7 +362,9 @@
 				//add page click event
 				$("ul:jqmData(role='menu') li > ul li").click(function(e) {
 				   $('body').trigger('hideOpenMenus');
-				   event.stopImmediatePropagation();
+				   if(typeof event.stopImmediatePropagation=='function'){
+						event.stopImmediatePropagation();
+				   }
 					$(this).find('a').trigger('click');
 				});
 				$('a[class*=class_top_bt_link]').each(function() {
@@ -451,6 +453,7 @@
 			 initDropdown();
 		});
 
+		var isbodyclick = true;
 		// init drop down menu
 		function initDropdown(){
 			$('body').bind('hideOpenMenus', function(){
@@ -458,22 +461,27 @@
 			}); 
 			var menuHandler = function(e) {
 				if($(this).find('li > ul').is(':hidden')){
+					isbodyclick = false;
 					$(this).find('li > ul').show();
 				}
 				else{
 					$('body').trigger('hideOpenMenus');
 				}
-				e.stopPropagation();
+				//e.stopPropagation();
 			};
 			$("ul:jqmData(role='menu') li > ul li").click(function(e) {
 			   $('body').trigger('hideOpenMenus');
-			   event.stopImmediatePropagation();
+			   if(typeof event.stopImmediatePropagation=='function'){
+					event.stopImmediatePropagation();
+			   }
 			    $(this).find('a').trigger('click');
 			});
 
 			$("ul:jqmData(role='menu') li > ul a").click(function(e) {
 			   $('body').trigger('hideOpenMenus');
-			   event.stopImmediatePropagation();
+			   if(typeof event.stopImmediatePropagation=='function'){
+					event.stopImmediatePropagation();
+			   }
 			   $('#selected-emotion').attr('src', $(this).find('img').attr('src'));
 			   $('#selected-emotion').attr('alt', $(this).find('img').attr('alt'));
 			   $('#selected-emotion-tip').html($(this).find('span').html());
@@ -481,7 +489,10 @@
 
 			$('body').delegate("ul:jqmData(role='menu')",'click',menuHandler);
 			$('body').click(function(e){
-			   $('body').trigger('hideOpenMenus');
+				if(isbodyclick==true){
+				   $('body').trigger('hideOpenMenus');
+				}
+				isbodyclick = true;
 			});
 			setTopBtnToDefaultImg();
 
