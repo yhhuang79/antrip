@@ -176,7 +176,10 @@
 			});
 			// friend list 
 			$('#friendlist').live('pagebeforeshow', function(){
-				//var sid = $.cookie("sid");
+				var sid = $.cookie("sid");
+				if(window.antrip){
+					sid = window.antrip.getCookie("sid");
+				}
 				var div_data = [];
 				$("#listview_2").html("");
 				$.mobile.showPageLoadingMsg("b", "Loading Friend List ...", true);
