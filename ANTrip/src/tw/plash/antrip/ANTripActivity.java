@@ -453,7 +453,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			
 			final Dialog dialog = new Dialog(mContext);
 			dialog.setContentView(R.layout.edittripname);
-			dialog.setTitle(R.string.untitled_trip);
+			dialog.setTitle(R.string.input_tripname);
 			dialog.setCancelable(false);
 			final EditText et = (EditText) dialog.findViewById(R.id.edittripname);
 			final String hint = getResources().getString(R.string.untitled_trip);
