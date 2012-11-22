@@ -127,7 +127,9 @@
 					data:{fid : fid, friendname : friendname, passcode : passcode},
 					type: 'GET', dataType: 'jsonp', cache: false,
 					success:function(result){
-						$.mobile.changePage($('#friendrequest'), {reload : true});
+						alert(g_str_addFriend+" - " +friendname);
+						$("#requestlistview").html("");
+						friendrequestInit();//$.mobile.changePage($('#friendrequest'), {reload : true});
 					}
 				});			
 			}
@@ -240,6 +242,11 @@
 			});
 			// friend request list 
 			$('#friendrequest').live('pageinit', function(){
+				$("#requestlistview").html("");
+				friendrequestInit();
+			});
+
+			function friendrequestInit(){
 				//var sid = $.cookie("sid");
 				var div_data = [];
 				$.mobile.showPageLoadingMsg("b", "Loading Friend Request List ...", true);
@@ -256,9 +263,10 @@
 						$.mobile.hidePageLoadingMsg();
 					}
 				});
-			});
+			}
 			$('#friendrequest').live('pageshow', function() {
-				$("#requestlistview").listview('refresh');
+				$("#requestlistview").html("");
+				friendrequestInit();
 			});			
 			// trip list
 			$('#triplist').live('pageshow', function() {
