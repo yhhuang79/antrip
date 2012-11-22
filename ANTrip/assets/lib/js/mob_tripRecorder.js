@@ -222,14 +222,14 @@
 					window.antrip.prepareStopRecording();
 			}
 
-			var y = window.prompt(g_str_typetripname, g_str_untitledtrip);
+			/*var y = window.prompt(g_str_typetripname, g_str_untitledtrip);
 			if(y==null || y=='undefined' || y==''){
 				y = g_str_untitledtrip;
-			}
+			}*/
 
 			$.cookie("isRecording", null);
 			if(window.antrip){
-				window.antrip.stopRecording(y);
+				window.antrip.stopRecording();
 //				window.antrip.removeCookie("isRecording");
 				window.antrip.removeCookie("trip_id");
 			}
