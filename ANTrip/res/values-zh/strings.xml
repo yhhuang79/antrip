@@ -6,6 +6,10 @@
     <string name="nope">算了</string>
     <string name="error">錯誤</string>
     
+    <string name="untitled_trip">未命名旅誌</string>
+    <string name="input_tripname">為您的旅誌命名</string>
+    <string name="save_tripname">儲存</string>
+    
     <string name="version">版本</string>
     <string name="account_info">帳號資訊</string>
     <string name="login_title">您是:</string>

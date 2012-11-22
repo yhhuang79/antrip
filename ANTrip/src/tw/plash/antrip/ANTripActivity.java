@@ -1,6 +1,8 @@
 package tw.plash.antrip;
 
 import java.io.File;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Locale;
 import java.util.PriorityQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -9,6 +11,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -16,7 +19,6 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
@@ -31,6 +33,7 @@ import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.CookieManager;
 import android.webkit.JsResult;
@@ -39,6 +42,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -252,6 +257,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 				 */
 				@Override
 				public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+					Log.e("AntripActivity", "onJSAlert");
 					new AlertDialog.Builder(mContext)
 							.setCancelable(false)
 							.setMessage(message)
@@ -434,11 +440,39 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		/**
 		 * 
 		 */
-		public void stopRecording(String tripname) {
+//		public void stopRecording(String tripname) {
+//			//XXX
+//			//the recording should already be stopped, just save the name and we're all done
+//			sendMessageToService(AntripService.MSG_STOP_RECORDING_ACTUAL, tripname);
+//			bufferedLoadURL("javascript:reloadTripList()");
+//		}
+		
+		public void stopRecording() {
 			//XXX
 			//the recording should already be stopped, just save the name and we're all done
-			sendMessageToService(AntripService.MSG_STOP_RECORDING_ACTUAL, tripname);
-			bufferedLoadURL("javascript:reloadTripList()");
+			
+			final Dialog dialog = new Dialog(mContext);
+			dialog.setContentView(R.layout.edittripname);
+			dialog.setTitle(R.string.untitled_trip);
+			dialog.setCancelable(false);
+			final EditText et = (EditText) dialog.findViewById(R.id.edittripname);
+			final String hint = getResources().getString(R.string.untitled_trip);
+			et.setHint(hint);
+			((Button) dialog.findViewById(R.id.edittripnamebtn)).setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					String tripname = null;
+					if (et.getText().length() > 0) {
+						tripname = et.getText().toString();
+					} else {
+						tripname = hint;
+					}
+					sendMessageToService(AntripService.MSG_STOP_RECORDING_ACTUAL, tripname);
+//					bufferedLoadURL("javascript:reloadTripList()");
+					dialog.dismiss();
+				}
+			});
+			dialog.show();
 		}
 		
 		/**

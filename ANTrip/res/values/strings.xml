@@ -6,6 +6,10 @@
     <string name="nope">nope</string>
     <string name="error">error</string>
     
+    <string name="untitled_trip">Untitled Trip</string>
+    <string name="input_tripname">Name your trip:</string>
+    <string name="save_tripname">Save</string>
+    
     <string name="version">Version</string>
     <string name="account_info">Account Info</string>
     <string name="login_title">Logged in as:</string>
