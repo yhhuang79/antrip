@@ -285,7 +285,7 @@
 								if(result.isShareTrip=="1"){
 									checkbox_str = "<input type='checkbox' checked='checked' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
 								}
-								div_data[i] = "<li><img src='" + data.image + "' /> "+checkbox_str+"<label for='checkbox_"+sid+data.id+"'>"+g_str_id+":" + data.name  + "</label></li>";
+								div_data[i] = "<li><img src='" + data.image + "' /> "+checkbox_str+"<label for='checkbox_"+sid+data.id+"'>" + data.name  + "</label></li>";
 								$("#listview_5").append(div_data[i]);
 								$("#checkbox_"+sid+data.id).checkboxradio();
 
