@@ -57,9 +57,11 @@
 				g_firstload = false;
 
 				if((result == null || result.tripInfoList == null || result.tripInfoList.length==0) && (localresult==-1 || localresult.tripInfoList == null) ){
-					var str_noTrip = g_str_notrip;
-					div_data[i] ="<div class='class_friend_bt' style='text-align:center;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
-					$("#listview_3").append(div_data.join('')).listview('refresh');
+					if($("#listview_3").html()==""){
+						var str_noTrip = g_str_notrip;
+						div_data[i] ="<div class='class_friend_bt' style='text-align:center;vertical-align:middle;'><b>"+str_noTrip+"</b></div>";
+						$("#listview_3").append(div_data.join('')).listview('refresh');	
+					}
 				}
 				else{
 					if(result != null && result.tripInfoList != null && result.tripInfoList.length>0){
@@ -72,7 +74,7 @@
 						$.each(result.tripInfoList, function(i,data){
 							var tripurl = "#tripmap?userid="+ sid +"&trip_id="+ data.trip_id+"&local=false";
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
-							div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.trip_id+"' ></div><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.trip_id+", false);event.stopImmediatePropagation();return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"
+							div_data[i] ="<li><div class='des_close_class_"+sid+"_"+data.trip_id+"' ></div><a class='listview'  href='" + tripurl  + "' rel='external'><div style='width:100px;margin:10px 10px 10px 0;text-align:center; float:left;border:2px solid #555;'><img src='" + mapurl + "' /></div><div class='listview_description' ><div id='div_deletemarker' onClick=\"confirmDelete("+sid+","+data.trip_id+", false);if(typeof event.stopImmediatePropagation == 'function'){event.stopImmediatePropagation();}return false;\"><img src='"+im+"deletemarker.png' style='text-align:right'></img></div><h3>" + data.trip_name  + "</h3><p>"+g_str_start+": " + data.trip_st + "</p><p>"+g_str_end+": " + data.trip_et    + "</p><p>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "</p><p>"+g_str_Length+": " + data.trip_length  + " M</p></div></a><li>"
 						});
 						$("#listview_3").append(div_data.join('')).listview('refresh');
 					}
