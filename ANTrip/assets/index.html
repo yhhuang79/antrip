@@ -201,7 +201,9 @@
 								$("#listview_2").append(div_data[i]);
 								$("#li_listview_"+data.id).collapsible({refresh:true});
 								$("#li_listview_"+data.id).click(function(e) {
-										event.stopImmediatePropagation();
+										if(typeof event.stopImmediatePropagation == 'function'){
+											event.stopImmediatePropagation();
+										}
 										if(length>0 && $("#div_listview_"+data.id).html()==""){
 											showTripListDetails(trip_list, data.id, data.name, $("#div_listview_"+data.id));
 										}
