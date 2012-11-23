@@ -249,7 +249,10 @@
 			});
 
 			function friendrequestInit(){
-				//var sid = $.cookie("sid");
+				var sid = $.cookie("sid");
+				if(window.antrip){
+					sid = window.antrip.getCookie("sid");
+				}
 				var div_data = [];
 				$.mobile.showPageLoadingMsg("b", "Loading Friend Request List ...", true);
 				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendRequestList.php',
