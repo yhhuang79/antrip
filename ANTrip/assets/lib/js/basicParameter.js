@@ -39,6 +39,7 @@
 		var g_startLatLng = new google.maps.LatLng(25.04752,121.614189);
 		var g_tripRecorderPath =  im+'tripRecorder.png';
 		var g_locatingPath =  im+'locating.png';
+		var g_share_map_false = im + "ub_share_map.png";
 		var g_checkin_invalid_imgPath = im + "check-in_invalid.png";
 		var g_checkin_imgPath = im + "check-in.png";
 		var g_antMarker = im+'ant_48.png';
@@ -110,7 +111,7 @@
 
 		var g_str_share = "Share";
 		var g_str_shareTriptoWhom = "Please choose who you want to share this trip with?";
-		var g_str_sharenumberoftrip = "the total number of shared trips";
+		var g_str_sharenumberoftrip = "shared trips";
 
 		var g_str_inputsomething ="please input something!";
 		var g_str_notrip = "You have no trip!"
