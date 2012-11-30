@@ -403,6 +403,7 @@
 			self.setCenter(latlng);
 			self.setZoom(g_zoom);
 		//	self.fitBounds(g_bounds);
+			$("#RecordButton").css('visibility','visible');
 			$('#map_canvas_1').gmap('refresh');
 		}
 	}
@@ -512,7 +513,7 @@
 			g_xmarker = null;
 		}
 
-		$('#map_canvas_1').gmap('watchPosition', function (position, status) {
+		/*$('#map_canvas_1').gmap('watchPosition', function (position, status) {
 			if ( status == 'OK' ) {
 				g_current_latitude = position.coords.latitude;
 				g_current_longitude = position.coords.longitude;
@@ -521,7 +522,7 @@
 				$('#map_canvas_1').gmap('clearWatch');
 			}
 		});
-		setPosition(g_current_latitude, g_current_longitude);
+		setPosition(g_current_latitude, g_current_longitude);*/
 	}
 
 	function CheckIn(){
