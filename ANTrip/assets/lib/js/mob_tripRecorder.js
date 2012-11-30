@@ -199,7 +199,7 @@
 			var sid = null;
 			sid = $.cookie("sid");
 			$.cookie("isRecording", true);
-			initRecorderMap();
+			initRecorderMap(true);
 			if(window.antrip){
 				//isRecording = window.antrip.setCookie("isRecording", "true");
 				sid = window.antrip.getCookie("sid");
@@ -255,7 +255,7 @@
 	var g_worker=null;
 	function syncPosition(result){		
 			cleanGlobalArray();
-			initRecorderMap();
+			initRecorderMap(true);
 			addPosition(result);
 			/*Concurrent.Thread.create(function(){
 				addPosition(result);
@@ -406,6 +406,8 @@
 			$("#RecordButton").css('visibility','visible');
 			$('#map_canvas_1').gmap('refresh');
 		}
+
+		$.mobile.hidePageLoadingMsg();
 	}
 
 	function drawCurrentPosition(latlng){
@@ -481,7 +483,9 @@
 		}
 	}
 
-	function initRecorderMap(){
+	function initRecorderMap(isSetPosition){
+
+		$.mobile.showPageLoadingMsg("b", g_str_localizationing, true);
 		var isRecording = null;
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){
@@ -513,16 +517,18 @@
 			g_xmarker = null;
 		}
 
-		/*$('#map_canvas_1').gmap('watchPosition', function (position, status) {
-			if ( status == 'OK' ) {
-				g_current_latitude = position.coords.latitude;
-				g_current_longitude = position.coords.longitude;
-				var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
-				setPosition(g_current_latitude, g_current_longitude);
-				$('#map_canvas_1').gmap('clearWatch');
-			}
-		});
-		setPosition(g_current_latitude, g_current_longitude);*/
+		if(isSetPosition==true){
+			$('#map_canvas_1').gmap('watchPosition', function (position, status) {
+				if ( status == 'OK' ) {
+					g_current_latitude = position.coords.latitude;
+					g_current_longitude = position.coords.longitude;
+					var latlng = new google.maps.LatLng(g_current_latitude, g_current_longitude);
+					setPosition(g_current_latitude, g_current_longitude);
+					$('#map_canvas_1').gmap('clearWatch');
+				}
+			});
+			setPosition(g_current_latitude, g_current_longitude);
+		}
 	}
 
 	function CheckIn(){

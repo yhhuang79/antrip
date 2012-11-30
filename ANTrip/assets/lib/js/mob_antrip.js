@@ -105,7 +105,7 @@
 			//clear mainpage content
 			$('#mainpage').find('div:jqmData(role="content")').html("");
 			//add locating button
-			$('#map').find('div:jqmData(role="content")').prepend("<div class='locating_class'><a href='javascript:initRecorderMap()' data-icon='gear' id='LocatingButton' class='class_right_bt' ><img src='"+g_locatingPath+"' id='img_LocatingButton' /><span class='tip' id='locating_bt_tip'>"+g_str_locating+"</span></a></div>");
+			$('#map').find('div:jqmData(role="content")').prepend("<div class='locating_class'><a href='javascript:initRecorderMap(true)' data-icon='gear' id='LocatingButton' class='class_right_bt' ><img src='"+g_locatingPath+"' id='img_LocatingButton' /><span class='tip' id='locating_bt_tip'>"+g_str_locating+"</span></a></div>");
 			
 			//note current page
 			g_page=$('#mainpage');
