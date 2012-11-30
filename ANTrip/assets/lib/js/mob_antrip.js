@@ -307,6 +307,7 @@
 			if(window.antrip){
 				window.antrip.startCheckin();
 			}
+			$("#message").attr("value","");
 			$("#selected-emotion").attr("src","./images/pleased.png");
 			$("#selected-emotion").attr("alt","3");
 			$("#takepicture").attr("src","");
