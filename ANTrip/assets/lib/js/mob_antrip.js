@@ -339,7 +339,7 @@
 
 				//change logout button to check-in  
 				if($(this).attr('id')=='map'){
-					var replaceHtml = "<li data-iconpos='right' class='ui-btn-right'><a href='' data-icon='check' id='CheckinButton' data-rel='dialog' class='class_right_bt'><img src='"+g_checkin_invalid_imgPath+"' id='img_CheckInButton'  style='display:none'/><span class='tip' id='checkin_bt_tip'>"+g_str_checkin+"</span></a><a href='javascript:startRecordTrip()' data-icon='gear' id='RecordButton' class='class_right_bt' style='visibility:hidden'><img src='"+g_tripRecorderPath+"' id='img_RecordButton' /><span class='tip' id='record_bt_tip'>"+g_str_startrecording+"</span></a>" ;
+					var replaceHtml = "<li data-iconpos='right' class='ui-btn-right'><a href='' data-icon='check' id='CheckinButton' data-rel='dialog' class='class_right_bt'><img src='"+g_checkin_invalid_imgPath+"' id='img_CheckInButton'  style='display:none'/><span class='tip' id='checkin_bt_tip'>"+g_str_checkin+"</span></a><a href='javascript:startRecordTrip()' data-icon='gear' id='RecordButton' class='class_right_bt' style='display:none'><img src='"+g_tripRecorderPath+"' id='img_RecordButton' /><span class='tip' id='record_bt_tip'>"+g_str_startrecording+"</span></a>" ;
 					
 					//disable logout button
 					if(window.antrip){

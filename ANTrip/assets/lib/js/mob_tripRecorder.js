@@ -406,7 +406,7 @@
 			$('#map_canvas_1').gmap('refresh');
 		}
 
-		$("#RecordButton").css('visibility','visible');
+		$("#RecordButton").show();
 		$.mobile.hidePageLoadingMsg();
 	}
 
@@ -441,9 +441,17 @@
 		});
 		g_currentmarker.setMap(self);
 		g_xmarker.setMap(self);
+		var isRecording = $.cookie("isRecording");
+		if(window.antrip){
+			isRecording = window.antrip.isRecording();
+		}
+		var content = g_str_iamhere;
+		if(isRecording != null){
+			content = g_str_checkinmessage;
+		}
 		var infowindow = new google.maps.InfoWindow(
 		{ 
-			'content': g_str_iamhere,
+			'content': content,
 			'maxWidth': '50px',
 			size: new google.maps.Size(50,50),
 			'position':latlng,
@@ -486,6 +494,7 @@
 	function initRecorderMap(isSetPosition){
 
 		$.mobile.showPageLoadingMsg("b", g_str_localizationing, true);
+		$("#RecordButton").hide();
 		var isRecording = null;
 		isRecording = $.cookie("isRecording");
 		if(window.antrip){
@@ -507,6 +516,8 @@
 				tripRecorder = setInterval(function(){getLocation()},5000);
 			}
 			changeIconToRecoding();
+			// always do locating when trip is recording.
+			isSetPosition = true; 
 		}
 		if(g_currentmarker!=null){
 			g_currentmarker.setMap(null);
