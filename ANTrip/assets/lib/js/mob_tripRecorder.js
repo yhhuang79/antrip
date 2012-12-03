@@ -71,7 +71,7 @@
 			$('#img_CheckInButton').attr("src", im+"check-in.png");
 			$('#img_RecordButton').attr('src', im+'tripRecorder_starting.png');
 			$('#RecordButton').find('.tip').html(g_str_nowrecording);
-			$('#CheckinButton').attr('href', '#checkin');
+			$('#CheckinButton').attr('onClick', "if(window.antrip){window.antrip.startCheckin();}");
 
 			scaleInterval($('#img_RecordButton'));
 			stopRotateInterval($('#img_RecordButton'));
@@ -403,10 +403,10 @@
 			self.setCenter(latlng);
 			self.setZoom(g_zoom);
 		//	self.fitBounds(g_bounds);
-			$("#RecordButton").css('visibility','visible');
 			$('#map_canvas_1').gmap('refresh');
 		}
 
+		$("#RecordButton").css('visibility','visible');
 		$.mobile.hidePageLoadingMsg();
 	}
 
