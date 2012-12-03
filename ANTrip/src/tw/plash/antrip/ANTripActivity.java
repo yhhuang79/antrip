@@ -84,38 +84,36 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			case AntripService.MSG_LOCATION_UPDATE:
 				//location update should provide with a non-null location related object
 				if (msg.obj != null) {
-					//will be provided with different location object in recording/non-recording situation
-					if (AntripService.isRecording()) {
-						/**
-						 * location updates during recording will be in the form of yu-hsiang style, Stringed, JSON format check-in list
-						 * so we need to test the data type first before passing to the JavaScript function in the html UI
-						 * - syncPosition method is now deprecated, only addPosition is being used
-						 */
-						if(msg.obj instanceof String){
-							String addpos = (String) msg.obj;
-							String addPositionUrl = "javascript:addPosition(" + addpos + ")";
-							//use the buffered thread-safe url loading method
-							bufferedLoadURL(addPositionUrl);
-						} else{
-							Log.e("Activity", "Message handle error: location update without STRING object");
-						}
+					if (msg.obj instanceof Location) {
+						Location loc = (Location) msg.obj;
+						// setPosition
+						String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + ","
+								+ loc.getLongitude() + ")";
+						// use the buffered thread-safe url loading method
+						bufferedLoadURL(singleLocationUpdateURL);
 					} else {
-						/**
-						 * non recording location updates will be in the form of Android Location object
-						 * 
-						 */
-						if(msg.obj instanceof Location){
-							Location loc = (Location) msg.obj;
-							// setPosition
-							String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + "," + loc.getLongitude() + ")";
-							//use the buffered thread-safe url loading method
-							bufferedLoadURL(singleLocationUpdateURL);
-						} else{
-							Log.e("Activity", "Message handle error: location update without LOCATION object");
-						}
+						Log.e("Activity", "Message handle error: location update without LOCATION object");
 					}
-				} else{
+				} else {
 					Log.e("Activity", "Message handle error: location update msg object does not have object payload");
+				}
+				break;
+			
+			case AntripService.MSG_DRAW_CACHED_POINTS:
+				/**
+				 * location updates during recording will be in the form of
+				 * yu-hsiang style, Stringed, JSON format check-in list so we
+				 * need to test the data type first before passing to the
+				 * JavaScript function in the html UI - syncPosition method is
+				 * now deprecated, only addPosition is being used
+				 */
+				if(msg.obj instanceof String){
+					String addpos = (String) msg.obj;
+					String addPositionUrl = "javascript:addPosition(" + addpos + ")";
+					//use the buffered thread-safe url loading method
+					bufferedLoadURL(addPositionUrl);
+				} else{
+					Log.e("Activity", "Message handle error: location update without STRING object");
 				}
 				break;
 			case AntripService.MSG_LOCATION_UPDATE_CHECKIN:

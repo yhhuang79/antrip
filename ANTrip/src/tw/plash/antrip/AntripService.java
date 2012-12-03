@@ -55,6 +55,7 @@ public class AntripService extends Service implements LocationPublisher{
 	static final int MSG_LOGOUT_EVENT = 12;
 	
 	static final int MSG_LOCATION_UPDATE = 20;
+	static final int MSG_DRAW_CACHED_POINTS = 21;
 //	static final int MSG_LOCATION_UPDATE_NULL = 21;
 	
 	static final int MSG_LOCATION_UPDATE_CHECKIN = 22;
@@ -75,7 +76,7 @@ public class AntripService extends Service implements LocationPublisher{
 				//save the client info, so we can send messages back later
 				outMessager = msg.replyTo;
 				if(shouldAddPosition){
-					sendMessageToUI(MSG_LOCATION_UPDATE, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
+					sendMessageToUI(MSG_DRAW_CACHED_POINTS, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
 					shouldAddPosition = false;
 				}
 			case MSG_INIT_LOCATION_THREAD:
