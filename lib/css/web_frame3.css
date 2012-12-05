@@ -1,0 +1,80 @@
+	body{
+		background-image: url("../../images/desBK.png");
+		background-repeat: repeat;
+	}
+	#ui-carousel-next, #ui-carousel-prev {
+		width: 296px;
+		height: 25px;
+		background: url("../../images/loginShowSlider/arrow-bottom.png") center center no-repeat;
+		display: block;
+		position: absolute;
+		left: 0
+		z-index: 100;
+		filter:alpha(opacity=20);
+		-moz-opacity:0.2;
+		-khtml-opacity: 0.2;
+		opacity: 0.2;
+	}
+
+	#ui-carousel-next {
+		top: 0;
+		background-image: url("../../images/loginShowSlider/arrow-top.png");
+	}
+
+	#ui-carousel-prev {
+		bottom: 5px;
+	}
+	
+	#ui-carousel-next > span, #ui-carousel-prev > span {
+		display: none;
+	}
+
+	#unit_radio_trip{
+		position: fixed;
+		border:1px solid #555;
+		background-image: url("../../images/MapBKImage.png");
+		background-repeat: repeat-x;
+		background-position: top center;
+		-webkit-border-radius: 3px;
+		-moz-border-radius: 3px;
+		border-radius: 3px;
+		z-index:20;
+		display:table-caption;
+	}
+
+	#searchFriend_div{
+		float:left;
+		margin-top:10px;
+	}
+
+	#findRequest{
+		float:right;
+		font-size:small;
+	}
+
+	#searchbar{
+		float:right;
+		display:table-cell;
+		position:static;
+	}
+	
+	#atable, #tripsum{
+		float:right;
+		display:inline;
+	}
+
+	#atable{
+		float:left;
+	}
+
+	#products{
+		float:left;
+		position:static;
+		display:table-column;
+		background-image: url("../../images/desBK.png");
+		background-repeat: repeat;
+	}
+	
+	.ui-btn-text {
+		font-size: small;
+	}
