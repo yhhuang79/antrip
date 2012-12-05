@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+	<title>ANTrip雲水途誌</title>
+	<script type="text/javascript" src="lib/jq_includes/jquery-1.7.2.min.js"></script>
+	<!--loading cookie library-->
+	<link rel="shortcut icon" href="images/favicon.ico" />
+	<link rel="Bookmark" href="images/favicon.ico" type="image/x-icon" />
+	<script type="text/javascript" src="lib/jq_includes/jquery.cookie.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.dialog.js"></script>
+	<script type="text/javascript" src="lib/js/basicParameter.js"></script>
+	<script type="text/javascript" src="lib/js/basicFunction.js"></script>
+	<script type="text/javascript">
+			$(document).ready(function(){
+				var sid = $.cookie("sid");
+				if(sid==null){
+					window.location = "index.html";
+				}
+				initScrollFrameToEndEvent();
+			});
+	</script>
+</head>
+	<frameset rows="*" border=0 framespacing=0 frameborder=0 cols="70%,30%">
+	  <frameset rows="80%,20%"  border=0 framespacing=0 frameborder=0 cols="*">
+		<frame src="" name="tripMapFrame" scrolling="No"/>
+		<frame src="" name="triipStatisticsFrame" scrolling="No"/>
+	  </frameset>
+	  <frame src="frame-3.html" name="triipListFrame" />
+	</frameset>
+<noframes>
+<body>
+</body>
+
+</noframes>
+</html>

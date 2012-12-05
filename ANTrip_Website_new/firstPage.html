@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+	<title>ANTrip雲水途誌</title>
+<!---->
+	<script type="text/javascript">
+			if(/MSIE (\d+\.\d+);/.test(navigator.userAgent)){ // no support for IE
+					alert("This web site is not supported by IE!");
+					window.location="error.html";
+			 }
+	</script>
+	<script type="text/javascript" src="lib/jq_includes/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.mobile-1.1.0.min.js"></script>
+	<script type="text/JavaScript" src="lib/jq_includes/jquery.curvycorners.source.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.core.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.widget.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.dialog.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.position.js"></script>
+	<script type="text/javascript" src="lib/jq_includes/jquery.ui.rcarousel.js"></script>
+	
+	<!--loading cookie library-->
+	<script type="text/javascript" src="lib/jq_includes/jquery.cookie.js"></script>
+
+	<!--loading css file-->
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery.mobile-1.1.0.min.css" />
+	<link type="text/css" rel="stylesheet" href="lib/css/rcarousel.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/web_antrip.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/web_headpage.css" />
+	<!--loading language-->
+	<script type="text/javascript" src="lib/lang/lang_Chinese.js"></script>
+	<script type="text/javascript" src="lib/lang/lang_English.js"></script>
+
+	<script type="text/javascript" src="lib/js/loadScript.js"></script>
+	<script type="text/javascript" src="lib/js/basicParameter.js"></script>
+	<script type="text/javascript" src="lib/js/md5.js"></script>
+	<script type="text/javascript" src="lib/js/basicFunction.js"></script>
+	<script type="text/javascript">
+	<!--
+		/*! html file ready*/
+		$(document).ready(function(){
+			initial();
+		});
+
+		function initial(){
+			// loading page overlay
+			var overlay = jQuery('<div valign=center id="overlay"></div>');
+			overlay.appendTo(document.body);
+			$("#overlay").css("display","block");
+
+			//change first page to scroll
+			$("body").css("overflow","scroll");
+
+			//load functions
+			require("lib/js/getURLVar.js");
+			require("lib/js/AntripLogin.js");
+
+			//forbidden select all
+			$(document).bind("selectstart",function(){return false;});
+
+			// multi-lang detection from user selection
+			$('#langOption').change(function() 
+			{
+			   g_lang=$(this).attr('value');
+			   $.cookie("g_lang", g_lang);
+			   setLanguage();
+			});
+
+			//init login area
+			var sid = $.cookie("sid");
+			if(sid == null ){
+				$('#username').show();
+				$('#password').show();
+				$('.class_login_bt').show();
+				$('.class_fblogin_bt').show();
+				//focus on login
+				$('#username').setfocus();
+				$('.class_logout_bt').hide();
+				$('.class_antrip_bt').hide();
+			}
+			else{
+				$('#username').hide();
+				$('#password').hide();
+				$(".class_login_bt").hide();
+				$('.class_fblogin_bt').hide();
+				$(".class_logout_bt").show();
+				$('.class_antrip_bt').show();
+				//window.location = "frame.html";
+			}
+
+			//init register dialog
+			initRegisterDialog();
+			initCautionDialog();
+			
+			//reset background content
+			setLoginBKLocation();
+			//set login Area corner style
+			$('.class_loginArea').corner(); 
+
+			//initial scroll introduction
+			jQuery(function($) {
+				$( "#carousel").rcarousel({width: 900, height:500, visible:1, step:1, speed: 700, auto: {enabled: false}});
+				$( "#carousel").corner();
+			});
+			$( "#ui-carousel-next" )
+				.add( "#ui-carousel-prev" )
+				.add( ".bullet" )
+				.hover(
+					function() {
+						$( this ).css( "opacity", 0.5 );
+					},
+					function() {
+						$( this ).css( "opacity", 0.2 );
+					}
+				);
+
+			$("input").keydown(function(evt){
+				sid = $.cookie("sid");
+				if(sid==null){
+					if(evt.keyCode==13){
+						Login();
+					}
+				}
+			});
+
+			//set default language
+			setLanguage();
+
+			initTips();
+		
+			$("#overlay").html(g_str_loading);
+			$("#overlay").css("display","none");
+		}
+	//-->
+	</script>
+	<!---->
+</head>
+<body id="body">
+	<div class='stage_class' id='stage'>
+		<div class='bklogo_class' id='bk_logo'>
+		  <div id="loginFun" class="loginFun_class">
+			<span id="up_span"></span>
+			<div id="upArea">
+				<div id="div_langOption"><span id="span_langtitle"></span><select id="langOption"></select></div>
+				<div id="topbuttonList" class="topbuttonList_class">
+					<div id="download_icon" class="class_top_bt" >	
+						<img class="class_top_bt" name="ub_download" id="ub_download" onClick="javascript:downloadPage();" alt="download"/>	
+						<span class="tip" id="download_tip"></span>
+					</div>
+					<div id="caution_icon" class="class_top_bt">	
+						<img  class="class_top_bt" name="ub_caution" id="ub_caution" onClick="$('#caution_page').dialog('open');" alt="caution"/>				
+						<span class="tip" id="caution_tip"></span>
+					</div>
+				</div>
+			</div>
+			<div id="carousel_parent">
+				<div id="carousel">
+				  <div id="sym_video" class="class_fun_div">
+					<iframe width="900" height="500" src="http://www.youtube.com/embed/hC3EHT0w4AM?rel=0&autoplay=1" frameborder="0"></iframe>
+				  </div>
+				    <img src="images/loginShowSlider/page5.png" alt="step 5"/>
+					<img src="images/loginShowSlider/page4.png" alt="step 4"/>
+					<img src="images/loginShowSlider/page1.png" alt="step 1"/>
+					<img src="images/loginShowSlider/page2.png" alt="step 2"/>
+					<img src="images/loginShowSlider/page3.png" alt="step 3"/>
+				</div>
+				<a href="#" id="ui-carousel-next"></a>
+				<a href="#" id="ui-carousel-prev"></a>
+			<div>
+			<div id="loginArea_div">
+				<div class='sologan_class'>
+				</div>
+				<div id="loginDes" class="loginDes_class">
+				</div>
+				<div id="loginArea" class="class_loginArea">
+					<div data-role='fieldcontain'><fieldset data-role='controlgroup'><label for='textinput1'></label><input id='username' placeholder='ID' value='' type='text' /></fieldset></div>
+					<div data-role='fieldcontain'><fieldset data-role='controlgroup'><label for='textinput2'></label><input id='password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
+					<div class="class_login_bt" onClick="javascript:Login();"><a data-role='button' data-transition='fade' data-theme='a' href='#login' class="login_bt_link">Login</a></div>
+					<div class="class_logout_bt" onClick="javascript:Logout();" ><a data-role='button' data-transition='fade' data-theme='a' href='#logout' class="logout_bt_link">Logout</a></div>
+					<div class="class_antrip_bt" onClick="javascript:top.window.location = 'frame.html';" ><a data-role='button' data-transition='fade' data-theme='b' href="" class="antrip_bt_link">Enter Antrip</a></div>
+					<div class="class_fblogin_bt"><a data-role="button" data-transition="fade" data-theme="b" data-icon="star" href="" onClick="window.open('http://plash2.iis.sinica.edu.tw/api/FacebookLogin.php','Facebook Login','toolbar=no,resizable=no,scrollbars=auto');return false" class="fblogin_bt_link">Login with Facebook</a></div>
+				</div>
+				<div id="end_Text" class="content_Text">
+					<img id="img_des_ant" />&nbsp;&nbsp;© 2012 ANTrip IIS Sinica | Design by TMSG | Valid XHTML5.0 | CSS
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div id="dialog-register" class="ui-widget" style="z-index:1010;" >
+		<p></p><p style="text-align:center"><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput1'></label><input id='reg_username' placeholder='USERNAME' value='' type='text' /></fieldset></div>
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput2'></label><input id='reg_email' placeholder='EMAIL' value='' type='text' /></fieldset></div>
+		<sup id="email_forgotten"></sup><br/><br/>
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput3'></label><input id='reg_password' placeholder='PASSWORD' value='' type='password' /></fieldset></div> 
+		<div data-role='fieldcontain'><fieldset data-role='reg_lgroup'><label for='reg_textinput4'></label><input id='reg_re_password' placeholder='Re-Enter PASSWORD' value='' type='password' /></fieldset></div> 
+		</p>
+	</div>
+	<!--caution-->
+	<div id="caution_page" class="ui-widget content_Text" style="z-index:1010;"> 
+
+	</div>
+</body>
+</html>
+</script>
