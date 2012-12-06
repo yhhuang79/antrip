@@ -1,11 +1,9 @@
 package tw.plash.antrip;
 
 import java.io.File;
-import java.sql.Timestamp;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.PriorityQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.JSONObject;
 
@@ -45,11 +43,12 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.crittercism.app.Crittercism;
 
-public class ANTripActivity extends Activity implements TripListReloader{
+public class ANTripActivity extends Activity implements ActivityCallback{
 	
 	private Context mContext;
 	private WebView mWebView = null;
@@ -62,17 +61,24 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	private Uri imageUri;
 	private final int REQUEST_CODE_TAKE_PICTURE = 100;
 	private final int REQUEST_CODE_DO_SETTINGS = 101;
+	private final int REQUEST_CODE_CHECKIN = 102;
 	
 	private SharedPreferences pref;
 	
-	private LinkedBlockingQueue<Location> locationQueue;
+//	private ArrayList<Location> locationList;
+//	private Location latestLocation;
+	private Location checkinLocation;
 	
 	private PriorityQueue<String> urlQueue;
 	private Handler mHandler;
 	private boolean canPostAgain;
 	private boolean canCallJavaScript = false;
 	private boolean needToLogout = false;
-//	private boolean duringCheckin = false;
+	private boolean duringCheckin = false;
+	private boolean canCheckin = false;
+	private boolean need2SaveCCO = false;
+	
+	private Button btn_checkin;
 	
 	boolean mIsBound;
 	private Messenger outMessenger = null;
@@ -84,14 +90,27 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			case AntripService.MSG_LOCATION_UPDATE:
 				//location update should provide with a non-null location related object
 				if (msg.obj != null) {
+					if (btn_checkin != null && canCheckin && AntripService.isRecording()) {
+						btn_checkin.setVisibility(View.VISIBLE);
+					}
 					if (msg.obj instanceof Location) {
+						// Location object is only received when NOT recording
+						// thus no check-in or edit tripname can occur
 						Location loc = (Location) msg.obj;
-						// setPosition
 						String singleLocationUpdateURL = "javascript:setPosition(" + loc.getLatitude() + ","
 								+ loc.getLongitude() + ")";
 						// use the buffered thread-safe url loading method
 						bufferedLoadURL(singleLocationUpdateURL);
+					} else if (msg.obj instanceof String) {
+						// String object is only received when recording
+						// either a single point, or a list of points like when
+						// re-init the activity during recording
+						String addpos = (String) msg.obj;
+						String addPositionUrl = "javascript:addPosition(" + addpos + ")";
+						// use the buffered thread-safe url loading method
+						bufferedLoadURL(addPositionUrl);
 					} else {
+						Log.e("Activity", "Message handle error: location update without STRING object");
 						Log.e("Activity", "Message handle error: location update without LOCATION object");
 					}
 				} else {
@@ -119,13 +138,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			case AntripService.MSG_LOCATION_UPDATE_CHECKIN:
 				if(msg.obj != null){
 					if(msg.obj instanceof Location){
-						if(cco != null){
-							cco.setLocation((Location) msg.obj);
-							Log.w("antripActivity", "IncomingHandler: update check-in loc: " + ((Location) msg.obj).toString());
-							doUnbindService();
-						} else{
-							Log.e("Activity", "Check-in object error: check-in object is null, cannot set location");
-						}
+						checkinLocation = (Location) msg.obj;
 					} else{
 						Log.e("Activity", "Message handle error: check-in location update without LOCATION object");
 					}
@@ -150,6 +163,11 @@ public class ANTripActivity extends Activity implements TripListReloader{
 				Message msg = Message.obtain(null, AntripService.MSG_REGISTER_CLIENT);
 				msg.replyTo = inMessenger;
 				outMessenger.send(msg);
+				if(need2SaveCCO && cco != null){
+					sendMessageToService(AntripService.MSG_SAVE_CHECKIN_OBJECT, cco);
+					cco = null;
+					need2SaveCCO = false;
+				}
 			} catch(RemoteException e){
 				e.printStackTrace();
 			}
@@ -162,23 +180,19 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		}
 	};
 	
-	private void sendMessageToService(int msgType, Object payload){
-		if(mIsBound){
-			if(outMessenger != null){
+	private void sendMessageToService(int msgType, Object payload) {
+		if (mIsBound) {
+			if (outMessenger != null) {
 				try {
-					if(payload != null){
+					if (payload != null) {
 						outMessenger.send(Message.obtain(null, msgType, payload));
-					} else{
+					} else {
 						outMessenger.send(Message.obtain(null, msgType));
 					}
 				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
-			} else{
-				
 			}
-		} else{
-			
 		}
 	}
 	
@@ -334,11 +348,11 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Crittercism.init(getApplicationContext(), "50a0662801ed852ced000002");
+		mContext = this;
+		
+		Crittercism.init(mContext, "50a0662801ed852ced000002");
 		
 		setContentView(R.layout.main);
-		
-		mContext = this;
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		Log.e("USERNAME", pref.getString("usrname", "LOL"));
@@ -347,15 +361,26 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		mHandler = new Handler();
 		canPostAgain = true;
 		
-		locationQueue = new LinkedBlockingQueue<Location>();
+//		locationList = new ArrayList<Location>();
 		
-//		ImageView btn = (ImageView) findViewById(R.id.btn_locate);
-//		btn.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				Toast.makeText(mContext, "LOCATE", Toast.LENGTH_SHORT).show();
-//			}
-//		});
+		ImageView btn_locate = (ImageView) findViewById(R.id.btn_locate);
+		btn_locate.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+			}
+		});
+		
+		btn_checkin = (Button) findViewById(R.id.btn_checkin);
+		btn_checkin.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				sendMessageToService(AntripService.MSG_GET_CHECKIN_LOCATION, null);
+				startActivityForResult(new Intent(mContext, CheckinWindow.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP), REQUEST_CODE_CHECKIN);
+			}
+		});
+		
+		
 		initUI();
 	}
 	
@@ -370,13 +395,6 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	 * supposedly the javascript interface will work without hiccup after implementing the interface
 	 */
 	private class jsinter implements JavaScriptCallback {
-		
-		// private final String imagepath =
-		// Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath();
-		// TODO:
-		// cannot assume getExtFilesDir will always return the path, might be
-		// null, need to check before proceeding
-		private final String imagepath = mContext.getApplicationInfo().dataDir;
 		
 		public void logout() {
 			// remove sid and stop stuffs
@@ -435,19 +453,17 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			return tid.toString();
 		}
 		
-		/**
-		 * 
-		 */
-//		public void stopRecording(String tripname) {
-//			//XXX
-//			//the recording should already be stopped, just save the name and we're all done
-//			sendMessageToService(AntripService.MSG_STOP_RECORDING_ACTUAL, tripname);
-//			bufferedLoadURL("javascript:reloadTripList()");
-//		}
-		
 		public void stopRecording() {
 			//XXX
 			//the recording should already be stopped, just save the name and we're all done
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if (btn_checkin != null) {
+						btn_checkin.setVisibility(View.GONE);
+					}
+				}
+			});
 			
 			final Dialog dialog = new Dialog(mContext);
 			dialog.setContentView(R.layout.edittripname);
@@ -491,6 +507,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			//Log.w("setMode", "mode= " + currentMode);
 			switch (currentMode) {
 			case 3:
+				canCheckin = true;
 				//need to start location service
 				sendMessageToService(AntripService.MSG_INIT_LOCATION_THREAD, null);
 				break;
@@ -500,6 +517,17 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			case 1:
 			case 4:
 			default:
+				
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						if (btn_checkin != null) {
+							btn_checkin.setVisibility(View.GONE);
+						}
+					}
+				});
+				
+				canCheckin = false;
 				// stop location service if not recording
 				sendMessageToService(AntripService.MSG_STOP_LOCATION_THREAD, null);
 				break;
@@ -561,67 +589,6 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		}
 		
 		/**
-		 * **check-in method family** save the emotion id to candidate check-in
-		 * object
-		 */
-		public void setEmotion(int id) {
-			if (cco != null) {
-				Log.w("activity", "setEmotion= " + id);
-				cco.setEmotionID(id);
-			}
-		}
-		
-		/**
-		 * **check-in method family** save the inputted text to candidate
-		 * check-in object
-		 */
-		public void setText(String text) {
-			if (cco != null) {
-				Log.w("activity", "setText= " + text);
-				cco.setCheckinText(text);
-			}
-		}
-		
-		/**
-		 * **check-in method family** create a new candidate check-in object
-		 * also request a coordinate from location service
-		 */
-		public void startCheckin() {
-//			duringCheckin = true;
-			cco = new CandidateCheckinObject();
-			//get a location for check-in purpose
-			sendMessageToService(AntripService.MSG_GET_CHECKIN_LOCATION, null);
-			//Log.w("activity", "start checkin called");
-			// request a check-in location from service
-			Log.e("activity", "start check-in");
-		}
-		
-		/**
-		 * **check-in method family** confirmed check-in action, pass the
-		 * candidate check-in object to location service to be saved
-		 */
-		public void endCheckin() {
-			String addpos = CheckinJSONConverter.fromCCOtoCheckinJSON(cco).toString();
-			bufferedLoadURL("javascript:addPosition(" + addpos + ")");
-			//reconnect to service to receive all the location updates during check-in, also save the check-in point
-			doBindService();
-			// send cco to service via startService call with action and extras
-			Log.w("activity", "end check-in, cco.emotion= " + cco.getEmotionID() + ", cco.text= " + cco.getCheckinText());
-			sendMessageToService(AntripService.MSG_SAVE_CHECKIN_LOCATION, cco);
-		}
-		
-		/**
-		 * **check-in method family** check-in action is canceled, drop the
-		 * candidate check-in object
-		 */
-		public void cancelCheckin() {
-			//reconnect to service to receive all the location updates during check-in
-			doBindService();
-			cco = null;
-			Log.e("activity", "cancel check-in");
-		}
-		
-		/**
 		 * Replace cookie function in html, save the key-value pair to android
 		 * preference
 		 * 
@@ -629,7 +596,6 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		 * @param value
 		 */
 		public void setCookie(String key, String value) {
-			Log.e("imagepath", ": " + imagepath);
 			pref.edit().putString(key, String.valueOf(value)).commit();
 			Log.w("setCookie", "key= " + key + ", value= " + String.valueOf(value));
 			//login action, send sid to service
@@ -652,10 +618,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		 * @return the value paired with the key, or null if key does not exist
 		 */
 		public String getCookie(String key) {
-			//Log.w("getCookie", "key= " + key + ", value= " + pref.getString(key, null));
-			//
 			Log.e("PATH", Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath());
-			Log.e("imagepath", ": " + imagepath);
 			return pref.getString(key, null);
 		}
 		
@@ -702,7 +665,6 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		public void reloadIndex(){
 			Log.w("antripActivity", "jsinterface: reloadindex");
 			bufferedLoadURL("file:///android_asset/index.html");
-//			mWebView.loadUrl("file:///android_asset/index.html");
 		}
 		
 		public String isRecording(){
@@ -721,6 +683,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	 * @param url
 	 */
 	private void bufferedLoadURL(final String url) {
+		//need to check if activity is doing check-in
 		urlQueue.offer(url);
 		// if already running, don't post again
 		if (canPostAgain) {
@@ -769,7 +732,11 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			Log.e("Activity", "onKeyDown: BACK BACK BACK");
 			//show a warning window to the user
 			if(pref.contains("sid")){
-				showThreat();
+				if(AntripService.isRecording()){
+					showWarning();
+				} else{
+					showThreat();
+				}
 			} else{
 				Log.e("antripActivity", "onkeydown: back not handled");
 				if(mWebView.getUrl().contains("FacebookLogin") && mWebView.canGoBack()){
@@ -783,6 +750,11 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			//other keys we don't care about
 			return super.onKeyDown(keyCode, event);
 		}
+	}
+	
+	private void showWarning(){
+		Toast.makeText(mContext, R.string.still_recording_warning, Toast.LENGTH_LONG).show();
+		finish();
 	}
 	
 	private void showThreat(){
@@ -812,86 +784,74 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	protected void onPause() {
 		super.onPause();
 		
-		try{
-			doUnbindService();
-		} catch(Throwable t){
-			Log.e("AntripActivity", "Failed to unbind from AntripService");
-		}
+		doUnbindService();
 		
 		if(AntripService.isStarted()){
-			Log.e("AntripActicity", "isstarted: true"); 
+			Log.e("AntripActicity", "onPause: isstarted: true"); 
 		} else{
-			Log.e("AntripActicity", "isstarted: false");
+			Log.e("AntripActicity", "onPause: isstarted: false");
 		}
 		
 		if(AntripService.isRecording()){
-			Log.e("AntripActicity", "isrecording: true");
+			Log.e("AntripActicity", "onPause: isrecording: true");
 		} else{
-			Log.e("AntripActicity", "isrecording: false");
+			Log.e("AntripActicity", "onPause: isrecording: false");
 		}
 		
 		// short circuit logic, if startService is not called, stop service will not be called
 		// if start service is called AND is not recording a trip, stop service will be called
 		if(AntripService.isStarted() && !AntripService.isRecording()){
 			Log.e("AntripActivity", "onPause: stopping service");
-			stopService(new Intent(getApplicationContext(), AntripService.class));
+			stopService(new Intent(mContext, AntripService.class));
 		}
 	}
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		final String noImageURL = "javascript:showPicture(-1)";
 		
 		switch(requestCode){
-		case REQUEST_CODE_TAKE_PICTURE:
-			switch (resultCode) {
-			case RESULT_OK:
-				// need to grab the generated filename plus filepath and return
-				// it to html for display purpose
-				String imageuri = pref.getString("imguri", null);
-				
-				//resize
-				SafeBitmapResizer.resize(imageuri);
-				
-				String imageURL = null;
-				if (imageuri != null) {
-					imageURL = "javascript:showPicture('" + imageuri + "')";
-				} else {
-					imageURL = noImageURL;
-				}
-				
-				// mWebView.loadUrl(imageURL);
-				bufferedLoadURL(imageURL);
-				//Log.e("onActivityResult", "imageURL= " + imageURL);
-				if (cco != null) {
-					cco.setPicturePath(imageuri);
-				}
-				break;
-			case RESULT_CANCELED:
-				// decides to not take a picture after all
-				// break;
-			case RESULT_FIRST_USER:
-				// not sure when will this method be called
-				// break;
-			default:
-				// handle all exceptions
-				
-				// mWebView.loadUrl(noImageURL);
-				bufferedLoadURL(noImageURL);
-				break;
-			}
-			break;
 		case REQUEST_CODE_DO_SETTINGS:
 			switch(resultCode){
 			case RESULT_OK:
 				//logout
 				Log.w("antripActivity", "onActivityResult: YES logout");
-				//these calls need to be placed AFTER onResume method...need to queue theom somehow
+				//these calls need to be placed AFTER onResume method...need to queue them somehow
 				needToLogout = true;
 				break;
 			default:
 				//no logout
 				Log.w("antripActivity", "onActivityResult: no logout");
+				break;
+			}
+			break;
+		case REQUEST_CODE_CHECKIN:
+			switch (resultCode) {
+			case RESULT_OK:
+				if (data.getSerializableExtra("cco") != null) {
+					Log.e("antrip activity", "received CCO!!!");
+					cco = (CandidateCheckinObject) data.getSerializableExtra("cco");
+					if(checkinLocation != null){
+						cco.setLocation(checkinLocation);
+						// save cco to DB
+						String addpos = CheckinJSONConverter.fromCCOtoCheckinJSON(cco).toString();
+						bufferedLoadURL("javascript:addPosition(" + addpos + ")");
+						// send cco to service via startService call with action and
+						// extras
+						Log.w("activity",
+								"end check-in, cco.emotion= " + cco.getEmotionID() + ", cco.text= " + cco.getCheckinText());
+						need2SaveCCO = true;
+					} else{
+						//XXX
+						//should maybe find a fail-safe way of setting check-in locations
+					}
+				}
+				break;
+			case RESULT_CANCELED:
+				Log.e("antrip activity", "received CCO: canceled");
+				cco = null;
+				break;
+			default:
+				Log.e("antrip activity", "received CCO: default");
 				break;
 			}
 			break;

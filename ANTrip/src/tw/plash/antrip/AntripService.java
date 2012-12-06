@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -30,9 +31,10 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	private Long firstcalltime = null;
 	
-	private LinkedBlockingQueue<Location> locationQueue;
+//	private LinkedBlockingQueue<Location> locationQueue;
 	
 	private DBHelper128 dh;
+	private Context mContext;
 	
 	private static Long currentTid;
 	private String currentUid;
@@ -50,14 +52,13 @@ public class AntripService extends Service implements LocationPublisher{
 	static final int MSG_STOP_RECORDING_ACTUAL = 13;
 //	static final int MSG_START_UPLOAD = 8;
 	static final int MSG_GET_CHECKIN_LOCATION = 9;
-	static final int MSG_SAVE_CHECKIN_LOCATION = 10;
+	static final int MSG_SAVE_CHECKIN_OBJECT = 10;
 	static final int MSG_SET_USERID = 11;
 	static final int MSG_LOGOUT_EVENT = 12;
 	
 	static final int MSG_LOCATION_UPDATE = 20;
 	static final int MSG_DRAW_CACHED_POINTS = 21;
 //	static final int MSG_LOCATION_UPDATE_NULL = 21;
-	
 	static final int MSG_LOCATION_UPDATE_CHECKIN = 22;
 	
 	private boolean shouldAddPosition = false;
@@ -76,7 +77,8 @@ public class AntripService extends Service implements LocationPublisher{
 				//save the client info, so we can send messages back later
 				outMessager = msg.replyTo;
 				if(shouldAddPosition){
-					sendMessageToUI(MSG_DRAW_CACHED_POINTS, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
+					//get points from DB instead
+//					sendMessageToUI(MSG_DRAW_CACHED_POINTS, CheckinJSONConverter.fromQtoCheckinJSON(locationQueue));
 					shouldAddPosition = false;
 				}
 			case MSG_INIT_LOCATION_THREAD:
@@ -86,7 +88,7 @@ public class AntripService extends Service implements LocationPublisher{
 					Log.w("AntripService", "IncomingHandler: init location thread called when skyhooklocation!=null");
 				} else{
 					if(pref.contains("sid")){
-						skyhookLocation = new SkyhookLocation(getApplicationContext(), AntripService.this);
+						skyhookLocation = new SkyhookLocation(mContext, AntripService.this);
 						skyhookLocation.run(10);
 					} else{
 						Log.w("AntripService", "IncomingHandler: init location thread call without sid");
@@ -136,7 +138,7 @@ public class AntripService extends Service implements LocationPublisher{
 					if(dh != null){
 						//do nothing, but seriously this should not happen
 					} else{
-						dh = new DBHelper128(getApplicationContext());
+						dh = new DBHelper128(mContext);
 					}
 					dh.setTripName(currentUid, currentTid.toString(), (String)msg.obj);
 					dh.closeDB();
@@ -148,7 +150,7 @@ public class AntripService extends Service implements LocationPublisher{
 				//activity requesting a loaction for check-in points, send a location back
 				sendMessageToUI(MSG_LOCATION_UPDATE_CHECKIN, skyhookLocation.getLastNonNullLocation());
 				break;
-			case MSG_SAVE_CHECKIN_LOCATION:
+			case MSG_SAVE_CHECKIN_OBJECT:
 				Log.i("AntripService", "IncomingHandler: case-MSG_SAVE_CHECKIN_LOCATION");
 				if(dh != null){
 					if(msg.obj instanceof CandidateCheckinObject){
@@ -160,13 +162,6 @@ public class AntripService extends Service implements LocationPublisher{
 					Log.e("AntripService", "IncomingHandler: save cco called when dh is null/DB is closed");
 				}
 				break;
-//			case MSG_START_UPLOAD:
-//				Log.i("AntripService", "IncomingHandler: case-MSG_START_UPLOAD");
-//				//XXX
-//				if(msg.obj instanceof String){
-//					new UploadThread(ANTripActivity.this, (String)msg.obj).execute();
-//				}
-//				break;
 			case MSG_SET_USERID:
 				Log.i("AntripService", "IncomingHandler: case-MSG_SET_USERID");
 				if(msg.obj instanceof String){
@@ -185,8 +180,10 @@ public class AntripService extends Service implements LocationPublisher{
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.e("AntripService", "onBind");
-		if(intent != null){
-			intent.getAction();
+		if(isRecording){
+			Log.w("AntripService", "onBind: isRecording = true");
+		} else{
+			Log.w("AntripService", "onBind: isRecording = false");
 		}
 		return inMessenger.getBinder();
 	}
@@ -195,18 +192,13 @@ public class AntripService extends Service implements LocationPublisher{
 	public void onRebind(Intent intent) {
 		super.onRebind(intent);
 		Log.e("AntripService", "onRebind");
-		if(intent != null){
-			intent.getAction();
-		}
 		if(isRecording){
 			//check-in
 			//return from settings
-			if(locationQueue != null && !locationQueue.isEmpty()){
-				Log.w("AntripService", "onRebind: update from Q");
-				shouldAddPosition = true;
-			}
+				Log.w("AntripService", "onRebind: isRecording = true");
+//				shouldAddPosition = true;
 		} else{
-			Log.w("AntripService", "onRebind: lalala");
+			Log.w("AntripService", "onRebind: isRecording = false");
 		}
 	}
 	
@@ -234,7 +226,7 @@ public class AntripService extends Service implements LocationPublisher{
 							Log.e("AntripService", "sendMessagetoUI: jsonobject location update");
 							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, ((JSONObject)payload).toString()));
 							//
-							locationQueue.clear();
+//							locationQueue.clear();
 						} else if(payload instanceof Location){
 							Log.e("AntripService", "sendMessagetoUI: location object location update");
 							outMessager.send(Message.obtain(null, MSG_LOCATION_UPDATE, CheckinJSONConverter.fromLocationtoCheckinJSON((Location)payload).toString()));
@@ -244,15 +236,15 @@ public class AntripService extends Service implements LocationPublisher{
 						}
 					} else{
 						//save all the location update during check-in as-is
-						if(locationQueue != null){
-							if(payload instanceof Location){
-								Log.e("AntripService", "sendMessagetoUI: location, outmessagr=null, location object");
-								locationQueue.offer((Location)payload);
-							} else{
-								//mmm
-								Log.e("AntripService", "sendMessagetoUI: location, outmessagr=null, location object, something wrong");
-							}
-						}
+//						if(locationQueue != null){
+//							if(payload instanceof Location){
+//								Log.e("AntripService", "sendMessagetoUI: location, outmessagr=null, location object");
+//								locationQueue.offer((Location)payload);
+//							} else{
+//								//mmm
+//								Log.e("AntripService", "sendMessagetoUI: location, outmessagr=null, location object, something wrong");
+//							}
+//						}
 					}
 				} else{
 					if(outMessager != null){
@@ -283,7 +275,9 @@ public class AntripService extends Service implements LocationPublisher{
 	public void onCreate() {
 		super.onCreate();
 		
-		pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		mContext = this;
+		
+		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		currentUid = pref.getString("sid", null);
 		
 		currentTid = null;
@@ -294,7 +288,7 @@ public class AntripService extends Service implements LocationPublisher{
 		
 		stats = null;
 		
-		locationQueue = new LinkedBlockingQueue<Location>();
+//		locationQueue = new LinkedBlockingQueue<Location>();
 		
 		isRunning = true;
 		isRecording = false;
@@ -329,7 +323,7 @@ public class AntripService extends Service implements LocationPublisher{
 					//dh is not null, a trip is probably recording now...
 					Log.e("AntripService", "onStartCommand: dh not null, possibly already recording...");
 				} else{
-					dh = new DBHelper128(getApplicationContext());
+					dh = new DBHelper128(mContext);
 					currentTid = intent.getLongExtra("tid", -1);
 					Log.e("AntripService", "onStartCommand: starting to record, tid= " + currentTid.toString());
 					stats = new TripStats();
@@ -350,8 +344,8 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	private void showNotification(){
 		Notification notification = new Notification(R.drawable.ant_24, getResources().getString(R.string.notification_new_trip_started), System.currentTimeMillis());
-		PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, new Intent(getApplicationContext(), ANTripActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
-		notification.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name), getResources().getString(R.string.notification_is_recording_a_trip), pendingIntent);
+		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, new Intent(mContext, ANTripActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+		notification.setLatestEventInfo(mContext, getResources().getString(R.string.app_name), getResources().getString(R.string.notification_is_recording_a_trip), pendingIntent);
 		startForeground(1337, notification);
 	}
 	
@@ -363,7 +357,7 @@ public class AntripService extends Service implements LocationPublisher{
 		
 		currentTid = null;
 		
-		locationQueue = null;
+//		locationQueue = null;
 		
 		if(dh != null){
 			dh.closeDB();
@@ -387,8 +381,8 @@ public class AntripService extends Service implements LocationPublisher{
 			
 			Log.w("AntripService", "newLocationUpdate: new location received");
 			//not recording, repost only valid and accurate opints to UI
-			if(LocationFilter.validityFilter(location)){
-				if(LocationFilter.accuracyFilter(location)){
+			if(LocationFilter.isValid(location)){
+				if(LocationFilter.isAccurate(location)){
 					//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
 					sendMessageToUI(MSG_LOCATION_UPDATE, location);
 				} else{
@@ -415,8 +409,8 @@ public class AntripService extends Service implements LocationPublisher{
 				
 				Log.w("AntripService", "newLocationUpdate: new location received");
 				//not recording, repost only valid and accurate opints to UI
-				if(LocationFilter.validityFilter(location)){
-					if(LocationFilter.accuracyFilter(location)){
+				if(LocationFilter.isValid(location)){
+					if(LocationFilter.isAccurate(location)){
 						//filter tests can be stacked, a location update have to pass all the filters to be reported to activity
 						sendMessageToUI(MSG_LOCATION_UPDATE, location);
 					} else{

@@ -8,7 +8,7 @@ public class LocationFilter {
 	 * @param inputLocation
 	 * @return true/false
 	 */
-	static public boolean accuracyFilter(Location inputLocation){
+	static public boolean isAccurate(Location inputLocation){
 		final int ACCURACY_THRESHOLD = 1500;
 		//make sure input parameter is not null
 		if(inputLocation != null){
@@ -23,7 +23,7 @@ public class LocationFilter {
 		return false;
 	}
 	
-	static public boolean validityFilter(Location inputLocation){
+	static public boolean isValid(Location inputLocation){
 		final int VALIDITY_THRESHOLD = -999;
 		if(inputLocation != null){
 			//at least input is not null

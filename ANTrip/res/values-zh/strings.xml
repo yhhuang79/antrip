@@ -6,6 +6,10 @@
     <string name="nope">算了</string>
     <string name="error">錯誤</string>
     
+    <string name="checkin_text_hint">落筆成章!</string>
+    
+    <string name="still_recording_warning">雲水途誌仍在背景持續記錄!</string>
+    
     <string name="untitled_trip">未命名旅誌</string>
     <string name="input_tripname">為您的旅誌命名</string>
     <string name="save_tripname">儲存</string>

@@ -150,7 +150,14 @@ public class BetterPopupWindow {
 	 * Displays like a QuickAction from the anchor view.
 	 */
 	public void showLikeQuickAction() {
-		this.showLikeQuickAction(0, 0);
+		this.showLikeQuickAction(0, 0, 0);
+	}
+	
+	/**
+	 * Displays like a QuickAction from the anchor view.
+	 */
+	public void showLikeQuickAction(int style) {
+		this.showLikeQuickAction(0, 0, style);
 	}
 
 	/**
@@ -161,10 +168,28 @@ public class BetterPopupWindow {
 	 * @param yOffset
 	 *            offset in the Y direction
 	 */
-	public void showLikeQuickAction(int xOffset, int yOffset) {
+	public void showLikeQuickAction(int xOffset, int yOffset, int style) {
 		this.preShow();
-
-		this.window.setAnimationStyle(R.style.Animations_GrowFromBottom);
+		
+		switch(style){
+		case 0:
+			this.window.setAnimationStyle(R.style.Animations_GrowFromTop);
+			break;
+		case 1:
+			this.window.setAnimationStyle(R.style.Animations_GrowFromBottom);
+			break;
+		case 2:
+			this.window.setAnimationStyle(R.style.Animations_GrowFromLeft);
+			break;
+		case 3:
+			this.window.setAnimationStyle(R.style.Animations_GrowFromRight);
+			break;
+		case 4:
+			break;
+		default:
+			this.window.setAnimationStyle(R.style.Animations_GrowFromCenter);
+			break;
+		}
 
 		int[] location = new int[2];
 		this.anchor.getLocationOnScreen(location);
@@ -187,7 +212,7 @@ public class BetterPopupWindow {
 		// display on bottom
 		if(rootHeight > anchorRect.top) {
 			yPos = anchorRect.bottom + yOffset;
-			this.window.setAnimationStyle(R.style.Animations_GrowFromTop);
+			this.window.setAnimationStyle(R.style.Animations_GrowFromBottom);
 		}
 
 		this.window.showAtLocation(this.anchor, Gravity.NO_GRAVITY, xPos, yPos);

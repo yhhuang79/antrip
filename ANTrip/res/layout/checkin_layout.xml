@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content" >
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/checkin_layout"
+        android:scaleType="fitXY"
+        android:src="@drawable/checkin_backscroll" />
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:id="@+id/checkin_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:background="@android:color/transparent"
+            android:orientation="vertical" >
+
+            <!-- check-in title -->
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dip"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/checkin_title" />
+
+            <!-- text area for check-in comments -->
+            <EditText
+                android:id="@+id/checkin_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dip"
+                android:hint="@string/checkin_text_hint"
+                android:lines="2" />
+
+            <!-- mood selector and the overlaying selection -->
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dip" >
+
+                <ImageView
+                    android:id="@+id/checkin_mood_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dip"
+                    android:layout_centerHorizontal="true"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:src="@color/checkin_selectmood_button_state" />
+
+                <ImageView
+                    android:id="@+id/checkin_mood_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignRight="@+id/checkin_mood_btn"
+                    android:layout_alignTop="@+id/checkin_mood_btn"
+                    android:layout_alignBottom="@+id/checkin_mood_btn"
+                    android:layout_margin="5dip"
+                    android:adjustViewBounds="true"
+                    android:paddingRight="30dip"
+                    android:scaleType="fitCenter"/>
+            </RelativeLayout>
+
+            <!-- "take picture" button and the overlaying taken picture thumbnail-->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_margin="5dip" >
+
+                <ImageView
+                    android:id="@+id/checkin_picture_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dip"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:src="@color/checkin_takepicture_button_state" />
+
+                <ImageView
+                    android:id="@+id/checkin_picture_thumbnail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|left"
+                    android:layout_margin="5dip"
+                    android:adjustViewBounds="true"
+                    android:paddingBottom="10dip"
+                    android:paddingLeft="30dip"
+                    android:scaleType="fitCenter"
+                    />
+            </FrameLayout>
+
+            <!-- commit check-in and cancel buttons -->
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2" >
+
+                <ImageView
+                    android:id="@+id/checkin_commit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dip"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:src="@color/checkin_commit_button_state" />
+
+                <ImageView
+                    android:id="@+id/checkin_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dip"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitCenter"
+                    android:src="@color/checkin_cancel_button_state" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>

@@ -49,7 +49,7 @@ public class TripStats {
 			// input not null, add one count
 			totalPointCount += 1;
 			// ignore -999 points at any stage
-			if (LocationFilter.validityFilter(loc)) {
+			if (LocationFilter.isValid(loc)) {
 				totalValidPointCount += 1;
 				lastInaccuratePointTime = new Timestamp(loc.getTime()).toString();
 				// if previous location was not null, it is not the first time
@@ -65,7 +65,7 @@ public class TripStats {
 						previousLoc = loc;
 					} else {
 						// not a check-in point, check for validity and accuracy
-						if (LocationFilter.accuracyFilter(loc)) {
+						if (LocationFilter.isAccurate(loc)) {
 							totalAccuratePointCount += 1;
 							lastGoodPointTime = new Timestamp(loc.getTime()).toString();
 							// input location is valid, calculate the distance

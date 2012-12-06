@@ -6,9 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.util.Log;
@@ -18,9 +18,40 @@ public class SafeBitmapResizer {
 	private final static int shortSide = 1080;
 	private final static int longSide = 1920;
 	
-//	private final static int shortSide = 720;
-//	private final static int longSide = 1280;
+	// private final static int shortSide = 720;
+	// private final static int longSide = 1280;
 	
+	public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+		// Raw height and width of image
+		final int height = options.outHeight;
+		final int width = options.outWidth;
+		int inSampleSize = 1;
+		
+		if (height > reqHeight || width > reqWidth) {
+			if (width > height) {
+				inSampleSize = Math.round((float) height / (float) reqHeight);
+			} else {
+				inSampleSize = Math.round((float) width / (float) reqWidth);
+			}
+		}
+		return inSampleSize;
+	}
+	
+	public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId, int reqWidth, int reqHeight) {
+		
+		// First decode with inJustDecodeBounds=true to check dimensions
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		BitmapFactory.decodeResource(res, resId, options);
+		
+		// Calculate inSampleSize
+		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+		
+		// Decode bitmap with inSampleSize set
+		options.inJustDecodeBounds = false;
+		return BitmapFactory.decodeResource(res, resId, options);
+	}
+
 	static public void resize(String pathOfInputImage) {
 		
 		if (pathOfInputImage != null) {
@@ -51,6 +82,17 @@ public class SafeBitmapResizer {
 						return;
 					}
 				}
+				
+				File tmp = new File(pathOfInputImage);
+				if(tmp.length() > 0){
+					if(tmp.length()/1024 < 1500L){
+						//if the file size if less than 1.5MB(1,500KB / 1500,000Byte), don't resize it
+						tmp = null;
+						return;
+					}
+				}
+				tmp = null;
+				
 				
 				/**
 				 * need to determine whether the input image is in landscape or portrait orientation

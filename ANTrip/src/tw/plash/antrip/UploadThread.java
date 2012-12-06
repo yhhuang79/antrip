@@ -62,9 +62,9 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 	
 	private ProgressDialog diag;
 	
-	private TripListReloader reloader;
+	private ActivityCallback reloader;
 	
-	public UploadThread(Context c, String id, TripListReloader tlr) {
+	public UploadThread(Context c, String id, ActivityCallback tlr) {
 		mContext = c;
 		dh = new DBHelper128(mContext);
 		uniqueid = id;

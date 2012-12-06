@@ -3,110 +3,121 @@
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="wrap_content"
 	android:layout_height="wrap_content"
-	android:background="@android:drawable/alert_light_frame"
+	android:background="#aa444444"
 	android:orientation="horizontal">
-	
+    
     <LinearLayout 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/angry"
-			android:text="Angry"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/nervous"
-			android:text="Nervous"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/bored"
-			android:text="Bored"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/sad"
-			android:text="Sad"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
+        <ImageView
+            android:id="@+id/mood_angry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_angry"
+            android:tag="0"/>
+		<ImageView
+            android:id="@+id/mood_bored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_bored"
+            android:tag="1"/>
+		<ImageView
+            android:id="@+id/mood_calm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_calm"
+            android:tag="2"/>
+		<ImageView
+            android:id="@+id/mood_excited"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_excited"
+            android:tag="3"/>
     </LinearLayout>
 	<LinearLayout 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/excited"
-			android:text="Excited"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/calm"
-			android:text="Calm"
-			android:minWidth="80dp"
-			android:minHeight="96dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/sleepy"
-			android:text="Sleepy"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
+        <ImageView
+            android:id="@+id/mood_happy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_happy"
+            android:tag="4"/>
+		<ImageView
+            android:id="@+id/mood_nervous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_nervous"
+            android:tag="5"/>
+		<ImageView
+            android:id="@+id/mood_peaceful"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_peaceful"
+            android:tag="6"/>
     </LinearLayout>
     <LinearLayout 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/happy"
-			android:text="Happy"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/pleased"
-			android:text="Pleased"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/relaxed"
-			android:text="Relaxed"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
-		<Button
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:id="@+id/peaceful"
-			android:text="Peaceful"
-			android:minWidth="80dp"
-			android:minHeight="40dp"
-			 />
+        <ImageView
+            android:id="@+id/mood_pleased"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_pleased"
+            android:tag="7"/>
+        <ImageView
+            android:id="@+id/mood_relaxed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_relaxed"
+            android:tag="8"/>
+        <ImageView
+            android:id="@+id/mood_sad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_sad"
+            android:tag="9"/>
+        <ImageView
+            android:id="@+id/mood_sleepy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dip"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/mood_sleepy"
+            android:tag="10"/>
     </LinearLayout>
 </LinearLayout>

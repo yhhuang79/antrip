@@ -1,5 +1,5 @@
 package tw.plash.antrip;
 
-public interface TripListReloader {
+public interface ActivityCallback {
 	public void shouldReloadTripList();
 }

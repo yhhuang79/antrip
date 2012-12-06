@@ -28,6 +28,14 @@ public class CandidateCheckinObject implements Serializable{
 		pictureName = null;
 		location = null;
 	}
+	
+	public boolean isValid(){
+		if(emotionID != null || pictureName != null || (checkinText != null && checkinText.length() > 0)){
+			return true;
+		} else{
+			return false;
+		}
+	}
 
 	public Integer getEmotionID() {
 		return emotionID;

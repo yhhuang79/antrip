@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android" >
-    
-    <FrameLayout 
+
+    <FrameLayout
         android:id="@+id/webViewPlaceHolder"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"/>
-    
-    <ImageView 
-        android:id="@+id/btn_locate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="5dip"
-        android:scaleType="fitCenter"
-        android:src="@drawable/locating"
-        android:adjustViewBounds="true"
-        android:layout_gravity="center_vertical|right"
-        android:visibility="gone"/>
-    
-    <!-- <WebView
-        android:id="@+id/webview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_gravity="fill"/> -->
+	
+     <ImageView
+            android:id="@+id/btn_locate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dip"
+            android:layout_gravity="center_vertical|right"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/locating"
+            android:visibility="gone" />
+     
+     <Button 
+         android:id="@+id/btn_checkin"
+         android:layout_width="wrap_content"
+         android:layout_height="wrap_content"
+         android:layout_marginBottom="5dip"
+         android:background="@color/checkin_button_state"
+         android:layout_gravity="center_horizontal|bottom"
+         android:visibility="gone"/>
 </merge>
