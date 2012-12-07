@@ -33,7 +33,7 @@ import android.util.Log;
  * @author CSZU
  * 
  */
-public class DBHelper128 {
+public class DBHelper {
 	
 	private static final String DATABASE_NAME = "antrip"; // database name
 	private static final int DATABASE_VERSION = 10; // required by SQLite tool
@@ -54,6 +54,9 @@ public class DBHelper128 {
 			+ "speed TEXT, " 
 			+ "bearing TEXT, " 
 			+ "accuracy TEXT, " 
+			+ "accelerometerX TEXT, " 
+			+ "accelerometerY TEXT, " 
+			+ "accelerometerZ TEXT, " 
 			+ "userid TEXT, "
 			+ "tripid TEXT, " 
 			+ "picture TEXT, " 
@@ -129,7 +132,7 @@ public class DBHelper128 {
 	 * 
 	 * @param context
 	 */
-	public DBHelper128(Context context) {
+	public DBHelper(Context context) {
 		mContext = context;
 		OpenHelper openHelper = new OpenHelper(mContext);
 		// get the DB with write permission
@@ -140,7 +143,7 @@ public class DBHelper128 {
 		} // something's wrong with the DB
 	}
 	
-	public DBHelper128(Context context, int a) {
+	public DBHelper(Context context, int a) {
 		mContext = context;
 		OpenHelper openHelper = new OpenHelper(mContext);
 		// get the DB with read permission

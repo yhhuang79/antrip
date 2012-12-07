@@ -235,7 +235,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 			mWebSettings.setCacheMode(WebSettings.LOAD_NO_CACHE);
 			mWebSettings.setSaveFormData(false);
 			mWebSettings.setSavePassword(false);
-			mWebSettings.setDomStorageEnabled(true);
+//			mWebSettings.setDomStorageEnabled(true);
 			//make sure no javascript is called before webpage finished loading
 			mWebView.setWebViewClient(new WebViewClient(){
 				@Override
@@ -605,7 +605,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 				sendMessageToService(AntripService.MSG_SET_USERID, value);
 				if(value.equals("206")){
 					Log.w("SECRETLY", "EXPORT ALL");
-					DBHelper128 ddd = new DBHelper128(mContext);
+					DBHelper ddd = new DBHelper(mContext);
 					ddd.exportEverything();
 					ddd.closeDB();
 					ddd = null;
@@ -658,7 +658,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 		 */
 		public void deleteTrip(String id){
 			//Log.w("activity", "delete trip: " + id);
-			DBHelper128 dhh = new DBHelper128(mContext);
+			DBHelper dhh = new DBHelper(mContext);
 			dhh.deleteTrip(pref.getString("sid", null), id);
 			dhh.closeDB();
 			dhh = null;

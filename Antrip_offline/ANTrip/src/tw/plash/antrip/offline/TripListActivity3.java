@@ -41,11 +41,13 @@ import android.widget.Toast;
 import com.crittercism.app.Crittercism;
 import com.emilsjolander.components.StickyListHeaders.StickyListHeadersListView;
 
-public class TripListActivity2 extends Activity {
+public class TripListActivity3 extends Activity implements TripListReloader{
 	
 	private TripListAdapter2 adapter = null;
 	private Context mContext;
 	private SharedPreferences pref;
+	
+	private boolean stillLoading;
 	
 	private StickyListHeadersListView stickyList;
 	
@@ -62,7 +64,7 @@ public class TripListActivity2 extends Activity {
 		
 		setContentView(R.layout.triplist2);
 		
-		loadTripLists();
+		initTripList();
 	}
 	
 	@Override
@@ -86,10 +88,10 @@ public class TripListActivity2 extends Activity {
 			}
 		});
 		
-		loadTripLists();
+		initTripList();
 	}
 	
-	private void loadTripLists() {
+	private void initTripList() {
 		
 		stickyList = (StickyListHeadersListView) findViewById(R.id.triplist2);
 		
@@ -97,7 +99,8 @@ public class TripListActivity2 extends Activity {
 			@Override
 			public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
 				//check if a column only exists in local trips exists
-				if (((JSONObject) parent.getItemAtPosition(position)).has("triplistheader")) {
+				final JSONObject obj = (JSONObject) parent.getItemAtPosition(position);
+				if (obj.has("triplistheader")) {
 					new AlertDialog.Builder(mContext)
 						.setItems(new String[] { "upload", "delete" },
 							new DialogInterface.OnClickListener() {
@@ -114,6 +117,19 @@ public class TripListActivity2 extends Activity {
 									case 1:
 										// delete
 										// this is a deletion from local DB
+										int pos = -1;
+										DBHelper dh = new DBHelper(mContext);
+										try {
+											if(dh.deleteLocalTrip(userid, obj.getString("trip_id")) > 0){
+												pos = position;
+												Toast.makeText(mContext, "\"" + obj.getString("trip_name") + "\" deleted!", Toast.LENGTH_LONG).show();
+											}
+										} catch (JSONException e) {
+											e.printStackTrace();
+										}
+										dh.closeDB();
+										dh = null;
+										loadTripList(pos);
 										break;
 									default:
 										break;
@@ -206,7 +222,6 @@ public class TripListActivity2 extends Activity {
 													//XXX
 													//remove the entry from trip list
 													Toast.makeText(mContext, "DELETED!", Toast.LENGTH_LONG).show();
-													loadTripLists();
 												} else {
 													//show deletion error message
 													Toast.makeText(mContext, "DELETION FAILED, TRY AGAIN LATER", Toast.LENGTH_LONG).show();
@@ -239,125 +254,173 @@ public class TripListActivity2 extends Activity {
 			}
 		});
 		
-		new AsyncTask<Void, Void, Integer>() {
+		loadTripList(-1);
+	}
+	
+	private void loadTripList(int position){
+		tlal = new TripListAsyncLoader(position);
+		tlal.execute();
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if(stillLoading){
+			tlal.cancel(true);
+		}
+	}
+	
+	private TripListAsyncLoader tlal;
+	
+	private class TripListAsyncLoader extends AsyncTask<Void, Void, Integer>{
+		
+		final private int ADAPTER_NOT_NULL = 0;
+		final private int ADAPTER_NOT_NULL_STUFF_TO_REMOVE = 1;
+		
+		final private int REMOTE_NOT_NULL_LOCAL_UNKNOWN = 2;
+		final private int REMOTE_NULL_LOCAL_UNKNOWN = 3;
+		final private int CONNECTION_ERROR_LOCAL_UNKNOWN = 4;
+		final private int REMOTE_EXCEPTION_LOCAL_UNKNOWN = 5;
+		
+		final private int NO_INTERNET_LOCAL_UNKNOWN = 6;
+		
+		private JSONArray localtripinfo;
+		private JSONArray remotetripinfo;
+		
+		final int pendingRemovePosition;
+		
+		public TripListAsyncLoader(int position) {
+			pendingRemovePosition = position;
+		}
+		
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
 			
-			JSONArray localtripinfo = null;
-			JSONArray remotetripinfo = null;
+			((TextView) stickyList.getEmptyView()).setText("Loading...");
 			
-			@Override
-			protected Integer doInBackground(Void... params) {
-				if (adapter == null) {
+			stillLoading = true;
+			
+			localtripinfo = null;
+			
+			remotetripinfo = null;
+		}
+
+		@Override
+		protected Integer doInBackground(Void... params) {
+			if(adapter != null){
+				if(pendingRemovePosition != -1){
+					return ADAPTER_NOT_NULL_STUFF_TO_REMOVE;
+				} else{
+					return ADAPTER_NOT_NULL;
+				}
+			} else{
+				if (userid != null) {
+					DBHelper dh = new DBHelper(mContext);
+					// get current tid from service
+					if (AntripService.getCurrentTid() != null) {
+						localtripinfo = dh.getAllTripInfoForHTML2(userid, AntripService.getCurrentTid().toString());
+					} else {
+						localtripinfo = dh.getAllTripInfoForHTML2(userid, null);
+					}
 					
-					if(userid != null){
-						DBHelper dh = new DBHelper(mContext);
-						//get current tid from service
-						if(AntripService.getCurrentTid() != null){
-							localtripinfo = dh.getAllTripInfoForHTML2(userid, AntripService.getCurrentTid().toString());
-						} else{
-							localtripinfo = dh.getAllTripInfoForHTML2(userid, null);
+					dh.closeDB();
+					dh = null;
+				}
+				if (isNetworkAvailable(mContext)) {
+					try {
+						String url = "http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php?userid=" + userid;
+						
+						HttpGet getRequest = new HttpGet(url);
+						
+						HttpParams httpParameters = new BasicHttpParams();
+						// Set the timeout in milliseconds until a connection is
+						// established.
+						// The default value is zero, that means the timeout is not used.
+						int timeoutConnection = 3000;
+						HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+						// Set the default socket timeout (SO_TIMEOUT)
+						// in milliseconds which is the timeout for waiting for
+						// data.
+						int timeoutSocket = 5000;
+						HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+						
+						DefaultHttpClient client = new DefaultHttpClient(httpParameters);
+						
+						HttpResponse response = client.execute(getRequest);
+						
+						Integer statusCode = response.getStatusLine().getStatusCode();
+						if (statusCode == 200) {
+							
+							BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+							JSONObject result = new JSONObject(new JSONTokener(in.readLine().replace("({", "{")
+									.replace("});", "}")));
+							in.close();
+							
+							remotetripinfo = result.getJSONArray("tripInfoList");
+							
+							client.getConnectionManager().shutdown();
+							
+							if(remotetripinfo != null && remotetripinfo.length() > 0){
+								//remote not null, local unknown
+								return REMOTE_NOT_NULL_LOCAL_UNKNOWN;
+							} else{
+								//remote null, local unknown
+								return REMOTE_NULL_LOCAL_UNKNOWN;
+							}
+						} else {
+							client.getConnectionManager().shutdown();
+							// connection error, local unknown
+							return CONNECTION_ERROR_LOCAL_UNKNOWN;
 						}
 						
-						dh.closeDB();
-						dh = null;
+					} catch (ClientProtocolException e) {
+						e.printStackTrace();
+					} catch (IOException e) {
+						e.printStackTrace();
+					} catch (JSONException e) {
+						e.printStackTrace();
 					}
-					if(isNetworkAvailable(mContext)){
-						try {
-							String url = "http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php?userid=" + userid;
-							
-							HttpGet getRequest = new HttpGet(url);
-							
-							HttpParams httpParameters = new BasicHttpParams();
-							// Set the timeout in milliseconds until a connection is established.
-							// The default value is zero, that means the timeout is not used. 
-							int timeoutConnection = 3000;
-							HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-							// Set the default socket timeout (SO_TIMEOUT) 
-							// in milliseconds which is the timeout for waiting for data.
-							int timeoutSocket = 5000;
-							HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-							
-							DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-							
-							HttpResponse response = client.execute(getRequest);
-							
-							Integer statusCode = response.getStatusLine().getStatusCode();
-							if (statusCode == 200) {
-								
-								BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity()
-										.getContent()));
-								JSONObject result = new JSONObject(new JSONTokener(in.readLine().replace("({", "{")
-										.replace("});", "}")));
-								in.close();
-								
-								remotetripinfo = result.getJSONArray("tripInfoList");
-								
-								Log.e("triplistactivity", "name: " + remotetripinfo.getJSONObject(0).getString("trip_name")
-										+ "; st: " + remotetripinfo.getJSONObject(0).getString("trip_st"));
-								
-								client.getConnectionManager().shutdown();
-								//supposedly all good
-								return 0;
-							} else{
-								
-								client.getConnectionManager().shutdown();
-								//connection error
-								return 1;
-							}
-							
-						} catch (ClientProtocolException e) {
-							e.printStackTrace();
-						} catch (IOException e) {
-							e.printStackTrace();
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						//exceptions
-						return 4;
-					} else{
-						//no internet
-						return 2;
-					}
-				} else{
-					//adapter not null
-					return 3;
+					// exceptions
+					return REMOTE_EXCEPTION_LOCAL_UNKNOWN;
+				} else {
+					return NO_INTERNET_LOCAL_UNKNOWN;
 				}
 			}
+		}
+		
+		@Override
+		protected void onCancelled() {
 			
-			protected void onPostExecute(Integer result) {
-				switch(result){
-				case 0:
-					//all good
-					if(remotetripinfo != null || localtripinfo != null){
-						adapter = new TripListAdapter2(mContext, remotetripinfo, localtripinfo);
-					} else{
-						((TextView) findViewById(android.R.id.empty)).setText("Nothing to see here...");
-						break;
-					}
-				case 3:
-					//adapter not null
-					stickyList.setAdapter(adapter);
-					//don't think i need to dismiss empty view myself
-					((TextView) findViewById(android.R.id.empty)).setVisibility(View.GONE);
-					break;	
-				case 1:
-					//connection error
-					Toast.makeText(mContext, "connection error", Toast.LENGTH_LONG).show();
-					break;
-				case 2:
-					//no internet
-					Toast.makeText(mContext, "no internet", Toast.LENGTH_LONG).show();
-					break;
-				case 4:
-					//exceptions
-					Toast.makeText(mContext, "exception", Toast.LENGTH_LONG).show();
-					break;
-				default:
-					//huh?
-					Toast.makeText(mContext, "huh?", Toast.LENGTH_LONG).show();
+		}
+		
+		protected void onPostExecute(Integer result) {
+			switch(result){
+			case REMOTE_NOT_NULL_LOCAL_UNKNOWN:
+			case REMOTE_NULL_LOCAL_UNKNOWN:
+			case CONNECTION_ERROR_LOCAL_UNKNOWN:
+			case REMOTE_EXCEPTION_LOCAL_UNKNOWN:
+			case NO_INTERNET_LOCAL_UNKNOWN:
+				//all local unknown, set adapter anyway
+				adapter = new TripListAdapter2(mContext, remotetripinfo, localtripinfo);
+				
+			case ADAPTER_NOT_NULL_STUFF_TO_REMOVE:
+				adapter.remove(pendingRemovePosition);
+				
+			case ADAPTER_NOT_NULL:
+				//adapter not null
+				stickyList.setAdapter(adapter);
+				//don't think i need to dismiss empty view myself
+//				((TextView) stickyList.getEmptyView()).setVisibility(View.GONE);
+				if(!adapter.isEmpty()){
 					break;
 				}
-			};
-		}.execute();
+			default:
+				((TextView) stickyList.getEmptyView()).setText("Nothing to see here...");
+				break;
+			}
+			stillLoading = false;
+		};
 	}
 	
 	private boolean isNetworkAvailable(Context context){
@@ -369,5 +432,10 @@ public class TripListActivity2 extends Activity {
 			return false;
 		}
 		
+	}
+
+	@Override
+	public void shouldReloadTripList(int pos) {
+		loadTripList(pos);
 	}
 }

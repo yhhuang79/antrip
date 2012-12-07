@@ -48,6 +48,8 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 		}
 		
 		try {
+			//data is not a large jsonarray with jsonobjects
+			//jsonobject from local DB will have an extra key called "triplistheader"
 			data = new JSONArray(new JSONTokener(combine));
 //			Log.i("triplistadapter2", "data= " + data.toString());
 		} catch (JSONException e) {
@@ -136,6 +138,23 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 	
 	class ViewHolder{
 		TextView tv1, tv2;
+	}
+	
+	public boolean remove(int position){
+		if(position < 0 || position > data.length()){
+			return false;
+		} else{
+			//XXX
+			//remove stuff with string operation
+			try {
+				
+				data.toString().replace(data.getJSONObject(position).toString(), "").replace(",,", ",");
+				return true;
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			return false;
+		}
 	}
 	
 	@Override

@@ -9,7 +9,7 @@ public class DBIntegrityChecker {
 	
 	private Long currentTid;
 	private String sid;
-	private DBHelper128 dh;
+	private DBHelper dh;
 	private Context mContext;
 	
 	public DBIntegrityChecker(Context context) {
@@ -27,7 +27,7 @@ public class DBIntegrityChecker {
 				//if service is recording, get the current trip id to avoid generating (possibly duplicating)current trip info
 				currentTid = AntripService.getCurrentTid();
 			}
-			dh = new DBHelper128(mContext);
+			dh = new DBHelper(mContext);
 			
 			//get a summary of trip data
 			//get all trip IDs in trip data table

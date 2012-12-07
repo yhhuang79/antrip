@@ -8,12 +8,20 @@
         android:layout_alignParentTop="true"
         layout="@layout/actionbar" />
 
+    <fragment
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        class="com.google.android.gms.maps.MapFragment" />
+
     <com.google.android.maps.MapView
         android:id="@+id/gmapview"
-        android:layout_below="@+id/gmapview_actionbar"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_below="@+id/gmapview_actionbar"
         android:apiKey="0qyApPpS31itWfnph0AWE2Hyy8OnSpy3zD-BmYA"
-        android:clickable="true" />
-    
+        android:clickable="true"
+        android:visibility="gone" />
+
 </RelativeLayout>

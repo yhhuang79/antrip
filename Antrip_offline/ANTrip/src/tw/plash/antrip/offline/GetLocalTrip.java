@@ -12,14 +12,14 @@ public class GetLocalTrip {
 	
 	private Context mContext;
 	private JSONObject result;
-	private DBHelper128 dh;
+	private DBHelper dh;
 	private SharedPreferences pref;
 	private String uid;
 	
 	public GetLocalTrip(Context c) {
 		mContext = c;
 		result = new JSONObject();
-		dh = new DBHelper128(c);
+		dh = new DBHelper(c);
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		uid = pref.getString("sid", null);
 	}

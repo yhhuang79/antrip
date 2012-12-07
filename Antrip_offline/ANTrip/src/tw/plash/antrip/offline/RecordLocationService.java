@@ -7,9 +7,10 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 
-public class LocationService extends Service {
+public class RecordLocationService extends Service {
 	
-	private static boolean isRecording = false;
+	private static boolean isRecording;
+	private static String currentTid;
 	
 	static final int MSG_REGISTER_CLIENT = 1;
 	static final int MSG_UNREGISTER_CLIENT = 2;
@@ -76,6 +77,19 @@ public class LocationService extends Service {
 		
 	}
 	
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		if(intent != null){
+			if(intent.getAction() != null && intent.getAction().equalsIgnoreCase("record")){
+				isRecording = true;
+			}
+		}
+		return START_STICKY;
+	}
+	
+	public static String getCurrentTid(){
+		return currentTid;
+	}
 	
 	public static boolean isRecording(){
 		return isRecording;

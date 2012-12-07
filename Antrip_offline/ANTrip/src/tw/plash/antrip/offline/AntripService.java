@@ -28,7 +28,7 @@ public class AntripService extends Service implements LocationPublisher{
 	
 	private LinkedBlockingQueue<Location> locationQueue;
 	
-	private DBHelper128 dh;
+	private DBHelper dh;
 	
 	private static Long currentTid;
 	private String currentUid;
@@ -131,7 +131,7 @@ public class AntripService extends Service implements LocationPublisher{
 					if(dh != null){
 						//do nothing, but seriously this should not happen
 					} else{
-						dh = new DBHelper128(getApplicationContext());
+						dh = new DBHelper(getApplicationContext());
 					}
 					dh.setTripName(currentUid, currentTid.toString(), (String)msg.obj);
 					dh.closeDB();
@@ -324,7 +324,7 @@ public class AntripService extends Service implements LocationPublisher{
 					//dh is not null, a trip is probably recording now...
 					Log.e("AntripService", "onStartCommand: dh not null, possibly already recording...");
 				} else{
-					dh = new DBHelper128(getApplicationContext());
+					dh = new DBHelper(getApplicationContext());
 					currentTid = intent.getLongExtra("tid", -1);
 					Log.e("AntripService", "onStartCommand: starting to record, tid= " + currentTid.toString());
 					stats = new TripStats();

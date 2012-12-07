@@ -57,7 +57,7 @@ import android.widget.Toast;
 public class UploadThread extends AsyncTask<Void, Void, Integer> {
 	
 	private Context mContext;
-	private DBHelper128 dh;
+	private DBHelper dh;
 	private String uniqueid;
 	private String userid;
 	private String localTripid;
@@ -68,7 +68,7 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 	
 	public UploadThread(Context c, String id, TripListReloader tlr) {
 		mContext = c;
-		dh = new DBHelper128(mContext);
+		dh = new DBHelper(mContext);
 		uniqueid = id;
 		userid = PreferenceManager.getDefaultSharedPreferences(mContext).getString("sid", null);
 		reloader = tlr;
@@ -424,7 +424,9 @@ public class UploadThread extends AsyncTask<Void, Void, Integer> {
 			dh.closeDB();
 			dh = null;
 		}
-		reloader.shouldReloadTripList();
+		//XXX
+		//should pass the position that needs to be removed
+		reloader.shouldReloadTripList(-1);
 	}
 	
 	private boolean isNetworkAvailable() {
