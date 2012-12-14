@@ -251,8 +251,8 @@ public class TripListActivity2 extends Activity {
 					if(userid != null){
 						DBHelper dh = new DBHelper(mContext);
 						//get current tid from service
-						if(AntripService.getCurrentTid() != null){
-							localtripinfo = dh.getAllTripInfoForHTML2(userid, AntripService.getCurrentTid().toString());
+						if(AntripService2.getCurrentTid() != null){
+							localtripinfo = dh.getAllTripInfoForHTML2(userid, AntripService2.getCurrentTid().toString());
 						} else{
 							localtripinfo = dh.getAllTripInfoForHTML2(userid, null);
 						}

@@ -22,7 +22,7 @@ public class Settings extends PreferenceActivity{
 		usrname.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				if(AntripService.isRecording()){
+				if(AntripService2.isRecording()){
 					//ask if user wants to logout even a trip is still recording
 					new AlertDialog.Builder(Settings.this)
 						.setMessage(R.string.logout_warning)

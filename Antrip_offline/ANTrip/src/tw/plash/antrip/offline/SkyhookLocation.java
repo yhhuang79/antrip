@@ -4,6 +4,8 @@ import java.util.Date;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.AsyncTask;
+import android.util.Log;
 
 import com.skyhookwireless.wps.WPSAuthentication;
 import com.skyhookwireless.wps.WPSContinuation;
@@ -30,6 +32,33 @@ public class SkyhookLocation{
 		locPublisher = lp;
 	}
 	
+	@Deprecated
+	public void asyncRun(final int timeIntervalInSeconds){
+		if(xps != null){
+			if(isRunning){
+				new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
+						xps.abort();
+						xps.getXPSLocation(auth, timeIntervalInSeconds, XPS.EXACT_ACCURACY, locationCallback);
+						return null;
+					}
+				}.execute();
+			} else{
+				new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
+						xps.getXPSLocation(auth, timeIntervalInSeconds, XPS.EXACT_ACCURACY, locationCallback);
+						isRunning = true;
+						return null;
+					}
+				}.execute();
+			}
+		} else{
+			
+		}
+	}
+	
 	/**
 	 * start retrieving skyhook xps periodic location with the given time interval
 	 * will send fixed location value to AntripService(both valid and null(-999) location)
@@ -52,6 +81,19 @@ public class SkyhookLocation{
 		} else{
 			//xps is null, this method might be called after cancel, or something else has gone south
 		}
+	}
+	
+	public void asyncCancel(){
+		new AsyncTask<Void, Void, Void>(){
+			@Override
+			protected Void doInBackground(Void... params) {
+				xps.abort();
+				xps = null;
+				isRunning = false;
+				return null;
+			}
+			
+		}.execute();
 	}
 	
 	/**
@@ -91,6 +133,7 @@ public class SkyhookLocation{
 		
 		@Override
 		public WPSContinuation handleError(WPSReturnCode arg0) {
+			Log.e("skyhooklocation", "handleerror: " + arg0.toString());
 			//XXX
 			nullLocation.setTime(new Date().getTime());
 			//need to use interface instead of static methods
@@ -100,6 +143,7 @@ public class SkyhookLocation{
 		
 		@Override
 		public WPSContinuation handleWPSPeriodicLocation(WPSLocation arg0) {
+			Log.e("skyhooklocation", "handlelocation: " + arg0.toString());
 			//save the latest non null location object for future(check-in) references
 			lastNonNullLocation = WPS2Location(arg0);
 			//XXX

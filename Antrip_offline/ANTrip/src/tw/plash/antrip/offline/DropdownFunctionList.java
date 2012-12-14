@@ -19,7 +19,8 @@ public class DropdownFunctionList extends BetterPopupWindow implements OnClickLi
 	@Override
 	protected void onCreate() {
 		// inflate layout
-		LayoutInflater inflater = (LayoutInflater) this.anchor.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		LayoutInflater inflater = (LayoutInflater) this.anchor.getContext().getSystemService(
+				Context.LAYOUT_INFLATER_SERVICE);
 		
 		ViewGroup root = (ViewGroup) inflater.inflate(R.layout.dropdown_activitylist, null);
 		
@@ -27,9 +28,9 @@ public class DropdownFunctionList extends BetterPopupWindow implements OnClickLi
 		for (int i = 0, icount = root.getChildCount(); i < icount; i++) {
 			View v = root.getChildAt(i);
 			
-			if(v instanceof LinearLayout){
-				((LinearLayout)v).setOnClickListener(this);
-			} else{
+			if (v instanceof LinearLayout) {
+				((LinearLayout) v).setOnClickListener(this);
+			} else {
 				Log.e("dropdown list", "huh2");
 			}
 		}
@@ -43,18 +44,18 @@ public class DropdownFunctionList extends BetterPopupWindow implements OnClickLi
 		// we'll just display a simple toast on a button click
 		Context mContext = this.anchor.getContext();
 		
-		if (v instanceof LinearLayout){
+		if (v instanceof LinearLayout) {
 			LinearLayout b = (LinearLayout) v;
 			String tag = (String) b.getTag();
-			if(tag.equals("triplist")){
-				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
-				mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			} else if(tag.equals("recorder")){
-				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
-//				mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-			} else if(tag.equals("friendlist")){
-				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
-//				mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			if (tag.equals("recorder")) {
+//				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
+				mContext.startActivity(new Intent(mContext, GMapRecorderActivity3.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			} else if (tag.equals("triplist")) {
+//				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
+				mContext.startActivity(new Intent(mContext, TripListActivity4.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+			} else if (tag.equals("friendlist")) {
+				Toast.makeText(mContext, "coming soon...", Toast.LENGTH_SHORT).show();
+				// mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
 			}
 		}
 		

@@ -868,7 +868,7 @@ public class ANTripActivity extends Activity implements TripListReloader{
 	}
 
 	@Override
-	public void shouldReloadTripList() {
+	public void shouldReloadTripList(int position) {
 		bufferedLoadURL("javascript:reloadTripList()");
 	}
 }

@@ -53,7 +53,7 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 	
 	private String userid;
 	
-	private ImageButton btn_activity_icon;
+	private ImageButton dropdownList;
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -71,7 +71,7 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		Crittercism.init(getApplicationContext(), "50aafd4a4f633a2e1a000002");
+//		Crittercism.init(getApplicationContext(), "50aafd4a4f633a2e1a000002");
 		
 		setContentView(R.layout.triplist2);
 		
@@ -79,21 +79,25 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		
-		userid = pref.getString("userid", "154");
-		btn_activity_icon = (ImageButton) findViewById(R.id.actionbar_activity_icon);
-		btn_activity_icon.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				new DropdownFunctionList(v).showLikePopDownMenu();
-			}
-		});
+		userid = pref.getString("userid", "-1");
 		
 		initTripList();
 	}
 	
 	private void initTripList() {
 		
+		dropdownList = (ImageButton) findViewById(R.id.actionbar_activity_icon);
+		dropdownList.setImageResource(R.drawable.dropdown_triplist_pressed);
+		dropdownList.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new DropdownFunctionList(v).showLikePopDownMenu();
+			}
+		});
+		
 		stickyList = (StickyListHeadersListView) findViewById(R.id.triplist2);
+		
+		stickyList.setEmptyView(findViewById(android.R.id.empty));
 		
 		stickyList.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override
@@ -113,22 +117,24 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 										//start upload thread, can try to lock this entry, overlapped with progress bar
 										//should maybe run as background service...?
 										//or maybe there should be a persistent background service, and run upload thread
+										//XXX
+										//pass position to upload thread for reference
 										break;
 									case 1:
 										// delete
 										// this is a deletion from local DB
 										int pos = -1;
-										DBHelper dh = new DBHelper(mContext);
+										DBHelper2 dh2 = new DBHelper2(mContext);
 										try {
-											if(dh.deleteLocalTrip(userid, obj.getString("trip_id")) > 0){
+											if(dh2.deleteLocalTrip(obj.getString("trip_id")) > 0){
 												pos = position;
 												Toast.makeText(mContext, "\"" + obj.getString("trip_name") + "\" deleted!", Toast.LENGTH_LONG).show();
 											}
 										} catch (JSONException e) {
 											e.printStackTrace();
 										}
-										dh.closeDB();
-										dh = null;
+										dh2.closeDB();
+										dh2 = null;
 										loadTripList(pos);
 										break;
 									default:
@@ -281,8 +287,9 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 		final private int REMOTE_NULL_LOCAL_UNKNOWN = 3;
 		final private int CONNECTION_ERROR_LOCAL_UNKNOWN = 4;
 		final private int REMOTE_EXCEPTION_LOCAL_UNKNOWN = 5;
+		final private int NOT_LOGGED_IN_LOCAL_UNKNOWN = 6;
 		
-		final private int NO_INTERNET_LOCAL_UNKNOWN = 6;
+		final private int NO_INTERNET_LOCAL_UNKNOWN = 7;
 		
 		private JSONArray localtripinfo;
 		private JSONArray remotetripinfo;
@@ -297,6 +304,7 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 		protected void onPreExecute() {
 			super.onPreExecute();
 			
+//			((TextView) findViewById(android.R.id.empty)).setText("Loading...");
 			((TextView) stickyList.getEmptyView()).setText("Loading...");
 			
 			stillLoading = true;
@@ -315,74 +323,79 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 					return ADAPTER_NOT_NULL;
 				}
 			} else{
-				if (userid != null) {
-					DBHelper dh = new DBHelper(mContext);
+				{
+					DBHelper2 dh2 = new DBHelper2(mContext);
 					// get current tid from service
-					if (AntripService.getCurrentTid() != null) {
-						localtripinfo = dh.getAllTripInfoForHTML2(userid, AntripService.getCurrentTid().toString());
+					if (AntripService2.getCurrentTripid() != null) {
+						localtripinfo = dh2.getAllTripInfoForHTML2(AntripService2.getCurrentTripid().toString());
 					} else {
-						localtripinfo = dh.getAllTripInfoForHTML2(userid, null);
+						localtripinfo = dh2.getAllTripInfoForHTML2(null);
 					}
 					
-					dh.closeDB();
-					dh = null;
+					dh2.closeDB();
+					dh2 = null;
 				}
 				if (isNetworkAvailable(mContext)) {
-					try {
-						String url = "http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php?userid=" + userid;
-						
-						HttpGet getRequest = new HttpGet(url);
-						
-						HttpParams httpParameters = new BasicHttpParams();
-						// Set the timeout in milliseconds until a connection is
-						// established.
-						// The default value is zero, that means the timeout is not used.
-						int timeoutConnection = 3000;
-						HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
-						// Set the default socket timeout (SO_TIMEOUT)
-						// in milliseconds which is the timeout for waiting for
-						// data.
-						int timeoutSocket = 5000;
-						HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-						
-						DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-						
-						HttpResponse response = client.execute(getRequest);
-						
-						Integer statusCode = response.getStatusLine().getStatusCode();
-						if (statusCode == 200) {
+					if(userid.equals("-1")){
+						//not logged in yet...show only local trips, and hint user to login
+						return NOT_LOGGED_IN_LOCAL_UNKNOWN;
+					} else{
+						try {
+							String url = "http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php?userid=" + userid;
 							
-							BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-							JSONObject result = new JSONObject(new JSONTokener(in.readLine().replace("({", "{")
-									.replace("});", "}")));
-							in.close();
+							HttpGet getRequest = new HttpGet(url);
 							
-							remotetripinfo = result.getJSONArray("tripInfoList");
+							HttpParams httpParameters = new BasicHttpParams();
+							// Set the timeout in milliseconds until a connection is
+							// established.
+							// The default value is zero, that means the timeout is not used.
+							int timeoutConnection = 3000;
+							HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+							// Set the default socket timeout (SO_TIMEOUT)
+							// in milliseconds which is the timeout for waiting for
+							// data.
+							int timeoutSocket = 5000;
+							HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 							
-							client.getConnectionManager().shutdown();
+							DefaultHttpClient client = new DefaultHttpClient(httpParameters);
 							
-							if(remotetripinfo != null && remotetripinfo.length() > 0){
-								//remote not null, local unknown
-								return REMOTE_NOT_NULL_LOCAL_UNKNOWN;
-							} else{
-								//remote null, local unknown
-								return REMOTE_NULL_LOCAL_UNKNOWN;
+							HttpResponse response = client.execute(getRequest);
+							
+							Integer statusCode = response.getStatusLine().getStatusCode();
+							if (statusCode == 200) {
+								
+								BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+								JSONObject result = new JSONObject(new JSONTokener(in.readLine().replace("({", "{")
+										.replace("});", "}")));
+								in.close();
+								
+								remotetripinfo = result.getJSONArray("tripInfoList");
+								
+								client.getConnectionManager().shutdown();
+								
+								if(remotetripinfo != null && remotetripinfo.length() > 0){
+									//remote not null, local unknown
+									return REMOTE_NOT_NULL_LOCAL_UNKNOWN;
+								} else{
+									//remote null, local unknown
+									return REMOTE_NULL_LOCAL_UNKNOWN;
+								}
+							} else {
+								client.getConnectionManager().shutdown();
+								// connection error, local unknown
+								return CONNECTION_ERROR_LOCAL_UNKNOWN;
 							}
-						} else {
-							client.getConnectionManager().shutdown();
-							// connection error, local unknown
-							return CONNECTION_ERROR_LOCAL_UNKNOWN;
+							
+						} catch (ClientProtocolException e) {
+							e.printStackTrace();
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (JSONException e) {
+							e.printStackTrace();
 						}
-						
-					} catch (ClientProtocolException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} catch (JSONException e) {
-						e.printStackTrace();
+						// exceptions
+						return REMOTE_EXCEPTION_LOCAL_UNKNOWN;
 					}
-					// exceptions
-					return REMOTE_EXCEPTION_LOCAL_UNKNOWN;
 				} else {
 					return NO_INTERNET_LOCAL_UNKNOWN;
 				}
@@ -400,6 +413,7 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 			case REMOTE_NULL_LOCAL_UNKNOWN:
 			case CONNECTION_ERROR_LOCAL_UNKNOWN:
 			case REMOTE_EXCEPTION_LOCAL_UNKNOWN:
+			case NOT_LOGGED_IN_LOCAL_UNKNOWN:
 			case NO_INTERNET_LOCAL_UNKNOWN:
 				//all local unknown, set adapter anyway
 				adapter = new TripListAdapter2(mContext, remotetripinfo, localtripinfo);
@@ -411,11 +425,12 @@ public class TripListActivity3 extends Activity implements TripListReloader{
 				//adapter not null
 				stickyList.setAdapter(adapter);
 				//don't think i need to dismiss empty view myself
-//				((TextView) stickyList.getEmptyView()).setVisibility(View.GONE);
+//				((TextView) findViewById(android.R.id.empty)).setVisibility(View.GONE);
 				if(!adapter.isEmpty()){
 					break;
 				}
 			default:
+//				((TextView) findViewById(android.R.id.empty)).setText("Nothing to see here...");
 				((TextView) stickyList.getEmptyView()).setText("Nothing to see here...");
 				break;
 			}
