@@ -65,8 +65,7 @@
         android:background="@color/background_state"
         android:clickable="true"
         android:orientation="horizontal"
-        android:tag="friendlist"
-        android:visibility="gone">
+        android:tag="friendlist">
 
         <ImageView
             android:layout_width="45dip"
@@ -86,6 +85,5 @@
             android:textSize="20sp"
             android:textColor="@android:color/black"/>
     </LinearLayout>
-   
 
 </LinearLayout>

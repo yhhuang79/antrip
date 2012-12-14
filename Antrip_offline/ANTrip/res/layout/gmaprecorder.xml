@@ -9,19 +9,43 @@
         layout="@layout/actionbar" />
 
     <fragment
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/map"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/gmapview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.google.android.gms.maps.MapFragment" />
-
-    <com.google.android.maps.MapView
-        android:id="@+id/gmapview"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
         android:layout_below="@+id/gmapview_actionbar"
-        android:apiKey="0qyApPpS31itWfnph0AWE2Hyy8OnSpy3zD-BmYA"
-        android:clickable="true"
-        android:visibility="gone" />
+        class="com.google.android.gms.maps.SupportMapFragment"
+        map:cameraTargetLat="23.795398"
+        map:cameraTargetLng="121.012756"
+        map:cameraZoom="6"
+        map:mapType="normal"
+        map:uiCompass="true"
+        map:uiRotateGestures="true"
+        map:uiScrollGestures="true"
+        map:uiTiltGestures="true"
+        map:uiZoomControls="true"
+        map:uiZoomGestures="true" />
 
+    <Button
+        android:id="@+id/btn_checkin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="10dip"
+        android:background="@color/checkin_button_state"
+        android:visibility="gone" />
+	
+    <TextView 
+        android:id="@+id/recorder_viewstub"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:layout_centerVertical="true"
+	    android:text="GPS DISABLED\nCLICK HERE TO ENABLE GPS"
+	    android:textSize="20sp"
+	    android:textColor="@android:color/black"
+	    android:background="#FFFF00"
+	    android:gravity="center"
+	    android:visibility="visible"/>
+    
 </RelativeLayout>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 	<style name="Animations" />
 
 	<style name="Animations.GrowFromBottom">
@@ -17,6 +17,11 @@
 		<item name="@android:windowExitAnimation">@anim/shrink_from_bottomright_to_topleft</item>
 	</style>
 	
+	<style name="Animations.PopDownMenuInv">
+		<item name="@android:windowEnterAnimation">@anim/grow_from_topright_to_bottomleft</item>
+		<item name="@android:windowExitAnimation">@anim/shrink_from_bottomleft_to_topright</item>
+	</style>
+	
 	<style name="Animations.GrowFromRight">
 		<item name="@android:windowEnterAnimation">@anim/grow_from_right_to_left</item>
 		<item name="@android:windowExitAnimation">@anim/shrink_from_left_to_right</item>
@@ -31,5 +36,4 @@
 		<item name="@android:windowEnterAnimation">@anim/grow_from_center</item>
 		<item name="@android:windowExitAnimation">@anim/shrink_from_center</item>
 	</style>
-	
 </resources>

@@ -2,11 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="46dip"
-    android:background="#ffaa0000">
+    android:background="#ffe9e5da">
     
     <ImageButton 
         android:id="@+id/actionbar_activity_icon"
-        android:src="@drawable/dropdown_friendlist"
         android:layout_width="50dip"
         android:layout_height="45dip"
         android:adjustViewBounds="true"
@@ -20,7 +19,6 @@
         android:layout_height="45dip"
         android:layout_toRightOf="@+id/actionbar_activity_icon"
         android:gravity="center_vertical"
-        android:text="TEST TEXT"
         android:textSize="20sp"
         android:paddingLeft="3dip"
         android:clickable="false"
@@ -28,19 +26,18 @@
         android:focusableInTouchMode="false"/>
     
     <ImageButton 
-        android:id="@+id/actionbar_action_button1"
-        android:src="@drawable/dropdown_recorder"
+        android:id="@+id/actionbar_action_button_left"
         android:layout_width="45dip"
         android:layout_height="45dip"
-        android:layout_toLeftOf="@+id/actionbar_action_button2"
+        android:layout_toLeftOf="@+id/actionbar_action_button_right"
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"
         android:padding="3dip"
-        android:background="@color/button_state"/>
+        android:background="@color/button_state"
+        android:visibility="gone"/>
     
     <ImageButton 
-        android:id="@+id/actionbar_action_button2"
-        android:src="@drawable/dropdown_triplist"
+        android:id="@+id/actionbar_action_button_right"
         android:layout_width="45dip"
         android:layout_height="45dip"
         android:layout_alignParentRight="true"
@@ -53,7 +50,7 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="1dip"
 	    android:layout_alignParentBottom="true"
-	    android:background="#ff00ff00"
+	    android:background="#ff3ab659"
 	    android:clickable="false"
 	    android:longClickable="false"
 	    android:focusable="false"

@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="tw.plash.antrip.offline"
     android:versionCode="1"
-    android:versionName="1.0.1122.1" >
+    android:versionName="1.0.1214.1" >
 
     <uses-sdk
         android:minSdkVersion="10"
@@ -10,7 +10,7 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
-<!-- CAMERA PERMISSIONS -->
+    <!-- CAMERA PERMISSIONS -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!-- SKYHOOK PERMISSIONS -->
@@ -34,7 +34,8 @@
     <permission
         android:name="tw.plash.antrip.offline.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
-	<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="tw.plash.antrip.offline.permission.MAPS_RECEIVE" />
 
     <application
@@ -49,24 +50,20 @@
             android:noHistory="true" >
         </activity>
         <activity
-            android:name="TripListActivity2"
-            android:configChanges="orientation" >
+            android:name="TripListActivity4"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout" android:launchMode="singleTask">
+        </activity>
+        <activity android:name="GMapRecorderActivity3" android:launchMode="singleTask" android:configChanges="keyboard|keyboardHidden|orientation|screenLayout">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="GMapRecorderActivity" >
-        </activity>
         <activity android:name="OSMRecorderActivity" >
         </activity>
-
-        <service android:name="tw.plash.antrip.offline.BasicLocationService" >
+        <service android:name="AntripService2" >
         </service>
-        <service android:name="RecordLocationService" >
-        </service>
-
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCFt3m5FxfGk-beR6Fc6CGRTIrLfROjoao" />

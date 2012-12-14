@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/antrip_beige">
+    
+	<TextView 
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:text="GPS DISABLED, CLICK HERE TO ENABLE GPS"
+	    android:maxLines="4"
+	    android:textSize="20sp"
+	    android:textColor="@color/mntf_green"
+	    android:gravity="center"/>
+    
+</FrameLayout>

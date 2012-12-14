@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">ANTrip offline</string>
+    <string name="app_name">ANTrip 2</string>
     <string name="okay">okay</string>
     <string name="nope">nope</string>
     <string name="error">error</string>
     
+    <string name="checkin_text_hint">Type something here!</string>
+    
+    <string name="still_recording_warning">ANTrip is still recording in the background!</string>
+    
+    <string name="untitled_trip">Untitled Trip</string>
+    <string name="input_tripname">Name your trip:</string>
+    <string name="save_tripname">Save</string>
+    
+    <string name="version">Version</string>
     <string name="account_info">Account Info</string>
     <string name="login_title">Logged in as:</string>
     <string name="pref_logout_sum">Click to logout</string>

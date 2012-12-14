@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">雲水途誌 offline</string>
+    <string name="app_name">雲水途誌 2</string>
     <string name="okay">好的</string>
     <string name="nope">算了</string>
     <string name="error">錯誤</string>
     
+    <string name="checkin_text_hint">落筆成章!</string>
+    
+    <string name="still_recording_warning">雲水途誌仍在背景持續記錄!</string>
+    
+    <string name="untitled_trip">未命名旅誌</string>
+    <string name="input_tripname">為您的旅誌命名</string>
+    <string name="save_tripname">儲存</string>
+    
+    <string name="version">版本</string>
     <string name="account_info">帳號資訊</string>
     <string name="login_title">您是:</string>
     <string name="pref_logout_sum">點擊以登出</string>
