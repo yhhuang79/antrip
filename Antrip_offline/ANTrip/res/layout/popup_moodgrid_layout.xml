@@ -13,28 +13,28 @@
         <ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_angry"
+			android:src="@drawable/emotion_angry"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="10"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_nervous"
+			android:src="@drawable/emotion_nervous"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="9"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_bored"
+			android:src="@drawable/emotion_bored"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="8"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_sad"
+			android:src="@drawable/emotion_sad"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="7"/>
@@ -47,21 +47,21 @@
         <ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_excited"
+			android:src="@drawable/emotion_excited"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="1"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_calm"
+			android:src="@drawable/emotion_calm"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="11"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_sleepy"
+			android:src="@drawable/emotion_sleepy"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="6"/>
@@ -73,28 +73,28 @@
         <ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_happy"
+			android:src="@drawable/emotion_happy"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="2"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_pleased"
+			android:src="@drawable/emotion_pleased"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="3"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_relaxed"
+			android:src="@drawable/emotion_relaxed"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="4"/>
 		<ImageView
 			android:layout_width="45dip"
 			android:layout_height="45dip"
-			android:src="@drawable/mood_peaceful"
+			android:src="@drawable/emotion_peaceful"
 			android:background="@color/background_state"
 			android:layout_margin="3dip"
 			android:tag="5"/>

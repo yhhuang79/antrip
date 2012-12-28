@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:background="@color/antrip_beige">
+
+    <include
+        android:id="@+id/friendfinder_actionbar"
+        android:layout_alignParentTop="true"
+        layout="@layout/actionbar" />
+
+    <ListView
+        android:id="@+id/friendfinder_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/friendfinder_actionbar"
+        android:cacheColorHint="@android:color/transparent"
+        android:divider="@null">
+    </ListView>
+	
+    <TextView
+        android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/friendfinder_actionbar"
+        android:background="@null"
+        android:gravity="center"
+        android:text="@string/toast_no_pending_friendreqiest"
+        android:textColor="@android:color/black"
+        android:textSize="20sp"
+        android:visibility="gone"/>
+</RelativeLayout>

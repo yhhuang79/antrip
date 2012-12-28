@@ -29,7 +29,7 @@
             android:layout_margin="3dip"
             android:padding="7dip"
             android:scaleType="fitXY"
-            android:src="@drawable/mood_pleased"
+            android:src="@drawable/emotion_pleased"
             android:background="@color/checkin_selectmood_button_state"/>
         
         <ImageView

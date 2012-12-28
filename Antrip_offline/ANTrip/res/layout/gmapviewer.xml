@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <include
+        android:id="@+id/gmapview_actionbar"
+        android:layout_alignParentTop="true"
+        layout="@layout/actionbar" />
+
+    <fragment
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/gmapview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/gmapview_actionbar"
+        class="com.google.android.gms.maps.SupportMapFragment"
+        map:cameraTargetLat="23.795398"
+        map:cameraTargetLng="121.012756"
+        map:cameraZoom="6"
+        map:mapType="normal"
+        map:uiCompass="true"
+        map:uiRotateGestures="true"
+        map:uiScrollGestures="true"
+        map:uiTiltGestures="true"
+        map:uiZoomControls="true"
+        map:uiZoomGestures="true" />
+
+    <TextView
+        android:id="@+id/gmapviewer_banner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/gmapview_actionbar"
+        android:background="#aaaaaaaa"
+        android:gravity="center"
+        android:lines="3"
+        android:textColor="@android:color/black"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_marginLeft="5dip">
+
+        <ImageView
+            android:id="@+id/gmapviewer_movetofirst"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:src="@color/button_state_movetofirst"
+            android:scaleType="fitCenter"/>
+
+        <ImageView
+            android:id="@+id/gmapviewer_zoomtoextent"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:layout_marginTop="15dip"
+            android:layout_marginBottom="15dip"
+            android:src="@color/button_state_zoomtoextent"
+            android:scaleType="fitCenter"/>
+
+        <ImageView
+            android:id="@+id/gmapviewer_movetolast"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:src="@color/button_state_movetolast"
+            android:scaleType="fitCenter"/>
+    </LinearLayout>
+</RelativeLayout>

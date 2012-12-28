@@ -51,7 +51,7 @@ public class MoodGrid extends BetterPopupWindow implements OnClickListener {
 	public void onClick(View v) {
 		// we'll just display a simple toast on a button click
 		ImageView b = (ImageView) v;
-		Log.w("mood grid", "clicky: " + (String) b.getTag());
+//		Log.w("mood grid", "clicky: " + (String) b.getTag());
 		mc.setMood(Integer.parseInt((String) b.getTag()));
 		this.dismiss();
 	}

@@ -1,5 +1,7 @@
 package tw.plash.antrip.offline;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import android.location.Location;
 
 public class LocationFilter {
@@ -9,7 +11,7 @@ public class LocationFilter {
 	 * @return true/false
 	 */
 	static public boolean isAccurate(Location inputLocation){
-		final int ACCURACY_THRESHOLD = 1500;
+		final int ACCURACY_THRESHOLD = 1499;
 		//make sure input parameter is not null
 		if(inputLocation != null){
 			//make sure provider column is not null nor "null" provider, as seen in null location case
@@ -24,7 +26,7 @@ public class LocationFilter {
 	}
 	
 	static public boolean isValid(Location inputLocation){
-		final int VALIDITY_THRESHOLD = -999;
+		final double VALIDITY_THRESHOLD = -998.0;
 		if(inputLocation != null){
 			//at least input is not null
 			if(!inputLocation.getProvider().isEmpty() && !inputLocation.getProvider().equalsIgnoreCase("null")){
@@ -34,6 +36,19 @@ public class LocationFilter {
 					//we mark invalid location with latitude value of -999
 					return true;
 				}
+			}
+		}
+		return false;
+	}
+	
+	static public boolean isValid(LatLng inputLocation){
+		final double VALIDITY_THRESHOLD = -998.0;
+		if(inputLocation != null){
+			//at least input is not null
+			if(inputLocation.latitude > VALIDITY_THRESHOLD){
+				//latitude value is larger then -999, meaning -998~infinity, thus assume valid
+				//we mark invalid location with latitude value of -999
+				return true;
 			}
 		}
 		return false;

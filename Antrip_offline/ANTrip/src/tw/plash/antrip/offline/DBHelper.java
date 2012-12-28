@@ -1072,7 +1072,21 @@ public class DBHelper {
 	public void exportEverything() {
 		if (db.isOpen()) {
 			try {
-				FileOutputStream fos = new FileOutputStream("/sdcard/" + System.currentTimeMillis() + ".txt");
+				String testpath = "/mnt/sdcard/";
+				String fullpath = null;
+				File tester = new File(testpath);
+				if (tester.exists() && tester.isDirectory()) {
+					fullpath = testpath + System.currentTimeMillis() + ".txt";
+				} else {
+					testpath = "/mnt/emmc/";
+					tester = new File(testpath);
+					if (tester.exists() && tester.isDirectory()) {
+						fullpath = testpath + System.currentTimeMillis() + ".txt";
+					}
+				}
+				Log.e("export everything", "path= " + fullpath);
+				FileOutputStream fos = new FileOutputStream(fullpath);
+//				FileOutputStream fos = new FileOutputStream("/sdcard/" + System.currentTimeMillis() + ".txt");
 				OutputStreamWriter osw = new OutputStreamWriter(fos);
 				Cursor mCursor = db.query(TRIP_INFO_TABLE, null, null, null, null, null, null);
 				if (mCursor != null) {

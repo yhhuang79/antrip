@@ -28,8 +28,8 @@
 
     <Button
         android:id="@+id/btn_checkin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dip"
+        android:layout_height="50dip"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="10dip"
@@ -41,11 +41,37 @@
 	    android:layout_width="fill_parent"
 	    android:layout_height="wrap_content"
 	    android:layout_centerVertical="true"
-	    android:text="GPS DISABLED\nCLICK HERE TO ENABLE GPS"
+	    android:text="@string/gpsdisabledwarning"
 	    android:textSize="20sp"
 	    android:textColor="@android:color/black"
 	    android:background="#FFFF00"
 	    android:gravity="center"
 	    android:visibility="visible"/>
     
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:layout_marginLeft="5dip">
+
+        <ImageView
+            android:id="@+id/gmaprecorder_movetofirst"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:src="@color/button_state_movetofirst"
+            android:scaleType="fitCenter"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/gmaprecorder_zoomtoextent"
+            android:layout_width="50dip"
+            android:layout_height="50dip"
+            android:layout_marginTop="15dip"
+            android:layout_marginBottom="15dip"
+            android:src="@color/button_state_zoomtoextent"
+            android:scaleType="fitCenter"
+            android:visibility="gone"/>
+    </LinearLayout>
 </RelativeLayout>

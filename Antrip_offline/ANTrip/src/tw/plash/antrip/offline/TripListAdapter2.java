@@ -1,5 +1,6 @@
 package tw.plash.antrip.offline;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -18,7 +19,6 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 	
 	private LayoutInflater mInflater;
 	
-//	private JSONArray data = null;
 	private ArrayList<JSONObject> data = null;
 	
 	public TripListAdapter2(Context context, JSONArray remotedata, JSONArray localdata) {
@@ -29,7 +29,7 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 		
 		if(localdata != null && localdata.length() > 0){
 			local = (ArrayList<JSONObject>) JSONUtility.asList(localdata);
-			Log.i("triplistadapter2", "local= " + local.toString());
+//			Log.i("triplistadapter2", "local= " + local.toString());
 		}
 		if(remotedata != null && remotedata.length() > 0){
 			remote = (ArrayList<JSONObject>) JSONUtility.asList(remotedata);
@@ -48,8 +48,8 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 				//remote not null
 				data = new ArrayList<JSONObject>(remote);
 			} else{
-				Log.e("triplistadapter2", "local and remote both null, impossibru la");
-				throw new NullPointerException();
+				Log.e("triplistadapter2", "local and remote both null, empty adapter");
+				data = new ArrayList<JSONObject>();
 			}
 		}
 		
@@ -72,13 +72,13 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 		try {
 			//only local tripinfo have this column
 			if(data.get(position).has("triplistheader")){
-				holder.htv.setText("pending upload");
+				holder.htv.setText(R.string.triplist_title_pendingupload);
 			} else{
 				holder.htv.setText(data.get(position).getString("trip_st").substring(0, 7).replace("-", "/"));
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
-			holder.htv.setText("error");
+			holder.htv.setText(R.string.error);
 		}
 		
 		return convertView;
@@ -98,7 +98,7 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 			} else{
 				id = Long.valueOf(data.get(position).getString("trip_st").substring(0, 7).replace("-", ""));
 			}
-			Log.w("header id", "position=" + position + "; id= " + id);
+//			Log.w("header id", "position=" + position + "; id= " + id);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
@@ -122,12 +122,12 @@ public class TripListAdapter2 extends StickyListHeadersBaseAdapter {
 		}
 		
 		try {
-			holder.tv1.setText((String) data.get(position).getString("trip_name"));
-			holder.tv2.setText((String) data.get(position).getString("trip_st"));
+			holder.tv1.setText(data.get(position).getString("trip_name"));
+			holder.tv2.setText(data.get(position).getString("trip_st"));
 		} catch (JSONException e) {
 			e.printStackTrace();
-			holder.tv1.setText("");
-			holder.tv2.setText("");
+			holder.tv1.setText("-");
+			holder.tv2.setText("-");
 		}
 		
 		return convertView;

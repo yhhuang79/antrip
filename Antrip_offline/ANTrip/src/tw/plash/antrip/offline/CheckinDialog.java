@@ -88,40 +88,40 @@ public class CheckinDialog extends Dialog implements MoodCallback{
 			cqac.setMood(mood);
 			switch(mood){
 			case 1:
-				mood_btn.setImageResource(R.drawable.mood_excited);
+				mood_btn.setImageResource(R.drawable.emotion_excited);
 				break;
 			case 2:
-				mood_btn.setImageResource(R.drawable.mood_happy);
+				mood_btn.setImageResource(R.drawable.emotion_happy);
 				break;
 			case 3:
-				mood_btn.setImageResource(R.drawable.mood_pleased);
+				mood_btn.setImageResource(R.drawable.emotion_pleased);
 				break;
 			case 4:
-				mood_btn.setImageResource(R.drawable.mood_relaxed);
+				mood_btn.setImageResource(R.drawable.emotion_relaxed);
 				break;
 			case 5:
-				mood_btn.setImageResource(R.drawable.mood_peaceful);
+				mood_btn.setImageResource(R.drawable.emotion_peaceful);
 				break;
 			case 6:
-				mood_btn.setImageResource(R.drawable.mood_sleepy);
+				mood_btn.setImageResource(R.drawable.emotion_sleepy);
 				break;
 			case 7:
-				mood_btn.setImageResource(R.drawable.mood_sad);
+				mood_btn.setImageResource(R.drawable.emotion_sad);
 				break;
 			case 8:
-				mood_btn.setImageResource(R.drawable.mood_bored);
+				mood_btn.setImageResource(R.drawable.emotion_bored);
 				break;
 			case 9:
-				mood_btn.setImageResource(R.drawable.mood_nervous);
+				mood_btn.setImageResource(R.drawable.emotion_nervous);
 				break;
 			case 10:
-				mood_btn.setImageResource(R.drawable.mood_angry);
+				mood_btn.setImageResource(R.drawable.emotion_angry);
 				break;
 			case 11:
-				mood_btn.setImageResource(R.drawable.mood_calm);
+				mood_btn.setImageResource(R.drawable.emotion_calm);
 				break;
 			default:
-				mood_btn.setImageResource(R.drawable.mood_pleased);
+				mood_btn.setImageResource(R.drawable.emotion_pleased);
 				break;
 			}
 		}

@@ -9,6 +9,7 @@
     <color name="android_green">#A4C639</color>
     <color name="devils_grey">#666666</color>
 	
+    <color name="antrip_red">#dd0e3e</color>
     <color name="antrip_beige">#e9e5da</color>
     <color name="mood_clicked_bg">#26c1c1</color>
 </resources>

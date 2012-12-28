@@ -133,7 +133,7 @@ public class SkyhookLocation{
 		
 		@Override
 		public WPSContinuation handleError(WPSReturnCode arg0) {
-			Log.e("skyhooklocation", "handleerror: " + arg0.toString());
+//			Log.e("skyhooklocation", "handleerror: " + arg0.toString());
 			//XXX
 			nullLocation.setTime(new Date().getTime());
 			//need to use interface instead of static methods
@@ -143,7 +143,7 @@ public class SkyhookLocation{
 		
 		@Override
 		public WPSContinuation handleWPSPeriodicLocation(WPSLocation arg0) {
-			Log.e("skyhooklocation", "handlelocation: " + arg0.toString());
+//			Log.e("skyhooklocation", "handlelocation: " + arg0.toString());
 			//save the latest non null location object for future(check-in) references
 			lastNonNullLocation = WPS2Location(arg0);
 			//XXX

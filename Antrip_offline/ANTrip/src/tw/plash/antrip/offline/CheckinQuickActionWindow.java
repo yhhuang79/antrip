@@ -72,7 +72,7 @@ public class CheckinQuickActionWindow extends BetterPopupWindow {
 				int[] loc = {0, 0};
 				
 				v.getLocationOnScreen(loc);
-				Log.e("checkinquicklactionwindow", "loc=" + loc[0] + ", " + loc[1]);
+//				Log.e("checkinquicklactionwindow", "loc=" + loc[0] + ", " + loc[1]);
 				cqac.showMoodGrid(loc);
 			}
 		});

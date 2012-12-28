@@ -9,20 +9,15 @@ package tw.plash.antrip.offline;
 public class CachedPoints {
 	public final double latitude;
 	public final double longitude;
-	public final int transportMode;
-	public final boolean marker;
+	public final String timestamp;
 	
-	public CachedPoints(double latitude, double longitude, int transportMode, boolean marker) {
+	public CachedPoints(double latitude, double longitude, String timestamp) {
 		this.latitude = latitude;
 		this.longitude = longitude;
-		this.transportMode = transportMode;
-		this.marker = marker;
+		this.timestamp = timestamp;
 	}
-
+	
 	public CachedPoints(double latitude, double longitude) {
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.transportMode = -2;
-		this.marker = false;
+		this(latitude, longitude, null);
 	}
 }

@@ -48,14 +48,11 @@ public class DropdownFunctionList extends BetterPopupWindow implements OnClickLi
 			LinearLayout b = (LinearLayout) v;
 			String tag = (String) b.getTag();
 			if (tag.equals("recorder")) {
-//				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
-				mContext.startActivity(new Intent(mContext, GMapRecorderActivity3.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+				mContext.startActivity(new Intent(mContext, GMapRecorderActivity3.class));
 			} else if (tag.equals("triplist")) {
-//				Toast.makeText(mContext, tag, Toast.LENGTH_SHORT).show();
-				mContext.startActivity(new Intent(mContext, TripListActivity4.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+				mContext.startActivity(new Intent(mContext, TripListActivity4.class));
 			} else if (tag.equals("friendlist")) {
-				Toast.makeText(mContext, "coming soon...", Toast.LENGTH_SHORT).show();
-				// mContext.startActivity(new Intent(mContext, GMapRecorderActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+				mContext.startActivity(new Intent(mContext, FriendListActivityTEMP.class));
 			}
 		}
 		

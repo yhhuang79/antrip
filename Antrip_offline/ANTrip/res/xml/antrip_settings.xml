@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/account_info" >
+    <PreferenceCategory android:title="@string/setting_title_account" >
         <Preference
             android:enabled="true"
-            android:key="usrname"
-            android:summary="@string/pref_logout_sum" />
+            android:key="username" />
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/setting_title_recorder" >
+        <ListPreference
+            android:entries="@array/setting_recorder_mode"
+            android:entryValues="@array/setting_recorder_mode_value"
+            android:key="recorder_mode"
+            android:title="@string/setting_title_recordermode" android:defaultValue="2"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/setting_title_general" >
+        <Preference
+            android:key="contact"
+            android:title="@string/setting_contact" />
+        <Preference
+            android:key="license"
+            android:title="@string/setting_tos" />
+        <Preference
+            android:key="version"
+            android:title="@string/version" />
     </PreferenceCategory>
 
 </PreferenceScreen>

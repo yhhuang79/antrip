@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:state_pressed="true" 
-		  android:drawable="@drawable/checkin_takepicture_click"/>
+		  android:drawable="@drawable/checkin_camera_click"/>
 	<item android:state_pressed="false" 
-		  android:drawable="@drawable/checkin_takepicture"/>
+		  android:drawable="@drawable/checkin_camera"/>
 	<item android:state_focused="true" 
-		  android:drawable="@drawable/checkin_takepicture_click"/>
+		  android:drawable="@drawable/checkin_camera_click"/>
 	<item android:state_focused="false" 
-		  android:drawable="@drawable/checkin_takepicture"/>
+		  android:drawable="@drawable/checkin_camera"/>
 	<item android:state_selected="true"
-		  android:drawable="@drawable/checkin_takepicture_click"/>
+		  android:drawable="@drawable/checkin_camera_click"/>
 	<item android:state_selected="false"
-		  android:drawable="@drawable/checkin_takepicture"/>
+		  android:drawable="@drawable/checkin_camera"/>
 </selector>

@@ -3,6 +3,7 @@ package tw.plash.antrip.offline;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,9 +31,11 @@ import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -40,6 +43,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.InfoWindowAdapter;
@@ -47,10 +51,10 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.LocationSource.OnLocationChangedListener;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -65,15 +69,23 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	private ImageButton recordBtn;
 	private ImageButton dropdownList;
 	
+	private ImageView movetofirst;
+	private ImageView zoomtoextent;
+	private MarkerOptions firstPoint;
+	private CameraUpdate zoomtoextentcameraupdate;
+	private LatLngBounds.Builder boundBuilder;
+	
 	private TextView warningPanel;
 	
 	private CheckinDialog checkinDiag;
 	
+	private boolean canStartRecord;
 	private boolean firstLoactionFixAnimate;
 	private Location latestLocation;
 	private CandidateCheckinObject cco;
 	private Uri imageUri;
 	final private int REQUEST_CODE_TAKE_PICTURE = 1377;
+	final private int REQUEST_CODE_SETTINGS = 1378;
 	private Polyline trajectory;
 	
 	private boolean mIsBound;
@@ -81,6 +93,9 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	private Messenger inMessenger;
 	private IncomingHandler ih;
 	private antripLocationSource als;
+	
+//	private Timer mTimer;
+//	private boolean shouldSkipTimertask;
 	
 	private interface ListenerCallback{
 		public void activateListener(OnLocationChangedListener olcl);
@@ -130,8 +145,27 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		public void handleMessage(Message msg) {
 			switch(msg.what){
 			case AntripService2.MSG_LOCATION_UPDATE:
+				Log.w("activity", "MSG_LOCATION_UPDATE");
 				if(msg.obj instanceof Location){
+//					if(mTimer != null){
+//						mTimer.cancel();
+//						mTimer.purge();
+//						mTimer = null;
+//					} else{
+//						mTimer = new Timer();
+//						mTimer.schedule(new TimerTask() {
+//							@Override
+//							public void run() {
+//								//show warning banner, about not receiving location update for a while
+//								if(!shouldSkipTimertask){
+//									
+//								}
+//							}
+//						}, 000);
+//					}
 					latestLocation = (Location) msg.obj;
+					//user is only allowed to start recording when a location fix is received
+					canStartRecord = true;
 					if(olcl != null){
 						//only valid and accurate location update will be 
 						//received, we can safely update current location
@@ -143,18 +177,31 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 						
 					}
 					if(AntripService2.isRecording()){
+						if(firstPoint == null){
+							firstPoint = new MarkerOptions().position(new LatLng(latestLocation.getLatitude(), latestLocation.getLongitude())).title(mContext.getString(R.string.gmapviewer_marker_start)).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_startpoint));
+							movetofirst.setVisibility(View.VISIBLE);
+						}
 						if(checkinBtn.getVisibility() == View.GONE){
 							checkinBtn.setVisibility(View.VISIBLE);
+						}
+						if(boundBuilder != null){
+							boundBuilder.include(new LatLng(latestLocation.getLatitude(), latestLocation.getLongitude()));
+							zoomtoextentcameraupdate = CameraUpdateFactory.newLatLngBounds(boundBuilder.build(), 30);
+							zoomtoextent.setVisibility(View.VISIBLE);
 						}
 						//draw polyline on map
 						if(trajectory == null){
 							//first time setup
-							trajectory = gmap.addPolyline(new PolylineOptions().add(new LatLng(latestLocation.getLatitude(), latestLocation.getLongitude())));
-							gmap.addMarker(new MarkerOptions().position(new LatLng(latestLocation.getLatitude(), latestLocation.getLongitude())).title("start"));
+							trajectory = gmap.addPolyline(new PolylineOptions().add(new LatLng(latestLocation.getLatitude(), latestLocation.getLongitude())).color(0xffff0000));
+							if(firstPoint != null){
+								gmap.addMarker(firstPoint);
+							}
 						} else{
 							//update the piont list, no need to clear the entire map to redraw
 							//this way, the first point marker will be kept
 							List<LatLng> list = trajectory.getPoints();
+//							Log.i("location update", "trajectory: " + list);
+//							Log.i("location update", "latest location: " + latestLocation);
 							list.add(new LatLng(latestLocation.getLatitude(), latestLocation.getLongitude()));
 							trajectory.setPoints(list);
 						}
@@ -162,33 +209,45 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 				}
 				break;
 			case AntripService2.MSG_SYNC_LOCATION:
+				Log.w("activity", "MSG_SYNC_LOCATION");
 				if(msg.obj instanceof ArrayList<?>){
+					zoomtoextent.setVisibility(View.GONE);
 					//clear the map for redrawing
 					ArrayList<JSONObject> data = (ArrayList<JSONObject>) msg.obj;
+//					Log.i("gmaprecorder activity", "sync location data=" + data);
 					if(data != null && data.size() > 0){
 						//at least one point exists
 						gmap.clear();
+						boundBuilder = new LatLngBounds.Builder();
 						try {
 							PolylineOptions po = new PolylineOptions();
 							for (JSONObject item : data) {
+								if(firstPoint == null){
+									firstPoint = new MarkerOptions().position(new LatLng(item.getDouble("latitude"), item.getDouble("longitude"))).title(mContext.getString(R.string.gmapviewer_marker_start)).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_startpoint));
+									movetofirst.setVisibility(View.VISIBLE);
+								}
+//								Log.e("recorder", "syncloc: " + item.toString());
+								boundBuilder.include(new LatLng(item.getDouble("latitude"), item.getDouble("longitude")));
 								po.add(new LatLng(item.getDouble("latitude"), item.getDouble("longitude")));
-								if(item.has("picture") || item.has("emotion") || item.has("note")){
+								if(item.has("checkin")){
 									CandidateCheckinObject tmpcco = new CandidateCheckinObject();
-									if(item.has("picture")){
-										tmpcco.setPicturePath(item.getString("picture"));
+									JSONObject tmpitem = item.getJSONObject("checkin");
+									if(tmpitem.has("picture")){
+										tmpcco.setPicturePath(tmpitem.getString("picture"));
 									}
-									if(item.has("emotion")){
-										tmpcco.setEmotionID(Integer.parseInt(item.getString("emotion")));
+									if(tmpitem.has("emotion")){
+										tmpcco.setEmotionID(Integer.parseInt(tmpitem.getString("emotion")));
 									}
-									if(item.has("note")){
-										tmpcco.setCheckinText(item.getString("note"));
+									if(tmpitem.has("note")){
+										tmpcco.setCheckinText(tmpitem.getString("note"));
 									}
-									gmap.addMarker(new MarkerOptions().position(new LatLng(item.getDouble("latitude"), item.getDouble("longitude"))).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_48)).snippet(tmpcco.toString()));
+									gmap.addMarker(new MarkerOptions().position(new LatLng(item.getDouble("latitude"), item.getDouble("longitude"))).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_48)).snippet(tmpcco.toString()).draggable(true));
 								}
 							}
-							trajectory = gmap.addPolyline(po);
-							Log.w("gmaprecorder activity3", "MSG_SYNC_LOCATION: po=" + po.toString());
-							gmap.addMarker(new MarkerOptions().position(new LatLng(data.get(0).getDouble("latitude"), data.get(0).getDouble("longitude"))).title("start"));
+							trajectory = gmap.addPolyline(po.color(0xffff0000));
+							gmap.addMarker(firstPoint);
+							zoomtoextentcameraupdate = CameraUpdateFactory.newLatLngBounds(boundBuilder.build(), 30);
+							zoomtoextent.setVisibility(View.VISIBLE);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
@@ -196,6 +255,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 				}
 				break;
 			case AntripService2.MSG_STOP_RECORDING_CONFIRMED:
+				Log.w("activity", "MSG_STOP_RECORDING_CONFIRMED");
 				if(msg.obj instanceof Boolean){
 					if((Boolean) msg.obj){
 						//trip is confirmed as VALID, show input trip name dialog
@@ -230,9 +290,9 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 					} else{
 						//trip is confirmed as INVALID, show warning
 						new AlertDialog.Builder(mContext)
-							.setTitle("Invalid Trip")
-							.setMessage("Your trip contains no valid point, it has been discarded")
-							.setPositiveButton("I see...", null)
+							.setTitle(R.string.alertdialog_invalid_trip_title)
+							.setMessage(R.string.alertdialog_invalid_trip_message)
+							.setPositiveButton(R.string.alertdialog_iseebutton, null)
 							.show();
 					}
 				} else{
@@ -240,8 +300,9 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 				}
 				break;
 			case AntripService2.MSG_AUTO_STOP_RECORDING_CONFIRMED:
+				Log.w("activity", "MSG_AUTO_STOP_RECORDING_CONFIRMED");
 				checkinBtn.setVisibility(View.GONE);
-				recordBtn.setImageResource(R.drawable.actionbar_record);
+				recordBtn.setImageResource(R.color.button_state_startrecord);
 				break;
 			default:
 				super.handleMessage(msg);
@@ -317,6 +378,10 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		firstLoactionFixAnimate = true;
 		trajectory = null;
 		
+		firstPoint = null;
+		zoomtoextentcameraupdate = null;
+		boundBuilder = null;
+		
 		ih = new IncomingHandler();
 		inMessenger = new Messenger(ih);
 		als = new antripLocationSource(ih);
@@ -335,36 +400,48 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		});
 		
 		recordBtn = (ImageButton) findViewById(R.id.actionbar_action_button_right);
+		recordBtn.setVisibility(View.VISIBLE);
 		if(AntripService2.isRecording()){
-			recordBtn.setImageResource(R.drawable.actionbar_record_pressed);
+			recordBtn.setImageResource(R.color.button_state_stoprecord);
 		} else{
-			recordBtn.setImageResource(R.drawable.actionbar_record);
+			recordBtn.setImageResource(R.color.button_state_startrecord);
 		}
 		recordBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				if(AntripService2.isRecording()){
-					//was recording, STOP recording now
+				if (AntripService2.isRecording()) {
+					// was recording, STOP recording now
+					firstPoint = null;
+					zoomtoextentcameraupdate = null;
+					zoomtoextent.setVisibility(View.GONE);
+					movetofirst.setVisibility(View.GONE);
 					checkinBtn.setVisibility(View.GONE);
-					recordBtn.setImageResource(R.drawable.actionbar_record);
+					recordBtn.setImageResource(R.color.button_state_startrecord);
 					sendMessageToService(AntripService2.MSG_STOP_RECORDING, null);
-					//wait for the stop recording confirmation
-					//if trip is valid, show input tripname dialog
-					//else show warning
-				} else{
-					//was NOT recording, START recording now
-					gmap.clear();
-					latestLocation = null;
-					firstLoactionFixAnimate = true;
-					trajectory = null;
-					sendMessageToService(AntripService2.MSG_START_RECORDING, null);
-					recordBtn.setImageResource(R.drawable.actionbar_record_pressed);
+					// wait for the stop recording confirmation
+					// if trip is valid, show input tripname dialog
+					// else show warning
+				} else {
+					// was NOT recording, START recording now
+					if(canStartRecord){
+						gmap.clear();
+						latestLocation = null;
+						firstLoactionFixAnimate = true;
+						trajectory = null;
+						boundBuilder = new LatLngBounds.Builder();
+						sendMessageToService(AntripService2.MSG_START_RECORDING, null);
+						recordBtn.setImageResource(R.color.button_state_stoprecord);
+					} else{
+						Toast.makeText(mContext, R.string.toast_waitingforfirstlocationfix, Toast.LENGTH_SHORT).show();
+					}
 				}
 			}
 		});
 		
+		((TextView) findViewById(R.id.actionbar_activity_title)).setText(R.string.dropdown_recorder);
+		
 		dropdownList = (ImageButton) findViewById(R.id.actionbar_activity_icon);
-		dropdownList.setImageResource(R.drawable.dropdown_recorder_pressed);
+		dropdownList.setImageResource(R.drawable.dropdown_recorder);
 		dropdownList.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -380,10 +457,28 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 			}
 		});
 		
+		movetofirst = (ImageView) findViewById(R.id.gmaprecorder_movetofirst);
+		movetofirst.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(firstPoint != null){
+					gmap.animateCamera(CameraUpdateFactory.newLatLngZoom(firstPoint.getPosition(), 16));
+				}
+			}
+		});
+		
+		zoomtoextent = (ImageView) findViewById(R.id.gmaprecorder_zoomtoextent);
+		zoomtoextent.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if(zoomtoextentcameraupdate != null){
+					gmap.animateCamera(zoomtoextentcameraupdate);
+				}
+			}
+		});
+		
 		isMapAvailable();
 	}
-	
-	
 	
 	private void doBindService(){
 		bindService(new Intent(mContext, AntripService2.class), mServiceConnection, BIND_AUTO_CREATE);
@@ -432,6 +527,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		doUnbindService();
 		
 		if(!AntripService2.isRecording()){
+			Log.e("activity", "stopping service");
 			//if not recording, stop the service
 			stopService(new Intent(mContext, AntripService2.class));
 		}
@@ -448,6 +544,21 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 				checkinDiag.setPicture(imageUri.getPath());
 				cco.setPicturePath(imageUri.getPath());
 			}
+			break;
+		case REQUEST_CODE_SETTINGS:
+			switch(resultCode){
+			case RESULT_OK:
+				//it's fine if you're logged out in recorder activity...
+				
+				break;
+			case RESULT_CANCELED:
+			case RESULT_FIRST_USER:
+			default:
+				//whatever...
+				break;
+			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -478,7 +589,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 					//start or end point
 				} else{
 					//show full size image via gallery
-					Toast.makeText(mContext, "snippet= " + marker.getSnippet(), Toast.LENGTH_LONG).show();
+//					Toast.makeText(mContext, "snippet= " + marker.getSnippet(), Toast.LENGTH_LONG).show();
 				}
 			}
 		});
@@ -495,51 +606,54 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			ViewGroup root = (ViewGroup) inflater.inflate(R.layout.checkin_test, null);
 			String tmp = cco.substring(0, cco.indexOf(";text:")).replace("mood:", "").replace(";", "");
+//			Log.e("tmp", "mood:" + tmp);
 			if(tmp != null && tmp.length() == 1){
 				switch(Integer.parseInt(tmp)){
 				case 1:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_excited);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_excited);
 					break;
 				case 2:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_happy);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_happy);
 					break;
 				case 3:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_pleased);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_pleased);
 					break;
 				case 4:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_relaxed);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_relaxed);
 					break;
 				case 5:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_peaceful);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_peaceful);
 					break;
 				case 6:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_sleepy);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_sleepy);
 					break;
 				case 7:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_sad);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_sad);
 					break;
 				case 8:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_bored);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_bored);
 					break;
 				case 9:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_nervous);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_nervous);
 					break;
 				case 10:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_angry);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_angry);
 					break;
 				case 11:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.mood_calm);
+					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_calm);
 					break;
 				}
 			} else{
 				((ImageView)root.findViewById(R.id.checkin_marker_mood)).setVisibility(View.GONE);
 			}
 			tmp = cco.substring(cco.indexOf(";text:") + 6, cco.indexOf(";pic:"));
+//			Log.e("tmp", "text:" + tmp);
 			if(tmp != null && tmp.length() > 0){
 				((TextView) root.findViewById(R.id.checkin_marker_text)).setText(tmp);
 			}
 			if(cco.indexOf(";pic:") + 5 < cco.length()){
 				tmp = cco.substring(cco.indexOf(";pic:") + 5);
+//				Log.e("tmp", "pic:" + tmp);
 				((ImageView) root.findViewById(R.id.checkin_marker_picture)).setImageBitmap(BitmapUtility.getPreview(tmp, 200));
 			}
 			return root;
@@ -555,7 +669,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	
 	@Override
 	public void setCheckinText(String text) {
-		Log.w("gmaprecorderactivity3", "setCheckinText: " + text);
+//		Log.w("gmaprecorderactivity3", "setCheckinText: " + text);
 		if(cco != null){
 			cco.setCheckinText(text);
 		} else{
@@ -572,8 +686,8 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		{
 			String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
 			String path = "/mnt/sdcard/";
-			Log.e("gmaprecorderactivity3", "path= " + path);
-			Log.e("gmaprecorderactivity3w", "system path= " + Environment.getExternalStorageDirectory().getAbsolutePath());
+//			Log.e("gmaprecorderactivity3", "path= " + path);
+//			Log.e("gmaprecorderactivity3w", "system path= " + Environment.getExternalStorageDirectory().getAbsolutePath());
 			File tester = new File(path);
 			if (tester.exists() && tester.isDirectory()) {
 				Log.w("sdcard/dcim", "exists");
@@ -606,7 +720,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		}
 		if(imagefile != null){
 			imageUri = Uri.fromFile(imagefile);
-			Log.w("startcamera", "imageUri= " + imageUri.getPath());
+//			Log.w("startcamera", "imageUri= " + imageUri.getPath());
 			// intent to launch Android camera app to take pictures
 			Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 			// input the desired filepath + filename
@@ -618,7 +732,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 
 	@Override
 	public void setMood(int mood) {
-		Log.w("gmaprecorderactivity3", "setMood: " + mood);
+//		Log.w("gmaprecorderactivity3", "setMood: " + mood);
 		if(cco != null){
 			cco.setEmotionID(mood);
 		} else{
@@ -632,7 +746,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		if(cco != null && cco.isValid()){
 			//save cco and draw marker
 			sendMessageToService(AntripService2.MSG_SAVE_CCO, cco);
-			gmap.addMarker(new MarkerOptions().position(new LatLng(cco.getLocation().getLatitude(), cco.getLocation().getLongitude())).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_48)).snippet(cco.toString()));
+			gmap.addMarker(new MarkerOptions().position(new LatLng(cco.getLocation().getLatitude(), cco.getLocation().getLongitude())).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_48)).snippet(cco.toString()).draggable(true));
 		} else{
 			//show warning
 		}
@@ -642,5 +756,26 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	public void cancel() {
 		Log.w("gmaprecorderactivity3", "cancel called");
 		cco = null;
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.activity_menu, menu);
+		return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()){
+		case R.id.menu_settings:
+			startActivityForResult(new Intent(mContext, tw.plash.antrip.offline.Settings.class), REQUEST_CODE_SETTINGS);
+			return true;
+		case R.id.menu_help:
+			Toast.makeText(mContext, R.string.toast_theres_no_help, Toast.LENGTH_SHORT).show();
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 }

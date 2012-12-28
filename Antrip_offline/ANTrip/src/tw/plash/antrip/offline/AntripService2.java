@@ -1,6 +1,5 @@
 package tw.plash.antrip.offline;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
@@ -9,13 +8,13 @@ import java.util.TimerTask;
 import org.json.JSONObject;
 
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -28,14 +27,15 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 public class AntripService2 extends Service implements LocationPublisher{
 	
+	final static int CONNECTION_TIMEOUT = 5000; //5 seconds connection timeout
+	
 	final private int timeout_FirstLocationFix = 60000; //60 seconds timeout for first location fix
-	final private int timeout_locationFixInterval = 300000;//30 seconds timeout between locations...
+	final private int timeout_locationFixInterval = 30000;//30 seconds timeout between locations...
 	
 	private static boolean isRecording;
 	
@@ -51,6 +51,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 	private SkyhookLocation skyhook;
 	
 	private boolean isUsingSkyhook;
+	private boolean shouldSkiptimertask;
 	
 	private DBHelper2 dh2;
 	private boolean isValidTripToKeep;
@@ -79,16 +80,28 @@ public class AntripService2 extends Service implements LocationPublisher{
 	private BroadcastReceiver br = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if(intent != null && intent.getAction() != null && intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-				if(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 999) <= 20){
-					//battery @ 30%, should stop recording now
-					Toast.makeText(mContext, "Low battery...Antrip auto stopping...", Toast.LENGTH_LONG).show();
+			if(intent != null && intent.getAction() != null){
+				if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
+					if(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 999) <= 20){
+						
+						Notification notification = new Notification();
+						notification.setLatestEventInfo(mContext, mContext.getResources().getString(R.string.lowbatteryautostopnotification_title), mContext.getResources().getString(R.string.lowbatteryautostopnotification_message), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+						((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(1384, notification);
+						
+						try {
+							inMessenger.send(Message.obtain(null, priMSG_LOW_BATTERY_AUTO_STOP));
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						}
+					}
+				} else if(intent.getAction().equals(Intent.ACTION_SHUTDOWN)){
+					//shutdown event, stop recording and save all the stuff
 					try {
 						inMessenger.send(Message.obtain(null, priMSG_LOW_BATTERY_AUTO_STOP));
 					} catch (RemoteException e) {
 						e.printStackTrace();
 					}
-				}
+				} 
 			}
 		}
 	};
@@ -115,18 +128,20 @@ public class AntripService2 extends Service implements LocationPublisher{
 		
 		@Override
 		public void onLocationChanged(Location location) {
+			location.setTime(new Date().getTime());
 			newLocationUpdate(location);
 		}
 	};
 	
 	private Messenger outMessenger;
-	final private Messenger inMessenger = new Messenger(new IncomingHandler());
+	private Messenger inMessenger = new Messenger(new IncomingHandler());
 	
 	private class IncomingHandler extends Handler{
 		@Override
 		public void handleMessage(Message msg) {
 			switch(msg.what){
 			case priMSG_SWITCH_LOCATING_METHOD:
+				Log.w("priMSG_SWITCH_LOCATING_METHOD", "called");
 				stopLocationUpdate();
 				if(isNetworkAvailable(mContext)){
 					//internet available, try to use skyhook
@@ -138,6 +153,8 @@ public class AntripService2 extends Service implements LocationPublisher{
 				}
 				break;
 			case priMSG_LOW_BATTERY_AUTO_STOP:
+				Log.w("priMSG_LOW_BATTERY_AUTO_STOP", "called");
+				shouldSkiptimertask = true;
 				stopLocationUpdate();
 				//finalize tripstats, closes db
 				isRecording = false;
@@ -145,7 +162,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 				if(isValidTripToKeep){
 					//save trip stats right now!!!!
 					if(dh2 != null){
-						stats.setButtonEndTime(new Timestamp(new Date().getTime()).toString());
+						stats.setButtonEndTime(new Date().getTime());
 						dh2.saveTripStats(currentTid, stats);
 						dh2.closeDB();
 						dh2 = null;
@@ -172,27 +189,36 @@ public class AntripService2 extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_REGISTER_CLIENT:
+				Log.w("MSG_REGISTER_CLIENT", "called");
 				outMessenger = msg.replyTo;
 				//if isRecording = true, sync location
 				if(isRecording){
 					if(dh2 != null){
 						ArrayList<JSONObject> data = dh2.getCurrentTripData(currentTid);
+//						Log.e("sync location", "data= " + data);
 						sendMessageToUI(MSG_SYNC_LOCATION, data);
 						//send the last point as location update
-						Location loc = dh2.getLatestPointFromCurrentTripData(currentTid);
+						Location loc = dh2.getLatestGoodPointFromCurrentTripData(currentTid);
 						sendMessageToUI(MSG_LOCATION_UPDATE, loc);
 					}
 				}
 				break;
 			case MSG_UNREGISTER_CLIENT:
+				Log.w("MSG_UNREGISTER_CLIENT", "called");
 				if(outMessenger == msg.replyTo){
 					outMessenger = null;
 				}
 				if(!isRecording){
+					if(mTimer != null){
+						mTimer.cancel();
+						mTimer.purge();
+						mTimer = null;
+					}
 					stopLocationUpdate();
 				}
 				break;
 			case MSG_INIT_LOCATION_THREAD:
+				Log.w("MSG_INIT_LOCATION_THREAD", "called");
 				if (isRecording) {
 					// skyhook is already running
 				} else {
@@ -200,11 +226,13 @@ public class AntripService2 extends Service implements LocationPublisher{
 					mTimer.schedule(new TimerTask() {
 						@Override
 						public void run() {
-							//if a new location update is not received in 1 minute, switch location service
-							try {
-								inMessenger.send(Message.obtain(null, priMSG_SWITCH_LOCATING_METHOD));
-							} catch (RemoteException e) {
-								e.printStackTrace();
+							if(!shouldSkiptimertask){
+								//if a new location update is not received in 1 minute, switch location service
+								try {
+									inMessenger.send(Message.obtain(null, priMSG_SWITCH_LOCATING_METHOD));
+								} catch (RemoteException e) {
+									e.printStackTrace();
+								}
 							}
 						}
 					}, timeout_FirstLocationFix);
@@ -222,6 +250,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_STOP_LOCATION_THREAD:
+				Log.w("MSG_STOP_LOCATION_THREAD", "called");
 				if (isRecording) {
 					
 				} else {
@@ -229,6 +258,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_START_RECORDING:
+				Log.w("MSG_START_RECORDING", "called");
 				//init dbhelper and start saving stuff to DB
 				if(dh2 != null){
 					//should be null at this point
@@ -238,20 +268,24 @@ public class AntripService2 extends Service implements LocationPublisher{
 					dh2 = new DBHelper2(mContext);
 					isValidTripToKeep = false;
 					stats = new TripStats();
-					stats.setButtonStartTime(new Timestamp(new Date().getTime()).toString());
+					stats.setButtonStartTime(new Date().getTime());
 					currentTid = String.valueOf(new Date().getTime());
+					
+					//create a new entry in db
+					Log.e("new recording!", "tripid= " + currentTid);
 					isRecording = true;
 					showNotification();
 				}
 				break;
 			case MSG_STOP_RECORDING:
+				Log.w("MSG_STOP_RECORDING", "called");
 				//finalize tripstats, closes db
 				isRecording = false;
 				stopForeground(true);
 				if(isValidTripToKeep){
 					//save trip stats right now!!!!
 					if(dh2 != null){
-						stats.setButtonEndTime(new Timestamp(new Date().getTime()).toString());
+						stats.setButtonEndTime(new Date().getTime());
 						dh2.saveTripStats(currentTid, stats);
 						dh2.closeDB();
 						dh2 = null;
@@ -278,6 +312,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_SAVE_TRIPNAME:
+				Log.w("MSG_SAVE_TRIPNAME", "called");
 				//init a new dbhelper and save the trip name
 				if(msg.obj instanceof String){
 					if(dh2 == null){
@@ -295,6 +330,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 				}
 				break;
 			case MSG_SAVE_CCO:
+				Log.w("MSG_SAVE_CCO", "called");
 				if(msg.obj instanceof CandidateCheckinObject){
 					if(dh2 != null){
 						dh2.insert((CandidateCheckinObject) msg.obj, currentTid);
@@ -324,13 +360,15 @@ public class AntripService2 extends Service implements LocationPublisher{
 	}
 	
 	private void stopLocationUpdate(){
-		if(isUsingSkyhook){
-			if (skyhook != null) {
-				skyhook.cancel();
-				skyhook = null;
+		if (skyhook != null) {
+			skyhook.asyncCancel();
+//			skyhook.cancel();
+			skyhook = null;
+		}
+		if(locManager != null){
+			if(locListener != null){
+				locManager.removeUpdates(locListener);
 			}
-		} else{
-			locManager.removeUpdates(locListener);
 		}
 	}
 	
@@ -363,7 +401,10 @@ public class AntripService2 extends Service implements LocationPublisher{
 		
 		isRecording = false;
 		
-		registerReceiver(br, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+		filter.addAction(Intent.ACTION_SHUTDOWN);
+		registerReceiver(br, filter);
 	}
 	
 	@Override
@@ -372,9 +413,11 @@ public class AntripService2 extends Service implements LocationPublisher{
 			if(intent.getAction().equals("startcalledfromgmaprecorder")){
 				//start service but do nothing
 				//ignore this call if already running
-			} else if(intent.getAction().equals("")){
-				//do other stuff
+			} else {
+				stopSelf();
 			}
+		} else{
+			stopSelf();
 		}
 		return START_STICKY;
 	}
@@ -383,13 +426,26 @@ public class AntripService2 extends Service implements LocationPublisher{
 	public void onDestroy() {
 		super.onDestroy();
 		
+		shouldSkiptimertask = true;
+		if(mTimer != null){
+			mTimer.cancel();
+			mTimer.purge();
+		}
+		mTimer = null;
+		
+		isRecording = false;
+		
+		inMessenger = null;
+		outMessenger = null;
+		
 		unregisterReceiver(br);
+		
+		stopForeground(true);
 		
 		stopLocationUpdate();
 		
 		locManager = null;
 		
-		isRecording = false;
 		currentTid = null;
 		if(dh2 != null){
 			dh2.closeDB();
@@ -398,6 +454,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 	}
 	
 	//need a timer to check the time between the latest two location update
+	private Long previousLocationTime = null;
 	
 	@Override
 	public void newLocationUpdate(Location location) {
@@ -412,19 +469,32 @@ public class AntripService2 extends Service implements LocationPublisher{
 		mTimer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				try {
-					inMessenger.send(Message.obtain(null, priMSG_SWITCH_LOCATING_METHOD));
-				} catch (RemoteException e) {
-					e.printStackTrace();
+				if(!shouldSkiptimertask){
+					try {
+						inMessenger.send(Message.obtain(null, priMSG_SWITCH_LOCATING_METHOD));
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}, timeout_locationFixInterval);
 		//XXX
 		//compare 10 consecutive location updates, if they are close-by
 		//prompt the "you haven't moved in XX:XX" message
+		
 		if(LocationFilter.isValid(location)){
 			if(LocationFilter.isAccurate(location)){
-				sendMessageToUI(MSG_LOCATION_UPDATE, location);
+				if(previousLocationTime == null){
+					previousLocationTime = location.getTime();
+					Log.d("antripservice2", "first locationupdate, previous time=" + previousLocationTime + ", location update time=" + location.getTime());
+					sendMessageToUI(MSG_LOCATION_UPDATE, location);
+				} else if((location.getTime() - previousLocationTime) > 8500){
+					Log.e("antripservice2", "locationupdate published, previous time=" + previousLocationTime + ", location update time=" + location.getTime() + ", difference=" + (location.getTime()-previousLocationTime));
+					previousLocationTime = location.getTime();
+					sendMessageToUI(MSG_LOCATION_UPDATE, location);
+				} else{
+					Log.d("antripservice2", "locationupdate not published, previous time=" + previousLocationTime + ", location update time=" + location.getTime() + ", difference=" + (location.getTime()-previousLocationTime));
+				}
 			} else{
 				//XXX
 				//show warning about moving to a place with better GPS signal...

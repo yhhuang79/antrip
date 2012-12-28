@@ -1,25 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:padding="5dip" 
-    android:orientation="vertical">
+    android:padding="5dip">
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="70dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/listitem_background"
+        android:paddingTop="6dip"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip"/>
+	
+    <ImageView 
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/listitem_bell"
+        android:layout_gravity="left"/>
     
-    <TextView 
-        android:text="trip name"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"/>
-    <TextView 
-        android:id="@+id/triplistitem_name"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"/>
-    <TextView 
-        android:text="start time"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"/>
-    <TextView 
-        android:id="@+id/triplistitem_starttime"
-        android:layout_height="wrap_content"
-        android:layout_width="fill_parent"/>
+    <ImageView 
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/listitem_bell"
+        android:layout_gravity="right"/>
     
-</LinearLayout>
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dip"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:paddingTop="5dip"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip">
+
+        <TextView
+            android:id="@+id/triplistitem_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" 
+            android:text="TSETSETS"
+            android:gravity="center_horizontal"/>
+
+        <TextView
+            android:id="@+id/triplistitem_starttime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" 
+            android:text="TSETSETS"
+            android:gravity="center_horizontal"/>
+    </LinearLayout>
+
+</FrameLayout>

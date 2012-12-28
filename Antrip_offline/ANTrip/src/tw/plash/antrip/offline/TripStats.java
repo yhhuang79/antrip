@@ -6,13 +6,13 @@ import android.location.Location;
 
 public class TripStats {
 	//time when start record button is pushed
-	private String buttonStartTime;
+	private Long buttonStartTime;
 	//time of the LAST inaccurate point
-	private String lastInaccuratePointTime;
+	private Long lastInaccuratePointTime;
 	//time of the GOOD good point
-	private String lastGoodPointTime;
+	private Long lastGoodPointTime;
 	//time when end record button is pushed
-	private String buttonEndTime;
+	private Long buttonEndTime;
 	//in meters
 	private final Double radius = 6371008.7714;
 	//in meters
@@ -61,10 +61,10 @@ public class TripStats {
 					// not a check-in point, check for validity and accuracy
 					if(LocationFilter.isValid(loc)){
 						totalValidPointCount += 1;
-						lastInaccuratePointTime = new Timestamp(loc.getTime()).toString();
+						lastInaccuratePointTime = loc.getTime();
 						if(LocationFilter.isAccurate(loc)){
 							totalAccuratePointCount += 1;
-							lastGoodPointTime = new Timestamp(loc.getTime()).toString();
+							lastGoodPointTime = loc.getTime();
 							//input location is valid, calculate the distance
 							totalValidLength += greatCircleDistance(previousLoc, loc);
 							//replace the location in holder with current location
@@ -97,7 +97,7 @@ public class TripStats {
 		return degree/180*Math.PI;
 	}
 
-	public String getNonNullEndTime(){
+	public Long getNonNullEndTime(){
 		if(buttonEndTime != null){
 			return buttonEndTime;
 		} else if(lastInaccuratePointTime != null){
@@ -108,27 +108,27 @@ public class TripStats {
 		}
 	}
 	
-	public String getButtonStartTime() {
+	public Long getButtonStartTime() {
 		return buttonStartTime;
 	}
 
-	public void setButtonStartTime(String buttonStartTime) {
+	public void setButtonStartTime(Long buttonStartTime) {
 		this.buttonStartTime = buttonStartTime;
 	}
 
-	public String getLastInaccuratePointTime() {
+	public Long getLastInaccuratePointTime() {
 		return lastInaccuratePointTime;
 	}
 
-	public String getLastGoodPointTime() {
+	public Long getLastGoodPointTime() {
 		return lastGoodPointTime;
 	}
 
-	public String getButtonEndTime() {
+	public Long getButtonEndTime() {
 		return buttonEndTime;
 	}
 
-	public void setButtonEndTime(String buttonEndTime) {
+	public void setButtonEndTime(Long buttonEndTime) {
 		this.buttonEndTime = buttonEndTime;
 	}
 
