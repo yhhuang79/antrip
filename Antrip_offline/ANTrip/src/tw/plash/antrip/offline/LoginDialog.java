@@ -297,13 +297,13 @@ public class LoginDialog extends Dialog{
 			public void onClick(View v) {
 				if(username.getText().length() < 4){
 					//username too short
-					username.setError("username too short, must > 4 characters");
+					username.setError(mContext.getString(R.string.register_usernametooshort));
 				} else if(username.getText().length() > 20){
 					//username too long
-					username.setError("username too long, must < 20 characters");
+					username.setError(mContext.getString(R.string.register_usernametoolong));
 				} else if(password.getText().length() < 1){
 					//password empty
-					password.setError("password is empty");
+					password.setError(mContext.getString(R.string.register_passwordempty));
 				} else if(!isNetworkAvailable()){
 					//no internet
 					new AlertDialog.Builder(mContext)

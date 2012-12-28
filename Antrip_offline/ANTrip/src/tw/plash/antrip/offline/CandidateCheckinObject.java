@@ -72,7 +72,7 @@ public class CandidateCheckinObject implements Serializable{
 			this.pictureName = picturePath.substring(picturePath.lastIndexOf("/"));
 		}catch(IndexOutOfBoundsException e){
 			e.printStackTrace();
-			this.pictureName = null;
+			this.pictureName = picturePath;
 		}
 	}
 	

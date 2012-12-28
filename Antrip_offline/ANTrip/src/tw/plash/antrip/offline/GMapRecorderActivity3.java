@@ -265,7 +265,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 						dialog.setCancelable(true);
 						dialog.setCanceledOnTouchOutside(true);
 						final EditText et = (EditText) dialog.findViewById(R.id.edittripname);
-						final String hint = getResources().getString(R.string.untitled_trip);
+						final String hint = mContext.getString(R.string.untitled_trip);
 						et.setHint(hint);
 						((Button) dialog.findViewById(R.id.edittripnamebtn)).setOnClickListener(new View.OnClickListener() {
 							@Override

@@ -2,7 +2,9 @@ package tw.plash.antrip.offline;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 
 import org.apache.http.HttpResponse;
@@ -17,10 +19,14 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -60,6 +66,9 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 	private String hash;
 	private String tripname;
 	private String tripid;
+//	private String userid;
+	
+	private ViewGroup infoWindow;
 	
 	private Polyline trajectory;
 	private ArrayList<MarkerOptions> checkinmarkerlist;
@@ -94,6 +103,7 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 		hash = null;
 		tripname = null;
 		tripid = null;
+//		userid = null;
 		
 		tripdata = null;
 		
@@ -183,6 +193,8 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 			}
 		});
 		
+		infoWindow = (ViewGroup) ((LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.checkin_test, null);
+		
 		isMapAvailable();
 		
 		if(isLocal){
@@ -216,7 +228,88 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 					//start or end point
 				} else{
 					//show full size image via gallery XXX
-//					Toast.makeText(mContext, "snippet= " + marker.getSnippet(), Toast.LENGTH_LONG).show();
+					if(marker.getSnippet().contains("http://plash2.iis.sinica.edu.tw/picture/")){
+						//XXX it is a remote check-in image
+						new AsyncTask<String, Void, Boolean>(){
+							
+							private ProgressDialog diag;
+							private Bitmap bitmap;
+							
+							protected void onPreExecute() {
+								bitmap = null;
+								diag = new ProgressDialog(mContext);
+								diag.setMessage(mContext.getString(R.string.universal_loading));
+								diag.setCancelable(true);
+								diag.setCanceledOnTouchOutside(true);
+								diag.setOnCancelListener(new DialogInterface.OnCancelListener() {
+									@Override
+									public void onCancel(DialogInterface dialog) {
+										cancel(true);
+									}
+								});
+								diag.setIndeterminate(true);
+								diag.show();
+								System.gc(); //do this before showing the image...just to be safe
+							};
+							
+							@Override
+							protected Boolean doInBackground(String... params) {
+								if (params != null && params.length > 0) {
+									String url = params[0];
+									if (url != null && url.length() > 0) {
+										Log.e("gmapviewer", "url=" + url);
+										try {
+											BitmapFactory.Options opts = new BitmapFactory.Options();
+											opts.inSampleSize = 2;
+											bitmap = BitmapFactory.decodeStream((InputStream) new java.net.URL(url).getContent(), null, opts);
+											return true;
+										} catch (MalformedURLException e) {
+											e.printStackTrace();
+										} catch (IOException e) {
+											e.printStackTrace();
+										}
+									}
+								}
+								return false;
+							}
+							
+							protected void onCancelled() {
+								diag.dismiss();
+								Toast.makeText(mContext, R.string.toast_canceled, Toast.LENGTH_SHORT).show();
+							};
+							protected void onPostExecute(Boolean result) {
+								diag.dismiss();
+								if(result && bitmap != null){
+									Log.e("getremote image", "good");
+									ImageView iv = new ImageView(mContext);
+									iv.setImageBitmap(bitmap);
+									iv.setPadding(3, 3, 3, 3);
+									Dialog dialog = new Dialog(mContext, android.R.style.Theme_Black_NoTitleBar);
+									dialog.setCancelable(true);
+									dialog.setCanceledOnTouchOutside(true);
+									dialog.setContentView(iv);
+									dialog.show();
+								} else{
+									Log.e("getremote image", "no good");
+									Toast.makeText(mContext, R.string.toast_unabletofetchtripdata, Toast.LENGTH_SHORT).show();
+								}
+							};
+						}.execute(marker.getSnippet().substring(marker.getSnippet().indexOf(";pic:") + 5));
+					} else if(marker.getSnippet().contains(".jpg")){
+						System.gc(); //do this before showing the image...just to be safe
+						//local picture
+						Bitmap bitmap = BitmapUtility.getPreview(marker.getSnippet().substring(marker.getSnippet().indexOf(";pic:") + 5), getWindow().getDecorView().getWidth());
+						if(bitmap != null){
+							ImageView iv = new ImageView(mContext);
+							iv.setImageBitmap(bitmap);
+							iv.setPadding(3, 3, 3, 3);
+							Dialog dialog = new Dialog(mContext, android.R.style.Theme_Black_NoTitleBar);
+							dialog.setCancelable(true);
+							dialog.setCanceledOnTouchOutside(true);
+							dialog.setContentView(iv);
+							dialog.show();
+						}
+					}
 				}
 			}
 		});
@@ -230,60 +323,66 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 		} else{
 			Log.e("gmap recorder", "getinfocontent: title null");
 			String cco = marker.getSnippet();
-			LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			ViewGroup root = (ViewGroup) inflater.inflate(R.layout.checkin_test, null);
-			String tmp = cco.substring(0, cco.indexOf(";text:")).replace("mood:", "").replace(";", "");
-//			Log.e("tmp", "mood:" + tmp);
-			if(tmp != null && tmp.length() == 1){
-				switch(Integer.parseInt(tmp)){
-				case 1:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_excited);
-					break;
-				case 2:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_happy);
-					break;
-				case 3:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_pleased);
-					break;
-				case 4:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_relaxed);
-					break;
-				case 5:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_peaceful);
-					break;
-				case 6:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_sleepy);
-					break;
-				case 7:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_sad);
-					break;
-				case 8:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_bored);
-					break;
-				case 9:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_nervous);
-					break;
-				case 10:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_angry);
-					break;
-				case 11:
-					((ImageView)root.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_calm);
-					break;
+			if(cco != null){
+				String tmp = cco.substring(0, cco.indexOf(";text:")).replace("mood:", "").replace(";", "");
+				if(infoWindow != null){
+					if(tmp != null && tmp.length() == 1){
+						switch(Integer.parseInt(tmp)){
+						case 1:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_excited);
+							break;
+						case 2:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_happy);
+							break;
+						case 3:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_pleased);
+							break;
+						case 4:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_relaxed);
+							break;
+						case 5:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_peaceful);
+							break;
+						case 6:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_sleepy);
+							break;
+						case 7:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_sad);
+							break;
+						case 8:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_bored);
+							break;
+						case 9:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_nervous);
+							break;
+						case 10:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_angry);
+							break;
+						case 11:
+							((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setImageResource(R.drawable.emotion_calm);
+							break;
+						}
+					} else{
+						((ImageView)infoWindow.findViewById(R.id.checkin_marker_mood)).setVisibility(View.GONE);
+					}
+					tmp = cco.substring(cco.indexOf(";text:") + 6, cco.indexOf(";pic:"));
+					Log.e("tmp", "text:" + tmp);
+					if(tmp != null && tmp.length() > 0){
+						((TextView) infoWindow.findViewById(R.id.checkin_marker_text)).setText(tmp);
+					}
+					if(cco.indexOf(";pic:") + 5 < cco.length()){
+						if(isLocal){
+							tmp = cco.substring(cco.indexOf(";pic:") + 5);
+							Log.e("tmp", "pic:" + tmp);
+							((ImageView) infoWindow.findViewById(R.id.checkin_marker_picture)).setImageBitmap(BitmapUtility.getPreview(tmp, 200));
+						} else {
+//							tmp = cco.substring(cco.indexOf(";pic:") + 5);
+							((ImageView) infoWindow.findViewById(R.id.checkin_marker_picture)).setImageResource(R.drawable.checkin_camera);
+						}
+					}
 				}
-			} else{
-				((ImageView)root.findViewById(R.id.checkin_marker_mood)).setVisibility(View.GONE);
 			}
-			tmp = cco.substring(cco.indexOf(";text:") + 6, cco.indexOf(";pic:"));
-//			Log.e("tmp", "text:" + tmp);
-			if(tmp != null && tmp.length() > 0){
-				((TextView) root.findViewById(R.id.checkin_marker_text)).setText(tmp);
-			}
-			if(cco.indexOf(";pic:") + 5 < cco.length()){
-				tmp = cco.substring(cco.indexOf(";pic:") + 5);
-//				Log.e("tmp", "pic:" + tmp);
-				((ImageView) root.findViewById(R.id.checkin_marker_picture)).setImageBitmap(BitmapUtility.getPreview(tmp, 200));
-			}
-			return root;
+			return infoWindow;
 		}
 	}
 
@@ -392,8 +491,12 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 	private class asyncloadremote extends AsyncTask<Void, Void, Boolean> {
 		
 		private PolylineOptions po;
+		private String remoteuserid;
+		private String remotrtripid;
 		
 		protected void onPreExecute() {
+			remoteuserid = null;
+			remotrtripid = null;
 			// check if trip data needs to be loaded
 			if (tripdata != null) {
 				cancel(true);
@@ -412,24 +515,23 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 		@Override
 		protected Boolean doInBackground(Void... params) {
 			
+			String url = "http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php?hash=" + hash + "&field_mask=1100001100000001";
 			
-				String url = "http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php?hash=" + hash + "&field_mask=1100001100000001";
-				
-				HttpGet getRequest = new HttpGet(url);
-				
-				HttpParams httpParameters = new BasicHttpParams();
-				// Set the timeout in milliseconds until a connection is
-				// established.
-				// The default value is zero, that means the timeout is not
-				// used.
-				HttpConnectionParams.setConnectionTimeout(httpParameters, AntripService2.CONNECTION_TIMEOUT);
-				// Set the default socket timeout (SO_TIMEOUT) in milliseconds
-				// which is the timeout for waiting for data.
-				int timeoutSocket = 10000;
-				HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
-				
-				DefaultHttpClient client = new DefaultHttpClient(httpParameters);
-				try {
+			HttpGet getRequest = new HttpGet(url);
+			
+			HttpParams httpParameters = new BasicHttpParams();
+			// Set the timeout in milliseconds until a connection is
+			// established.
+			// The default value is zero, that means the timeout is not
+			// used.
+			HttpConnectionParams.setConnectionTimeout(httpParameters, AntripService2.CONNECTION_TIMEOUT);
+			// Set the default socket timeout (SO_TIMEOUT) in milliseconds
+			// which is the timeout for waiting for data.
+			int timeoutSocket = 10000;
+			HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+			
+			DefaultHttpClient client = new DefaultHttpClient(httpParameters);
+			try {
 				HttpResponse response = client.execute(getRequest);
 				
 				Integer statusCode = response.getStatusLine().getStatusCode();
@@ -438,7 +540,14 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 					BufferedReader in = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 					JSONObject result = new JSONObject(new JSONTokener(in.readLine()));
 					in.close();
-					
+					try{
+						remoteuserid = result.getString("userid");
+						remotrtripid = result.getString("trip_id");
+					} catch(JSONException e){
+						e.printStackTrace();
+						remoteuserid = null;
+						remotrtripid = null;
+					}
 					
 					tripdata = (ArrayList<JSONObject>) JSONUtility.asList(result.getJSONArray("CheckInDataList"));
 					
@@ -446,13 +555,20 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 					for (JSONObject item : tripdata) {
 						try {
 							
-							LatLng latlng = new LatLng(item.getDouble("lat")/1E6, item.getDouble("lng")/1E6);
-							if(item.getDouble("lat") > -998 && item.getInt("accu") < 1499){
-//								Log.e("latlng", "lat,lng: " + latlng.latitude + ", " + latlng.longitude);
-								if(firstPoint == null){
-									firstPoint = new MarkerOptions().position(latlng).title(mContext.getString(R.string.gmapviewer_marker_start)).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_startpoint));
+							LatLng latlng = new LatLng(item.getDouble("lat") / 1E6, item.getDouble("lng") / 1E6);
+							if (item.getDouble("lat") > -998 && item.getInt("accu") < 1499) {
+								// Log.e("latlng", "lat,lng: " + latlng.latitude
+								// + ", " + latlng.longitude);
+								if (firstPoint == null) {
+									firstPoint = new MarkerOptions()
+											.position(latlng)
+											.title(mContext.getString(R.string.gmapviewer_marker_start))
+											.icon(BitmapDescriptorFactory
+													.fromResource(R.drawable.placemarker_startpoint));
 								}
-								lastPoint = new MarkerOptions().position(latlng).title(mContext.getString(R.string.gmapviewer_marker_end)).icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_endpoint));
+								lastPoint = new MarkerOptions().position(latlng)
+										.title(mContext.getString(R.string.gmapviewer_marker_end))
+										.icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_endpoint));
 								po.add(latlng);
 								boundbuilder.include(latlng);
 							}
@@ -461,7 +577,12 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 								CandidateCheckinObject tmpcco = new CandidateCheckinObject();
 								JSONObject tmpitem = item.getJSONObject("CheckIn");
 								if (tmpitem.has("picture_uri") && !tmpitem.getString("picture_uri").equals("null")) {
-									tmpcco.setPicturePath(tmpitem.getString("picture_uri"));
+									Log.e("gmapviewer", "picture=" + tmpitem.getString("picture_uri"));
+									if(remoteuserid != null && remotrtripid != null){
+//										tmpcco.setPicturePath("http://plash2.iis.sinica.edu.tw/picture/" + remoteuserid + "/" + remotrtripid + "/" + tmpitem.getString("picture_uri"));
+//										tmpcco.setPicturePath("http://plash2.iis.sinica.edu.tw/picture/" + remoteuserid + "/" + remotrtripid + "/thumb/" + tmpitem.getString("picture_uri"));
+										tmpcco.setPicturePath("http://plash2.iis.sinica.edu.tw/picture/" + remoteuserid + "/" + remotrtripid + "/thumb.m/" + tmpitem.getString("picture_uri"));
+									}
 								}
 								if (tmpitem.has("emotion") && !tmpitem.getString("emotion").equals("null")) {
 									tmpcco.setEmotionID(Integer.parseInt(tmpitem.getString("emotion")));
@@ -469,11 +590,10 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 								if (tmpitem.has("message") && !tmpitem.getString("message").equals("null")) {
 									tmpcco.setCheckinText(tmpitem.getString("message"));
 								}
-								checkinmarkerlist.add(new MarkerOptions()
-									.position(latlng)
-									.icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_48))
-									.snippet(tmpcco.toString())
-									.draggable(true));
+								checkinmarkerlist.add(new MarkerOptions().position(latlng)
+										.icon(BitmapDescriptorFactory.fromResource(R.drawable.placemarker_48))
+										.snippet(tmpcco.toString()).draggable(true));
+								Log.e("tempcco", "=" + tmpcco.toString());
 							}
 						} catch (JSONException e) {
 							e.printStackTrace();
@@ -493,7 +613,7 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 				e.printStackTrace();
 			} catch (JSONException e) {
 				e.printStackTrace();
-			} finally{
+			} finally {
 				client.getConnectionManager().shutdown();
 			}
 			
@@ -525,8 +645,9 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 	}
 	
 	@Override
-	protected void onDestroy() {
-		super.onDestroy();
+	protected void onPause() {
+		super.onPause();
+		gmap.clear();
 		if(isLocal){
 			if(localloader != null){
 				localloader.cancel(true);
@@ -576,9 +697,9 @@ public class GMapViewer extends FragmentActivity implements InfoWindowAdapter{
 				})
 				.show();
 			return true;
-		case R.id.menu_help:
-			Toast.makeText(mContext, R.string.toast_theres_no_help, Toast.LENGTH_SHORT).show();
-			return true;
+//		case R.id.menu_help:
+//			Toast.makeText(mContext, R.string.toast_theres_no_help, Toast.LENGTH_SHORT).show();
+//			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}

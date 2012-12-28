@@ -16,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.app.ExpandableListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -59,6 +61,8 @@ public class FriendListActivityTEMP extends ExpandableListActivity{
 	private ImageButton addFriendBtn;
 	private ImageButton pendingFriendRequestBtn;
 	
+	private int JVM_HEAP_POINT_COUNT_LIMIT;
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		
@@ -82,6 +86,8 @@ public class FriendListActivityTEMP extends ExpandableListActivity{
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		
 		userid = pref.getString("userid", "-1");
+		
+		JVM_HEAP_POINT_COUNT_LIMIT = ((ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass() * 60;
 		
 		initFriendList();
 	}
@@ -128,7 +134,20 @@ public class FriendListActivityTEMP extends ExpandableListActivity{
 				JSONObject obj = (JSONObject) parent.getExpandableListAdapter().getChild(groupPosition, childPosition);
 				if(obj != null){
 					try {
-						startActivity(new Intent(mContext, GMapViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("tripname", obj.getString("trip_name")).putExtra("hash", obj.getString("hash")));
+						String hash = obj.getString("hash");
+						String tripname = obj.getString("trip_name");
+						String count = obj.getString("num_of_pts");
+						if(Integer.valueOf(count) > JVM_HEAP_POINT_COUNT_LIMIT){
+							//trip is too long for this device to display
+							new AlertDialog.Builder(mContext)
+								.setTitle(R.string.toast_cannotviewtrip)
+								.setMessage(R.string.tripistoolargetodisplay)
+								.setNeutralButton(R.string.alertdialog_iseebutton, null)
+								.show();
+						} else{
+							startActivity(new Intent(mContext, GMapViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("tripname", tripname).putExtra("hash", hash));
+						}
+						
 					} catch (JSONException e) {
 						e.printStackTrace();
 						Toast.makeText(mContext, R.string.toast_cannotviewtrip, Toast.LENGTH_SHORT).show();
@@ -233,6 +252,8 @@ public class FriendListActivityTEMP extends ExpandableListActivity{
 							in.close();
 							
 							JSONArray info = result.getJSONArray("tripInfoList");
+//							int num = result.getInt("tripInfoNum");
+//							info.p
 //							Log.i("info", "info=" + info.toString());
 							if (info != null) {
 								((FriendListAdapterTEMP) elv.getExpandableListAdapter()).addChildData(gid, info);

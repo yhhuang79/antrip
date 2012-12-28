@@ -105,12 +105,13 @@ public class UploadThread extends AsyncTask<Void, Integer, Integer> {
 		} else{
 			diag = new ProgressDialog(mContext);
 			diag.setTitle(R.string.progressdialog_uploading);
-			diag.setMessage("uplolading"); //XXX
+			diag.setMessage(mContext.getString(R.string.progressdialog_uploading));
 			diag.setCancelable(false);
 			diag.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
 			diag.setMax(100);
 			diag.setProgress(0);
 			diag.show();
+			System.gc(); //just trying to be safe
 		}
 	}
 	
@@ -120,51 +121,53 @@ public class UploadThread extends AsyncTask<Void, Integer, Integer> {
 		Log.i("uploadthread", "onprogresupdate values=" + values.toString());
 		switch(values[0]){
 		case STAGE_0_PREPARE: //preparing upload information
-			diag.setMessage("Preparing data for upload...(part 1 of 4)");
+//			diag.setMessage("Preparing data for upload...(part 1 of 4)");
 			diag.setProgress(values[1]); //total progress 1%
 			break;
 		case STAGE_1_ADDRESS: //doing address
 			switch(values[1]){
 			case 5:
-				diag.setMessage("Preparing data for upload...(part 2 of 4)");
+//				diag.setMessage("Preparing data for upload...(part 2 of 4)");
 				diag.setProgress(values[1]); //total progress 5%
 				break;
 			case 10:
-				diag.setMessage("Preparing data for upload...(part 3 of 4)");
+//				diag.setMessage("Preparing data for upload...(part 3 of 4)");
 				diag.setProgress(values[1]); //total progress 10%
 				break;
 			case 15:
-				diag.setMessage("Preparing data for upload...(part 4 of 4)");
+//				diag.setMessage("Preparing data for upload...(part 4 of 4)");
 				diag.setProgress(values[1]); //total progress 15%
 				break;
 			}
 			break;
 		case STAGE_2_INFODATA: //uploading tripinfo/data
+			System.gc(); //just trying to be safe
 			switch(values[1]){
 			case 20:
-				diag.setMessage("Preparing data for upload...done");
+//				diag.setMessage("Preparing data for upload...done");
 				diag.setProgress(values[1]);
 				break;
 			default:
-				diag.setMessage("Uploading data..." + values[1] + "%");
+//				diag.setMessage("Uploading data..." + values[1] + "%");
 				diag.setProgress(20 + values[1]/100*30);
 				break;
 			}
 			break;
 		case STAGE_3_PICTURE: //uploading pictures
+			System.gc(); //just trying to be safe
 			switch(values[1]){
 			case 50:
-				diag.setMessage("Uploading data...done!");
+//				diag.setMessage("Uploading data...done!");
 				diag.setProgress(values[1]);
 				break;
 			case 0:
 				totalpictures = values[2];
-				diag.setMessage("Preparing to upload " + totalpictures + " pictures...");
+//				diag.setMessage("Preparing to upload " + totalpictures + " pictures...");
 				diag.setProgress(51);
 				break;
 			default:
 				if(totalpictures > 0){ //XXX don't think it will have value of 0, just to be safe...
-					diag.setMessage("Uploading picture + " + values[1] + " of " + totalpictures + "..." + values[2] + "%");
+//					diag.setMessage("Uploading picture + " + values[1] + " of " + totalpictures + "..." + values[2] + "%");
 					diag.setProgress(51 + (values[2]/100*(values[1]/totalpictures)*44));
 				}
 				break;
@@ -173,18 +176,18 @@ public class UploadThread extends AsyncTask<Void, Integer, Integer> {
 		case STAGE_4_CONFIRM: //confirming with server
 			switch(values[1]){
 			case 95:
-				diag.setMessage("Upload pictures...done!");
+//				diag.setMessage("Upload pictures...done!");
 				diag.setProgress(values[1]);
 				break;
 			default:
-				diag.setMessage("Confirming upload...");
+//				diag.setMessage("Confirming upload...");
 				diag.setProgress(values[1]);
 				break;
 			}
 			
 			break;
 		case STAGE_5_ALLDONE: //done
-			diag.setMessage("All done!");
+			diag.setMessage(mContext.getString(R.string.progressdialog_upload_done));
 			diag.setProgress(100);
 			break;
 		}
@@ -262,7 +265,6 @@ public class UploadThread extends AsyncTask<Void, Integer, Integer> {
 		}
 	}
 	
-	//XXX need better error message...
 	@Override
 	protected void onPostExecute(Integer result) {
 		super.onPostExecute(result);

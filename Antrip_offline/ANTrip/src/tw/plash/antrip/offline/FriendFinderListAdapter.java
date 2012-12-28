@@ -193,7 +193,7 @@ public class FriendFinderListAdapter extends BaseAdapter{
 								protected void onPostExecute(Boolean result) {
 									if (result) {
 										clickedd.put(position, "good");
-										Toast.makeText(mContext, mContext.getResources().getString(R.string.toast_friendrequest_success) + " " + name, Toast.LENGTH_SHORT).show();
+										Toast.makeText(mContext, mContext.getString(R.string.toast_friendrequest_success) + " " + name, Toast.LENGTH_SHORT).show();
 									} else {
 										clickedd.put(position, "failed");
 										Toast.makeText(mContext, R.string.toast_friendrequest_fail, Toast.LENGTH_SHORT).show();

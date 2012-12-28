@@ -40,8 +40,17 @@ public class FriendListAdapterTEMP extends BaseExpandableListAdapter {
 	}
 	
 	public void addChildData(long id, JSONArray childdata) {
+		Log.e("addchilddata", "id:" + id);
 		if(childData == null){
 			childData = new SparseArray<JSONArray>();
+		}
+		if((int)id == 0){
+			try {
+				groupData.get(0).put("shareTripNum", childdata.length());
+			} catch (JSONException e) {
+				e.printStackTrace();
+				//well...don't update it then...
+			}
 		}
 		childData.put((int) id, childdata);
 	}
@@ -72,28 +81,29 @@ public class FriendListAdapterTEMP extends BaseExpandableListAdapter {
 
 	@Override
 	public long getChildId(int groupPosition, int childPosition) {
-		if(childData != null){
-			try {
-				return childData.get((int) getGroupId(groupPosition)).getJSONObject(childPosition).getInt("trip_id");
-			} catch (JSONException e) {
-				e.printStackTrace();
-				return childPosition;
-			}
-		} else{
+//		if(childData != null){
+//			try {
+//				return childData.get((int) getGroupId(groupPosition)).getJSONObject(childPosition).getInt("trip_id");
+//			} catch (JSONException e) {
+//				e.printStackTrace();
+//				return childPosition;
+//			}
+//		} else{
 			return childPosition;
-		}
+//		}
 	}
 
 	@Override
 	public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 		ChildViewHolder holder = null;
-		
+		Log.e("getchildview", groupPosition + ", " + childPosition);
 		if(convertView == null){
 			holder = new ChildViewHolder();
-			convertView = mInflater.inflate(R.layout.triplistitem, null);
+			convertView = mInflater.inflate(R.layout.friendtriplistitem, null);
 			//XXX find all the holder views by id
-			holder.name = (TextView) convertView.findViewById(R.id.triplistitem_name);
-			holder.time = (TextView) convertView.findViewById(R.id.triplistitem_starttime);
+			holder.name = (TextView) convertView.findViewById(R.id.friendtriplistitem_name);
+			holder.time = (TextView) convertView.findViewById(R.id.friendtriplistitem_starttime);
+			holder.sharer = (TextView) convertView.findViewById(R.id.friendtriplistitem_sharer);
 			convertView.setTag(holder);
 		} else{
 			holder = (ChildViewHolder) convertView.getTag();
@@ -105,21 +115,28 @@ public class FriendListAdapterTEMP extends BaseExpandableListAdapter {
 			if(childData != null){
 				holder.name.setText(childData.get((int) getGroupId(groupPosition)).getJSONObject(childPosition).getString("trip_name"));
 				holder.time.setText(childData.get((int) getGroupId(groupPosition)).getJSONObject(childPosition).getString("trip_st"));
+				if((int) getGroupId(groupPosition) == 0 && childData.get((int) getGroupId(groupPosition)).getJSONObject(childPosition).has("username")){
+					holder.sharer.setText(convertView.getResources().getString(R.string.puclivtripsharer) + " " + childData.get((int) getGroupId(groupPosition)).getJSONObject(childPosition).getString("username"));
+					holder.sharer.setVisibility(View.VISIBLE);
+				} else{
+					holder.sharer.setVisibility(View.GONE);
+				}
 			} else{
 				holder.name.setText("-");
 				holder.time.setText("-");
-//				throw new JSONException(null);
+				holder.sharer.setVisibility(View.GONE);
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
 			holder.name.setText("-");
 			holder.time.setText("-");
+			holder.sharer.setVisibility(View.GONE);
 		}
 		return convertView;
 	}
 	
 	class ChildViewHolder{
-		TextView name, time;
+		TextView name, time, sharer;
 	}
 
 	@Override
@@ -127,9 +144,11 @@ public class FriendListAdapterTEMP extends BaseExpandableListAdapter {
 		int count = 0;
 		try {
 			if(childData != null){
-				count = groupData.get(groupPosition).getInt("shareTripNum");
-			} else{
-//				count = 1;
+//				if(groupPosition == 0){
+//					count = groupData.get(groupPosition).getInt("shareTripNum") - 1;
+//				} else{
+					count = groupData.get(groupPosition).getInt("shareTripNum");
+//				}
 			}
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -149,7 +168,7 @@ public class FriendListAdapterTEMP extends BaseExpandableListAdapter {
 
 	@Override
 	public long getGroupId(int groupPosition) {
-		long id = 0;
+		long id = -1;
 		try {
 			id = groupData.get(groupPosition).getInt("id");
 		} catch (JSONException e) {

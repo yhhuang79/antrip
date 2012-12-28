@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -63,12 +64,14 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 	
 	private boolean stillLoading;
 	
+	private int JVM_HEAP_POINT_COUNT_LIMIT;
+	
 	final private int REQUEST_CODE_SETTINGS = 1379;
 	
 	private StickyListHeadersListView stickyList;
 	
 	private ImageButton dropdownList;
-	private ImageButton refreshBtn;
+//	private ImageButton refreshBtn;
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -93,6 +96,8 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		
 		userid = pref.getString("userid", "-1");
+		
+		JVM_HEAP_POINT_COUNT_LIMIT = ((ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass() * 60;
 		
 		initTripList();
 	}
@@ -500,9 +505,9 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 																		diag.dismiss();
 																		if(result){
 																			dialog.dismiss();
-																			Toast.makeText(mContext, "Trip shared!", Toast.LENGTH_SHORT).show();
+																			Toast.makeText(mContext, R.string.toast_triplist_shared_success, Toast.LENGTH_SHORT).show();
 																		} else{
-																			Toast.makeText(mContext, "Unable to share trip!", Toast.LENGTH_LONG).show();
+																			Toast.makeText(mContext, R.string.toast_triplist_shared_failed, Toast.LENGTH_LONG).show();
 																		}
 																	}
 																	
@@ -639,7 +644,17 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 					try {
 						String name = obj.getString("trip_name");
 						String hash = obj.getString("hash");
-						startActivity(new Intent(mContext, GMapViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("islocal", false).putExtra("tripname", name).putExtra("hash", hash));
+						String count = obj.getString("num_of_pts");
+						if(Integer.valueOf(count) > JVM_HEAP_POINT_COUNT_LIMIT){
+							//trip is too long for this device to display
+							new AlertDialog.Builder(mContext)
+								.setTitle(R.string.toast_cannotviewtrip)
+								.setMessage(R.string.tripistoolargetodisplay)
+								.setNeutralButton(R.string.alertdialog_iseebutton, null)
+								.show();
+						} else{
+							startActivity(new Intent(mContext, GMapViewer.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP).putExtra("islocal", false).putExtra("tripname", name).putExtra("hash", hash));
+						}
 					} catch (JSONException e) {
 						e.printStackTrace();
 						Toast.makeText(mContext, R.string.toast_cannotviewtrip, Toast.LENGTH_LONG).show();

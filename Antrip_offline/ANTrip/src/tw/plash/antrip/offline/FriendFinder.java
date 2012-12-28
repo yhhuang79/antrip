@@ -125,7 +125,7 @@ public class FriendFinder extends Activity implements InvalidateViewsCallback{
 								if (isNetworkAvailable(mContext)) {
 									
 									String url = "http://plash2.iis.sinica.edu.tw/api/GetAllUserList.php?userid="
-											+ userid + "&name=" + prefix;
+											+ userid + "&name=" + InternetUtility.encode(prefix);
 									
 									HttpGet getRequest = new HttpGet(url);
 									

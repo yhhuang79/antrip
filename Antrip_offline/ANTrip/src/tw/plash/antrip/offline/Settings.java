@@ -98,7 +98,7 @@ public class Settings extends PreferenceActivity{
 					e.printStackTrace();
 				}
 //				String appname = (ai != null)?mContext.getPackageManager().getApplicationLabel(ai).toString():"a";
-				String appname = "tw.plash.antrip";
+				String appname = "tw.plash.antrip.offline";
 				try {
 					startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id="+appname)));
 				} catch (android.content.ActivityNotFoundException anfe) {

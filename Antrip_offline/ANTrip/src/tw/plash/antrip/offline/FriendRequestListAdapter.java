@@ -194,19 +194,17 @@ public class FriendRequestListAdapter extends BaseAdapter{
 						protected void onPostExecute(Boolean result) {
 							if (result) {
 								clickedd.put(position, "good");
-								Toast.makeText(mContext, "You are now friends with \"" + name + "\"!",
-										Toast.LENGTH_SHORT).show();
+								Toast.makeText(mContext, mContext.getString(R.string.toast_friendrequest_accept_success_prefix) + " " + name + " " + mContext.getString(R.string.toast_friendrequest_accept_success_suffix), Toast.LENGTH_SHORT).show();
 								ivc.removePosition(position);
 							} else {
 								clickedd.put(position, "failed");
-								Toast.makeText(mContext, "Failed to become friends with \"" + name + "\"!",
-										Toast.LENGTH_SHORT).show();
+								Toast.makeText(mContext, R.string.register_serverbusy, Toast.LENGTH_SHORT).show();
 							}
 							ivc.requestViewsInvalidation();
 						};
 					}.execute();
 				} else if (clickedd.get(position).equals("working")) {
-					Toast.makeText(mContext, "sending request...", Toast.LENGTH_SHORT).show();
+//					Toast.makeText(mContext, "sending request...", Toast.LENGTH_SHORT).show();
 				} else {
 					// no more other cases here, i think
 				}
@@ -219,14 +217,14 @@ public class FriendRequestListAdapter extends BaseAdapter{
 				holder.buttonaccept.setImageResource(R.drawable.friendfinder_working);
 			} else if(clickedd.get(position).equals("failed")){
 				//can try again
-				holder.buttonaccept.setImageResource(R.color.button_state_friendfinderadd);
+				holder.buttonaccept.setImageResource(R.color.button_state_friendrequest_confirm);
 			} else{
 				//failed, try again later XXX
 				
 			}
 		} else{
 			//no different relationship other than "not friend"
-			holder.buttonaccept.setImageResource(R.color.button_state_friendfinderadd);
+			holder.buttonaccept.setImageResource(R.color.button_state_friendrequest_confirm);
 		}
 		
 		//should display user image...

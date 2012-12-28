@@ -82,16 +82,18 @@ public class AntripService2 extends Service implements LocationPublisher{
 		public void onReceive(Context context, Intent intent) {
 			if(intent != null && intent.getAction() != null){
 				if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-					if(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 999) <= 20){
-						
-						Notification notification = new Notification();
-						notification.setLatestEventInfo(mContext, mContext.getResources().getString(R.string.lowbatteryautostopnotification_title), mContext.getResources().getString(R.string.lowbatteryautostopnotification_message), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
-						((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(1384, notification);
-						
-						try {
-							inMessenger.send(Message.obtain(null, priMSG_LOW_BATTERY_AUTO_STOP));
-						} catch (RemoteException e) {
-							e.printStackTrace();
+					if(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 999) < 25){
+						if(isRecording){
+							//don't care if you're not recording...
+							Notification notification = new Notification(R.drawable.antrip_status_icon, mContext.getString(R.string.lowbatteryautostopnotification_title), System.currentTimeMillis());
+							notification.setLatestEventInfo(mContext, mContext.getString(R.string.lowbatteryautostopnotification_title), mContext.getString(R.string.lowbatteryautostopnotification_message), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+							((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(1384, notification);
+							
+							try {
+								inMessenger.send(Message.obtain(null, priMSG_LOW_BATTERY_AUTO_STOP));
+							} catch (RemoteException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 				} else if(intent.getAction().equals(Intent.ACTION_SHUTDOWN)){
@@ -373,7 +375,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 	}
 	
 	private void showNotification(){
-		Notification notification = new Notification(R.drawable.ant_24, getResources().getString(R.string.notification_new_trip_started), System.currentTimeMillis());
+		Notification notification = new Notification(R.drawable.antrip_status_icon, mContext.getString(R.string.notification_new_trip_started), System.currentTimeMillis());
 		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, new Intent(mContext, GMapRecorderActivity3.class), PendingIntent.FLAG_UPDATE_CURRENT);
 		notification.setLatestEventInfo(mContext, getResources().getString(R.string.app_name), getResources().getString(R.string.notification_is_recording_a_trip), pendingIntent);
 		startForeground(1377, notification);
