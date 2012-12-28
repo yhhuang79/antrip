@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="tripistoolargetodisplay">Trip is too large to display, please use Antrip website instead</string>
     <string name="register_usernametrydifferent">try a different username</string>
     <string name="register_serverbusy">Server is busy, please try again later</string>
     <string name="register_connectionerror">Connection error, please try again later!</string>
@@ -12,12 +13,13 @@
     <string name="register_usernametoolong">username cannot exceed 20 characters</string>
     <string name="register_usernametooshort">username must have at least 4 characters</string>
     
+    <string name="puclivtripsharer">Sharer:</string>
     <string name="friendlist_emptyview">Login to find your friends</string>
     <string name="gmapviewer_marker_end">End</string>
     <string name="gmapviewer_marker_start">Start</string>
     <string name="universal_loading">Loading...</string>
-    <string name="lowbatteryautostopnotification_title">Antrip has auto-saved and shut down</string>
-    <string name="lowbatteryautostopnotification_message">Remaining battery reached auto-stop threshold(20%)</string>
+    <string name="lowbatteryautostopnotification_title">Antrip auto-saved</string>
+    <string name="lowbatteryautostopnotification_message">Battery below threshold(25%)</string>
     <string name="friendfinder_emptylist">No results found for your query</string>
 	<string name="friendlist_sharedtrips">Trips shared with you:</string>
     <string name="public_trip_available">Number of public trips:</string>
@@ -43,6 +45,7 @@
     <string name="setting_title_youare">Logged in as: </string>
     <string name="setting_title_notlogin">You are not logged in yet</string>
     
+    <string name="progressdialog_upload_done">Upload complete</string>
     <string name="progressdialog_uploading">Uploading...</string>
     <string name="progressdialog_deleting">Deleting</string>
     <string name="progressdialog_registering">Registering...</string>
@@ -63,7 +66,11 @@
     <string name="alertdialog_iseebutton">I see...</string>
     <string name="alertdialog_invalid_trip_message">Your trip contains no valid point, it has been discarded</string>
     <string name="alertdialog_invalid_trip_title">Invalid Trip</string>
-
+	
+    <string name="toast_friendrequest_accept_success_suffix">!</string>
+    <string name="toast_friendrequest_accept_success_prefix">You are now friends with</string>
+    <string name="toast_triplist_shared_failed">Unable to share trip!</string>
+    <string name="toast_triplist_shared_success">Trip shared!</string>
     <string name="toast_waitingforfirstlocationfix">Locating, please wait...</string>
     <string name="toast_nofriendtosharetripwith">You have no friends to share trips with...</string>
     <string name="toast_addfriendnotloginyet">Please login first!</string>
@@ -72,7 +79,7 @@
     <string name="toast_alreadyfriends">You are already friends</string>
     <string name="toast_friendrequestpending">Request already sent</string>
     <string name="toast_no_pending_friendreqiest">You have no pending friend request</string>
-    <string name="toast_cannotviewtrip">Error! Unable to view this trip!</string>
+    <string name="toast_cannotviewtrip">Oops! Unable to view this trip!</string>
     <string name="toast_trip_deletion_failed">Deletion failed! Try again later!</string>
     <string name="toast_trip_cannotdelete">cannot be deleted!</string>
     <string name="toast_trip_deleted">deleted!</string>
@@ -84,7 +91,7 @@
     <string name="toast_login_canceled">Login canceled</string>
     <string name="toast_canceled">Canceled</string>
     <string name="toast_nointernet_nofetch">No internet connection, unable to load your trip...</string>
-    <string name="toast_unabletofetchtripdata">ERROR: Unable to fetch data</string>
+    <string name="toast_unabletofetchtripdata">Unable to fetch data</string>
     <string name="toast_theres_no_help">There\'s no help...</string>
     <string name="toast_function_coming_soon">Function coming soon...</string>
     <string name="toast_low_battery_warning">Low battery!Antrip will stop recording now!</string>
@@ -132,7 +139,7 @@
     
     <string name="notification_new_trip_started">A new recording has begun!</string>
     <string name="notification_is_recording_a_trip">is recording your trip...</string>
-    <string name="toast_upload_done">ANTrip:\nall uploads complete</string>
+    
     <string name="notification_upload_in_progress">upload in progress...</string>
     <string name="notification_starting_upload">start uploading trip(s)</string>
     <string name="alertdiag_threat_title">Quit ANTrip?</string>

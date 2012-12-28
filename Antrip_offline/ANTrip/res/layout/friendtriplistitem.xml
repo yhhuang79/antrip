@@ -38,7 +38,7 @@
         android:paddingRight="30dip">
 
         <TextView
-            android:id="@+id/triplistitem_name"
+            android:id="@+id/friendtriplistitem_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
@@ -47,12 +47,21 @@
             android:gravity="center_horizontal"/>
 
         <TextView
-            android:id="@+id/triplistitem_starttime"
+            android:id="@+id/friendtriplistitem_starttime"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textColor="@android:color/black"
             android:textSize="14sp" 
             android:gravity="center_horizontal"/>
+        
+        <TextView
+            android:id="@+id/friendtriplistitem_sharer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" 
+            android:gravity="center_horizontal"
+            android:visibility="gone"/>
     </LinearLayout>
 
 </FrameLayout>

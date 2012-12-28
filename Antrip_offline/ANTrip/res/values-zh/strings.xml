@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="tripistoolargetodisplay">此旅誌資料量過大，請利用雲水途誌網站檢視</string>
     <string name="register_usernametrydifferent">請輸入其他使用者名稱</string>
     <string name="register_serverbusy">伺服器忙碌中，請稍後再試</string>
     <string name="register_connectionerror">連線失敗，請稍後再試</string>
@@ -12,6 +13,7 @@
     <string name="register_usernametoolong">使用者名稱至多二十個字元</string>
     <string name="register_usernametooshort">使用者名稱至少四個字元</string>
     
+    <string name="puclivtripsharer">分享者:</string>
     <string name="friendlist_emptyview">請登入帳號以檢視你的好友社群</string>
     <string name="gmapviewer_marker_end">終點</string>
     <string name="gmapviewer_marker_start">起點</string>
@@ -31,9 +33,9 @@
     <string name="menu_settings">設定</string>
     <string name="menu_maptype">地圖種類</string>
     
-    <string name="setting_title_recordermode">紀錄模式</string>
+    <string name="setting_title_recordermode">記錄模式</string>
     <string name="setting_title_account">帳號資訊</string>
-    <string name="setting_title_recorder">紀錄設定</string>
+    <string name="setting_title_recorder">記錄設定</string>
     <string name="setting_title_general">一般設定</string>
     <string name="setting_contact">聯絡 PLASH 團隊</string>
     <string name="setting_privacy">隱私權政策</string>
@@ -43,6 +45,7 @@
     <string name="setting_title_youare">目前登入帳號: </string>
     <string name="setting_title_notlogin">你尚未登入</string>
     
+    <string name="progressdialog_upload_done">上傳完成</string>
     <string name="progressdialog_uploading">上傳中...</string>
     <string name="progressdialog_deleting">刪除</string>
     <string name="progressdialog_registering">註冊中...</string>
@@ -61,9 +64,13 @@
     <string name="alertdialog_sorrybutton">不好意思...</string>
     <string name="alertdialog_nointernet_nologin">無網路連線，無法登入</string>
     <string name="alertdialog_iseebutton">原來如此...</string>
-    <string name="alertdialog_invalid_trip_message">你的旅程紀錄無效，已從裝置中刪除</string>
+    <string name="alertdialog_invalid_trip_message">你的旅程記錄無效，已從裝置中刪除</string>
     <string name="alertdialog_invalid_trip_title">無效的旅程</string>
     
+    <string name="toast_friendrequest_accept_success_suffix">的好友</string>
+    <string name="toast_friendrequest_accept_success_prefix">恭喜! 你已成為</string>
+    <string name="toast_triplist_shared_failed">分享失敗!</string>
+    <string name="toast_triplist_shared_success">分享成功!</string>
     <string name="toast_waitingforfirstlocationfix">定位中，請稍後...</string>
     <string name="toast_nofriendtosharetripwith">無可分享旅誌的好友...</string>
     <string name="toast_addfriendnotloginyet">請先登入!</string>
@@ -72,7 +79,7 @@
     <string name="toast_alreadyfriends">此人已是您的好友</string>
     <string name="toast_friendrequestpending">懸而未決的好友邀請</string>
     <string name="toast_no_pending_friendreqiest">尚無未回覆的好友邀請</string>
-    <string name="toast_cannotviewtrip">錯誤! 無法觀看此旅誌!</string>
+    <string name="toast_cannotviewtrip">糟糕! 無法觀看此旅誌!</string>
     <string name="toast_trip_deletion_failed">刪除失敗，請稍後重試!</string>
     <string name="toast_trip_cannotdelete">無法刪除!</string>
     <string name="toast_trip_deleted">已刪除!</string>
@@ -84,10 +91,10 @@
     <string name="toast_login_canceled">登入取消</string>
     <string name="toast_canceled">已取消</string>
     <string name="toast_nointernet_nofetch">無網路連線，旅程無法顯示</string>
-    <string name="toast_unabletofetchtripdata">錯誤: 無法取得資料</string>
+    <string name="toast_unabletofetchtripdata">無法取得資料</string>
     <string name="toast_theres_no_help">嘖嘖...</string>
     <string name="toast_function_coming_soon">功能建置中...</string>
-    <string name="toast_low_battery_warning">電量過低!雲水途誌即將停止紀錄!</string>
+    <string name="toast_low_battery_warning">電量過低!雲水途誌即將停止記錄!</string>
     
     <string name="app_name">雲水途誌</string>
     <string name="okay">好的</string>
@@ -108,8 +115,8 @@
     <string name="dialog_or">或</string>
     <string name="dialog_loginwithfacebook">從Facebook登入</string>
     <string name="dialog_button_register">註冊</string>
-    <string name="dialog_agreetostuff">我同意PLASH的服務條款及隱私權政策</string>
-    <string name="dropdown_recorder">紀錄軌跡</string>
+    <string name="dialog_agreetostuff">我同意PLASH的 <a href="http://www.plash.tw/html/antrip.html">服務條款</a></string>
+    <string name="dropdown_recorder">記錄軌跡</string>
     <string name="dropdown_triplist">歷史旅誌</string>
     <string name="dropdown_friendlist">好友清單</string>
     <string name="gpsdisabledwarning">GPS未開啟!\n點選此處來開啟GPS</string>
@@ -128,14 +135,13 @@
     <string name="upload_complete">上傳完成!</string>
     
 	<string name="notification_new_trip_started">一個新的旅程開始了</string>
-    <string name="notification_is_recording_a_trip">正在紀錄你的旅程...</string>
-    <string name="toast_upload_done">雲水途誌:\n旅程上傳完成</string>
+    <string name="notification_is_recording_a_trip">正在記錄你的旅程...</string>
     <string name="notification_upload_in_progress">正在上傳旅程...</string>
     <string name="notification_starting_upload">開始上傳旅程</string>
     <string name="alertdiag_threat_title">結束雲水途誌?</string>
     
     <string name="login_warning">請先登入!</string>
-    <string name="logout_warning">有旅誌仍在紀錄中，還是要登出嗎?</string>
+    <string name="logout_warning">有旅誌仍在記錄中，還是要登出嗎?</string>
     
     <string name="eowversion">新世界生存者紀念版</string>
     
