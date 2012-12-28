@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="register_usernametrydifferent">try a different username</string>
+    <string name="register_serverbusy">Server is busy, please try again later</string>
+    <string name="register_connectionerror">Connection error, please try again later!</string>
+    <string name="register_usernametaken">Username is already taken</string>
+    <string name="register_success">Registration success!</string>
+    <string name="register_emailinvalid">Invalid e-mail format</string>
+    <string name="register_emailempty">please enter e-mail</string>
+    <string name="register_passworddoesnotmatch">password does not match</string>
+    <string name="register_passwordempty">please enter password</string>
+    <string name="register_usernametoolong">username cannot exceed 20 characters</string>
+    <string name="register_usernametooshort">username must have at least 4 characters</string>
+    
+    <string name="friendlist_emptyview">Login to find your friends</string>
     <string name="gmapviewer_marker_end">End</string>
     <string name="gmapviewer_marker_start">Start</string>
     <string name="universal_loading">Loading...</string>

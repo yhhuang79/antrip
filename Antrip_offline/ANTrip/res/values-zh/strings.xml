@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="register_usernametrydifferent">請輸入其他使用者名稱</string>
+    <string name="register_serverbusy">伺服器忙碌中，請稍後再試</string>
+    <string name="register_connectionerror">連線失敗，請稍後再試</string>
+    <string name="register_usernametaken">此帳號已有使用者申請</string>
+    <string name="register_success">註冊成功!</string>
+    <string name="register_emailinvalid">電子郵件格式錯誤</string>
+    <string name="register_emailempty">請輸入電子郵件</string>
+    <string name="register_passworddoesnotmatch">密碼核對錯誤</string>
+    <string name="register_passwordempty">請輸入密碼</string>
+    <string name="register_usernametoolong">使用者名稱至多二十個字元</string>
+    <string name="register_usernametooshort">使用者名稱至少四個字元</string>
+    
+    <string name="friendlist_emptyview">請登入帳號以檢視你的好友社群</string>
     <string name="gmapviewer_marker_end">終點</string>
     <string name="gmapviewer_marker_start">起點</string>
     <string name="universal_loading">載入中...</string>
