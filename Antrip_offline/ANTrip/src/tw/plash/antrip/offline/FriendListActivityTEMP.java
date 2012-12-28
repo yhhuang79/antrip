@@ -481,7 +481,7 @@ public class FriendListActivityTEMP extends ExpandableListActivity{
 				pendingFriendRequestBtn.setVisibility(View.GONE);
 				adapter = new FriendListAdapterTEMP(mContext, null);
 				expListView.setAdapter(adapter);
-				((TextView) expListView.getEmptyView().findViewById(R.id.emptytext)).setText("login to find your friends!");
+				((TextView) expListView.getEmptyView().findViewById(R.id.emptytext)).setText(R.string.friendlist_emptyview);
 				((ProgressBar) expListView.getEmptyView().findViewById(R.id.emptyprogressbar)).setVisibility(View.GONE);
 				break;
 			case ADAPTER_IS_NULL_HAS_USERID_NO_INTERNET:

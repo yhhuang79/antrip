@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.commons.math3.analysis.solvers.RegulaFalsiSolver;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
@@ -112,17 +113,6 @@ public class LoginDialog extends Dialog{
 				});
 				
 				final TextView tv = (TextView) findViewById(R.id.register_tos);
-//				tv.setAutoLinkMask(Linkify.WEB_URLS);
-//				tv.setOnClickListener(new View.OnClickListener() {
-//					@Override
-//					public void onClick(View v) {
-//						WebView wv = new WebView(mContext);
-//						wv.loadUrl("");
-//						LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//						addContentView(wv, lp);
-//						
-//					}
-//				});
 				tv.setMovementMethod(LinkMovementMethod.getInstance());
 				
 				final Button commit = (Button) findViewById(R.id.register_commit);
@@ -142,28 +132,32 @@ public class LoginDialog extends Dialog{
 							protected void onPreExecute() {
 								//check if all fields are valid
 								if(username.getText().length() < 1){
-									username.setError("username must have at least 4 characters!");
+									username.setError(mContext.getString(R.string.register_usernametooshort));
 									cancel(true);
 								} else if(username.getText().length() > 20){
-									username.setError("username must not exceed 20 characters!");
+									username.setError(mContext.getString(R.string.register_usernametoolong));
 									cancel(true);
 								} else if (password.getText().length() < 1){
-									password.setError("password must not be empty!");
+									password.setError(mContext.getString(R.string.register_passwordempty));
 									cancel(true);
 								} else if (password2.getText().length() < 1){
-									password2.setError("password must not be empty!");
+									password2.setError(mContext.getString(R.string.register_passwordempty));
 									cancel(true);
 								} else if (!password.getText().toString().equals(password2.getText().toString())){
-									password.setError("password does not match");
-									password2.setError("password does not match");
+									password.setError(mContext.getString(R.string.register_passworddoesnotmatch));
+									password2.setError(mContext.getString(R.string.register_passworddoesnotmatch));
 									cancel(true);
 								} else if(email.getText().length() < 1){
-									email.setError("e-mail must not be empty!");
+									email.setError(mContext.getString(R.string.register_emailempty));
+									cancel(true);
+								} else if(!StringValidityChecker.isValidEmail(email.getText().toString())){
+									//check email format
+									email.setError(mContext.getString(R.string.register_emailinvalid));
 									cancel(true);
 								} else{
 									diag = new ProgressDialog(mContext);
 									diag.setCancelable(false);
-									diag.setMessage("Registering...");
+									diag.setMessage(mContext.getString(R.string.progressdialog_registering));
 									diag.setIndeterminate(true);
 									diag.show();
 								}
@@ -233,21 +227,21 @@ public class LoginDialog extends Dialog{
 								case SUCCESS:
 									//XXX show success toast and dismiss dialog
 									dismiss();
-									Toast.makeText(mContext, "Register success!", Toast.LENGTH_SHORT).show();
+									Toast.makeText(mContext, R.string.register_success, Toast.LENGTH_SHORT).show();
 									break;
 								case USERNAME_TAKEN:
 									//XXX show error on username textbox
-									Toast.makeText(mContext, "Username already taken!", Toast.LENGTH_SHORT).show();
-									username.setError("Try a different username");
+									Toast.makeText(mContext, R.string.register_usernametaken, Toast.LENGTH_SHORT).show();
+									username.setError(mContext.getString(R.string.register_usernametrydifferent));
 									break;
 								case EXCEPTION:
 									//XXX show exception and ask user to try again later
-									Toast.makeText(mContext, "Connection error! Try again later!", Toast.LENGTH_LONG).show();
+									Toast.makeText(mContext, R.string.register_connectionerror, Toast.LENGTH_LONG).show();
 									break;
 								case WHAT:
 								default:
 									//XXX say server is busy, try again later
-									Toast.makeText(mContext, "Server is busy! try again later!", Toast.LENGTH_LONG).show();
+									Toast.makeText(mContext, R.string.register_serverbusy, Toast.LENGTH_LONG).show();
 									break;
 								}
 							}
