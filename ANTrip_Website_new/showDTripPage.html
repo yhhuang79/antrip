@@ -15,11 +15,14 @@
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery.mobile-1.1.0.min.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/jquery-ui-1.8.21.custom.css" />
+	<link rel="stylesheet" type="text/css" href="lib/css/jquery.tagsinput.css" />
 	<link rel="stylesheet" type="text/css" href="lib/css/pcframe.css" />
 	<link rel="shortcut icon" href="images/favicon.ico" />
 	<link rel="Bookmark" href="images/favicon.ico" type="image/x-icon" />
 	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<script type="text/javascript" src="lib/js/tripUnit.js"></script>
+	<script type="text/javascript" src="lib/js/jquery.tagsinput.js"></script>
+	<script type="text/javascript" src="lib/js/jquery.jeditable.js"></script>
 	<script type="text/javascript" src="lib/jq_includes/jquery.cookie.js"></script>
 	<script type="text/javascript" src="lib/js/markerclusterer.js"></script>
 	<script type="text/javascript" src="lib/lang/lang_Chinese.js"></script>
@@ -34,14 +37,25 @@
 	<script type="text/javascript" src="lib/js/GetTripFromID.js"></script>
 	<!--Adobe Edge Runtime End-->
 </head>
-<body id="body">
+<body id="body" style="background-image:url('images/MapBKImage.png');">
+	<div class='tripMap_class' id='stage'>
+			<div class="welcomeText">
+				<div id="tripname"></div>
+				<div id="shareuser"></div>
+			</div>
+			<div class="centerGroup">
+				<div id="div_trip_tags"><fieldset data-role='tagsgroup'><input id="trip_tags" type="text" class="tags ui-widget-content ui-corner-all" value="" /></fieldset></div>
+				<div id="des_display_unit" class=" ui-corner-all des_display_unit_class"><div id='des_textarea'></div></div>
+			</div>
+	</div>
   <div id="sym_editpage" class="class_fun_div">
-	  
 		 <div id="edit_display_area">
 			 <div id="dialog" title="Trip Note" class="ui-widget"></div>
 			 <div id="map_canvas">
 		
 			 </div>
+			<div id="player_canvas">
+			</div>
 			 <div id="calculate_area" class="class_paper">
 				 <div id="calculate_area_sub">
 				<!--<img id="img_calculate_area" src=""></img>	-->
@@ -52,7 +66,7 @@
 
 	  </div>
 	  	<div id="end_Text" class="content_Text">
-	<img id="img_des_ant" src=""></img>&nbsp;&nbsp;© 2012 ANTrip IIS Sinica | Design by TMSG | Valid XHTML5.0 | CSS
+	<a href="http://www.plash.tw/antrip" target="_blank"><img id="img_des_ant" /></a>&nbsp;&nbsp;© 2012 ANTrip IIS Sinica | Design by TMSG | Valid XHTML5.0 | CSS
 	</div>
 </body>
 	<script type="text/javascript" src="lib/js/AntripEmbedded.js"></script>

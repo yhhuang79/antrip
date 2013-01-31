@@ -24,9 +24,11 @@
 		//$("#end_Text").css('width',"auto");
 		setLanguage(true);
 		//alert(g_hashCode);
-		GetTripPointfromID(g_hashCode, g_calUnit);
-		showTripEditBtList(userid);
+		GetTripPointfromID(g_hashCode, g_calUnit, showTripEditBtList);
+	//	alert(userid);
+	//	showTripEditBtList(userid);
 		g_ready =true;
+		$("#player_canvas").hide();
 		$("#img_des_ant").attr('src',im+'ant_24.png');
 		$("#overlay").html(g_str_loading);
 		$("#overlay").css("display","none");

@@ -34,7 +34,7 @@
 	var g_tripTimeStampArray = null;
 	var g_openMarker = true;
 	var g_picture_uri = null;
-	function GetTripPointfromID(hashCode, _unit){
+	function GetTripPointfromID(hashCode, _unit, callbackfunc){
 		$('#map_canvas').css('visibility', 'hidden');
 		$('#map_canvas').gmap({ 'zoom':g_zoom, 'callback': function(map) {
 			var self = this;
@@ -67,21 +67,24 @@
 							lastlatlng = latlng;
 							g_tripArray.push(point);
 							g_tripPointArray.push(latlng);
+							point.timestamp = trimTimeFormat(point.timestamp);
 							g_tripTimeStampArray.push(point.timestamp);
 							bounds.extend(latlng);
 							if (typeof point.CheckIn != 'undefined'){
 								var CheckInInfo="<div style='display:block;overflow:hidden;'>";
 								var title="";
+								var link="";
 								var markicon = null;
 								CheckInInfo +="<p>";
 								if(point.CheckIn.picture_uri!=null && typeof point.CheckIn.picture_uri!='undefined'){
-									title = 'http://plash2.iis.sinica.edu.tw/picture/'+result.userid+"/"+result.trip_id+"/thumb/"+point.CheckIn.picture_uri;
+									title = 'http://plash2.iis.sinica.edu.tw/picture/'+result.userid+"/"+result.trip_id+"/thumb.s/"+point.CheckIn.picture_uri;
+									link = 'http://plash2.iis.sinica.edu.tw/picture/'+result.userid+"/"+result.trip_id+"/"+point.CheckIn.picture_uri;
 									var meta = document.createElement('meta');
 									meta.setAttribute("property", "og:image");
 									meta.setAttribute("content", title);
 									(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(meta);
 									g_picture_uri = point.CheckIn.picture_uri;
-									CheckInInfo +="<a href='"+title+"' target='_blank' style='float:left; margin:0 5px 0 0;' ><img style='display:block;' src=" + title + " height='200' /></a>";
+									CheckInInfo +="<a href='"+link+"' target='_blank' style='float:left; margin:0 5px 0 0;' ><img style='display:block;' src='" + title + "' height='200' /></a>";
 									markicon = "images/placemarker.png";
 								}
 								if(point.CheckIn.emotion!=null && typeof point.CheckIn.emotion!='undefined'){
@@ -92,7 +95,7 @@
 									}
 								}
 								if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
-									CheckInInfo += ""+ point.CheckIn.message +"";
+									CheckInInfo += "<div style='width:100%'>"+ point.CheckIn.message +"</div>";
 									if(markicon==null){
 										markicon = "images/placemarker_text.png";
 									}
@@ -102,8 +105,12 @@
 								if(markicon==null){
 									markicon = "images/placemarker.png";
 								}
+								var title_message = "";
+								if(point.CheckIn.message!=null && typeof point.CheckIn.message!='undefined'){
+									title_message = point.CheckIn.message;
+								}
 								var placemarker = new google.maps.Marker({
-									'title': title,
+									'title': title_message,
 									'position': latlng, 
 									'bounds': true,
 									'icon': markicon
@@ -133,7 +140,7 @@
 								}
 								google.maps.event.addListener(placemarker, 'click', function() {
 									//OpenAllMarkerInfo(false);
-									placemarker.openInfoWindow();
+									placemarker.clickTrigger();
 								});
 								google.maps.event.addListener(placemarker, 'mouseout', function() {
 									;
@@ -142,10 +149,15 @@
 									window.open(title,"_blank ");
 								});*/
 								placemarker.getTitle = function() {
-									return title;
+									return link;
 								}
 								placemarker.getPosition = function() {
 									return latlng;
+								}
+								placemarker.clickTrigger = function() {
+									setAntMarker(placemarker);
+									OpenAllMarkerInfo(false);
+									placemarker.openInfoWindow();
 								}
 								placemarker.setMap(map);
 								g_tripMarkerArray.push(placemarker);
@@ -200,10 +212,14 @@
 										}
 									}
 									google.maps.event.addListener(pointmarker, 'click', function() {
+											pointmarker.clickTrigger();
+									});
+									pointmarker.clickTrigger = function() {
 											OpenAllPointInfo(false);
 											pointmarker.openInfoWindow(true);
-									});
-									pointmarker.setMap(map);
+											setAntMarker(pointmarker);
+									}
+									//pointmarker.setMap(map);
 									g_tripPointMarkerArray.push(pointmarker);
 								}
 							}
@@ -213,7 +229,7 @@
 				g_mapPath = new google.maps.Polyline({
 					'strokeColor': "#FF0000", 
 					'strokeOpacity': 0.8, 
-					'strokeWeight': 10, 
+					'strokeWeight': 8, 
 					'path': g_tripPointArray
 				});
 
@@ -221,11 +237,22 @@
 					map.fitBounds(bounds);
 				}
 				g_mapPath.setMap(map);
-				self.set('MarkerClusterer', new MarkerClusterer(map, g_tripPointMarkerArray));
+			//	self.set('MarkerClusterer', new MarkerClusterer(map, g_tripPointMarkerArray));
 				$('#map_canvas').gmap('refresh');
 				$('#map_canvas').css('visibility', 'visible');
 
+				userid = result.userid;
+				g_trip = result.trip_id;
+				showTags(result.userid, result.trip_id);
+				showDescription(result.userid, result.trip_id);
 				showNote(result.userid, result.trip_id);
+
+				if(callbackfunc != 'undefined' && typeof callbackfunc== 'function'){
+					callbackfunc(userid);
+					$.cookie("g_tripname", result.tripName);
+					$("#tripname").html(g_str_tripname+":<input type='text' id='input_tripName' name='tripName' disabled=true value='"+result.tripName+"' />");
+					$("#shareuser").html(g_str_sharefromWho+result.username);
+				}
 
 				if(top.frames['triipStatisticsFrame']){
 					top.frames['triipStatisticsFrame'].location="frame-2.html";
@@ -252,6 +279,24 @@
 				}
 			}});				
 		}});
+	}
+	
+	var g_antsmarker = null;
+	function setAntMarker(marker){
+		var map =  $('#map_canvas').gmap('get','map');
+		var username = $.cookie("username");
+		if(g_antsmarker){
+			g_antsmarker.setMap(null);
+			g_antsmarker = null;
+		}
+		g_antsmarker = new google.maps.Marker({
+			'animation': google.maps.Animation.BOUNCE,
+			'title': username,
+			'position': marker.getPosition(), 
+			'bounds': true,
+			'icon': "images/ant_24.png"
+		});
+		g_antsmarker.setMap(map);
 	}
 
 	function OpenAllMarkerInfo(IsOpen){

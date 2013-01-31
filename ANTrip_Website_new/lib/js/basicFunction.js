@@ -51,6 +51,7 @@
 	function setMapCanvasSize(IsExtend){
 		var fixedValue = 20;
 		var calheight = document.body.clientHeight;
+		var calWidth = document.body.clientWidth;
 		if(isPCMacOS()==false){
 			calheight = window.innerHeight*80/100;
 		}
@@ -62,6 +63,7 @@
 			$("#map_canvas").css('height', calheight-fixedValue);
 			$("#player_canvas").css('height', calheight-fixedValue);
 		}
+		$(".rightBtnList").css('margin-left', calWidth-80);
 		$("#map_canvas").css('width', document.body.clientWidth-fixedValue);
 		$("#player_canvas").css('width', document.body.clientWidth-fixedValue);
 	}
@@ -226,6 +228,7 @@
 		$.cookie("sid", null);
 		$.cookie("username", null);
 		$.cookie("g_trip", null);
+		$.cookie("hash", null);
 		g_tripnum = 0;
 		g_tripname ="";
 		g_tripIndex=0;

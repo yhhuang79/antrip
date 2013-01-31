@@ -53,9 +53,9 @@
           height: calheight,
 		  backgroundColor: 'transparent',
           hAxis: {title: dataFromAjax[0][0]},
-		  vAxes: {0: {title:g_str_altitude_table + "/"+ g_str_speed_table, textStyle:{color: 'blue'}}, 1: {title:g_str_checkin_table, textStyle:{color: 'red'}}},
+		  vAxes: {0: {title:g_str_altitude_table, textStyle:{color: 'blue'}}, 1: {title:"", textStyle:{color: 'red'}, textPosition:"none"},  2: {title:g_str_speed_table, textStyle:{color: 'ff9900'}}},
           seriesType: "line",
-          series: {1: {type: "bars", targetAxisIndex :1}}
+          series: {1: {type: "bars", targetAxisIndex :1},  2: {type: "line", targetAxisIndex :2}}
         });
 		//mapping google chart mouse over to trip path
 		google.visualization.events.addListener(ac, 'onmouseover', usefulHandler);
@@ -73,12 +73,12 @@
 				if(pointIndex>0){
 					pointIndex--;
 					if(callframe!=null){
-						callframe.OpenAllMarkerInfo(false);
-						callframe.g_tripMarkerArray[pointIndex].openInfoWindow(true);
+						//callframe.OpenAllMarkerInfo(false);
+						callframe.g_tripMarkerArray[pointIndex].clickTrigger();//openInfoWindow(true);
 					}
 					else{
-						OpenAllMarkerInfo(false);
-						g_tripMarkerArray[pointIndex].openInfoWindow(true);
+						//OpenAllMarkerInfo(false);
+						g_tripMarkerArray[pointIndex].clickTrigger();//openInfoWindow(true);
 					}
 					g_pointIndex = pointIndex; // save index of checkin during mouse over. it is used for mouse click to open picture window
 				}
@@ -86,13 +86,13 @@
 			else{
 				if(callframe!=null){
 					var pointIndex = Math.round((e.row/dataFromAjax.length)*callframe.g_tripPointMarkerArray.length);
-					callframe.OpenAllPointInfo(false);
-					callframe.g_tripPointMarkerArray[pointIndex].openInfoWindow(true);
+					//callframe.OpenAllPointInfo(false);
+					callframe.g_tripPointMarkerArray[pointIndex].clickTrigger();
 				}
 				else{
 					var pointIndex = Math.round((e.row/dataFromAjax.length)*g_tripPointMarkerArray.length);
-					OpenAllPointInfo(false);
-					g_tripPointMarkerArray[pointIndex].openInfoWindow(true);
+					//OpenAllPointInfo(false);
+					g_tripPointMarkerArray[pointIndex].clickTrigger();
 				}	
 			}
 		}

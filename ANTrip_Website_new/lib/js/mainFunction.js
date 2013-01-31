@@ -16,7 +16,7 @@
 		$("#trip_length").html(g_str_length+": "+$.cookie('g_trip_length') + " M");
 		//alert($.cookie("g_shareuser"));
 		if($.cookie("g_shareuser")!=null && $.cookie("g_shareuser")!='undefined'){
-			$("#shareuser").html(g_str_sharefromWho+": "+$.cookie('g_shareuser'));
+			$("#shareuser").html(g_str_sharefromWho+$.cookie('g_shareuser'));
 		}	
 	}
 
@@ -115,6 +115,9 @@
 		}
 		var sid = $.cookie("sid");
 		var order = $("input:radio[name=radio_triplist]:checked").val();
+		if($.cookie("g_triporder")!=null){
+			order = $.cookie("g_triporder");
+		}
 		if(order==null){
 			order = "trip_id";
 		}
@@ -145,6 +148,14 @@
 		});
 	}
 
+	function trimTimeFormat(time){
+				var stringTime = new String(time);
+				if(typeof stringTime.lastIndexOf=='function' && stringTime.lastIndexOf(".")>=0){
+					stringTime = stringTime.slice(0, stringTime.lastIndexOf("."));
+				}
+				return stringTime;
+	}
+
 	function showTripListResult(result){
 			g_trip = result.tripInfoList[0].trip_id;
 			g_tripname = result.tripInfoList[0].trip_name.toString();
@@ -153,22 +164,19 @@
 			
 			var width="100%";
 			if( $(window.frames['triipListFrame']) ){
-				var fixedValue = 150;
+				var fixedValue = 120;
 				width = top.window.frames["triipListFrame"].document.body.clientWidth - fixedValue;
 			}
-			//alert($(window).width());
 			$.each(result.tripInfoList, function(i,data){
-				//var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 				if(data.st_addr_prt2==null || data.st_addr_prt2==""){
 					data.st_addr_prt2 = data.st_addr_prt1;
 				}
-				var shared_friends = getSharedFriendListByTripID(data.trip_id);
-				if(shared_friends!=""&&shared_friends!='undefined'){
-					shared_friends = g_str_sharetoWho+shared_friends;
-				}
+
+				data.trip_st = trimTimeFormat(data.trip_st);
+				data.trip_et = trimTimeFormat(data.trip_et);
 				var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
 				var tripname = data.trip_name.toString();
-				var appendcontent="<div id='div_"+sid+data.trip_id+"' style='margin-top:-5px;margin-right:0px;width:100%;display:table-row;'><button  id='button"+sid+data.trip_id+"' class='tripItem' onClick=\"g_trip="+data.trip_id+";g_tripname='"+ data.trip_name+"';g_tripIndex="+i+";	$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_st', '"+data.trip_st+"');$.cookie('g_trip_et', '"+data.trip_et+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_trip_st_address', '" + data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 + "');$.cookie('g_trip_et_address', '" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "');$.cookie('g_shareuser', null);top.frames['tripMapFrame'].location='frame-1.html';\"><div class='product' ><div class='wrapper' style='width:"+width+"px'><div class='listview_image' ><a class='listview' href=''><img src='" + mapurl + "'/></a></div><div class='listview_description' ><a class='listview' href=''>" + data.trip_name  + "<br/>"+g_str_start+": " + data.trip_st + "<br/>"+g_str_end+": " + data.trip_et  + "<br/>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "<br/>"+g_str_length+": " + data.trip_length  + " M<br/>"+shared_friends+"</a></div></div></div></button>";
+				var appendcontent="<div id='div_"+sid+data.trip_id+"' style='margin-top:-5px;margin-right:0px;width:100%;display:table-row;'><button  id='button"+sid+data.trip_id+"' class='tripItem' onClick=\"g_trip="+data.trip_id+";g_tripname='"+ data.trip_name+"';g_tripIndex="+i+";	$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_st', '"+data.trip_st+"');$.cookie('g_trip_et', '"+data.trip_et+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_trip_st_address', '" + data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 + "');$.cookie('g_trip_et_address', '" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "');$.cookie('g_shareuser', null);top.frames['tripMapFrame'].location='frame-1.html';\"><div class='product' ><div class='wrapper' style='width:"+width+"px'><div class='listview_image' ><a class='listview' href=''><img src='" + mapurl + "'/></a></div><div class='listview_description' ><a class='listview' href=''>" + data.trip_name  + "<br/>"+g_str_start+": " + data.trip_st + "<br/>"+g_str_end+": " + data.trip_et + "<br/>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "<br/>"+g_str_length+": " + data.trip_length  + " M</a></div></div></div></button>";
 				
 				appendcontent += "<div id='div_deletemarker'  onClick=\"confirmDelete('"+data.trip_id+"', false);\"><img src='"+im+"deletemarker.png' align=right></img></div>";
 
@@ -180,7 +188,7 @@
 			$("#products").css("position","static");
 	}
 
-	function showPublicTripListResult(result, appendToObj){
+	function showPublicTripListResult(result, appendToObj, topOrder){
 			g_trip = result.tripInfoList[0].trip_id;
 			g_tripname = result.tripInfoList[0].trip_name.toString();
 			g_tripLength = result.tripInfoList.length;
@@ -188,22 +196,19 @@
 			
 			var width="100%";
 			if( $(window.frames['triipListFrame']) ){
-				var fixedValue = 150;
+				var fixedValue = 100;
 				width = top.window.frames["triipListFrame"].document.body.clientWidth - fixedValue;
 			}
-			//alert($(window).width());
 			$.each(result.tripInfoList, function(i,data){
-				//var tripurl = "#sym_editpage?userid="+ sid +"&trip_id="+ data.trip_id;
 				if(data.st_addr_prt2==null || data.st_addr_prt2==""){
 					data.st_addr_prt2 = data.st_addr_prt1;
 				}
-				var shared_friends = getSharedFriendListByTripID(data.trip_id);
-				if(shared_friends!=""&&shared_friends!='undefined'){
-					shared_friends = g_str_sharetoWho+shared_friends;
-				}
+
 				var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
 				var tripname = data.trip_name.toString();
-				var appendcontent="<div id='div_"+sid+data.trip_id+"' style='margin-top:-5px;margin-right:0px;width:100%;display:table-row;'><button  id='button"+sid+data.trip_id+"' class='tripItem' onClick=\"g_trip="+data.trip_id+";g_tripname='"+ data.trip_name+"';g_tripIndex="+i+";	$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_st', '"+data.trip_st+"');$.cookie('g_trip_et', '"+data.trip_et+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_trip_st_address', '" + data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 + "');$.cookie('g_trip_et_address', '" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "');$.cookie('g_shareuser', null);top.frames['tripMapFrame'].location='frame-1.html?userid="+data.userid+"';\"><div class='product' ><div class='wrapper' style='width:"+width+"px'><div class='listview_image' ><a class='listview' href=''><img src='" + mapurl + "'/></a></div><div class='listview_description' ><a class='listview' href=''>" + data.trip_name  + "<br/>"+g_str_start+": " + data.trip_st + "<br/>"+g_str_end+": " + data.trip_et  + "<br/>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "<br/>"+g_str_length+": " + data.trip_length  + " M<br/>"+g_str_sharefromWho+ ":"+data.username+"</a></div></div></div></button>";
+				data.trip_st = trimTimeFormat(data.trip_st);
+				data.trip_et = trimTimeFormat(data.trip_et);
+				var appendcontent="<div id='div_"+sid+data.trip_id+"' style='margin-top:-5px;margin-right:0px;width:100%;display:table-row;'><button  id='button"+sid+data.trip_id+"' class='tripItem' onClick=\"g_trip="+data.trip_id+";g_tripname='"+ data.trip_name+"';g_tripIndex="+i+";	$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_st', '"+data.trip_st+"');$.cookie('g_trip_et', '"+data.trip_et+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_trip_st_address', '" + data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 + "');$.cookie('g_trip_et_address', '" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "');$.cookie('g_shareuser', null);top.frames['tripMapFrame'].location='frame-1.html?userid="+data.username+"';\"><div class='product' ><div class='wrapper' style='width:"+width+"px'><div class='listview_image' ><a class='listview' href=''><img src='" + mapurl + "'/></a></div><div class='listview_description' ><a class='listview' href=''>" + data.trip_name  + "<br/>"+g_str_start+": " + data.trip_st + "<br/>"+g_str_end+": " + data.trip_et  + "<br/>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "<br/>"+g_str_length+": " + data.trip_length  + " M<br/>"+g_str_sharefromWho+data.username+"</a></div></div></div></button>";
 
 				appendcontent += "</div>";
 
@@ -216,6 +221,41 @@
 			});
 			$("button","div[id*=products]" ).button();
 			$("#products").css("position","static");
+	}
+
+
+	function showPublicTripListResultInFirstPage(result, appendToObj, topOrder){		
+			$.each(result.tripInfoList, function(i,data){
+				if(topOrder!='undefined' && i >= topOrder){
+					return;
+				}
+				if(data.st_addr_prt2==null || data.st_addr_prt2==""){
+					data.st_addr_prt2 = data.st_addr_prt1;
+				}
+
+				var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
+				var tripname = data.trip_name.toString();
+
+				var strShowDLink = "/showDTripFrame.php?hash="+data.hash+"&g_lang="+g_lang+"&g_calUnit="+$("input:radio[name=radio]:checked").val();
+				var s_url = getRootPath()+strShowDLink;
+				$.ajax({url:'http://plash.tw/yourls-api.php',
+					data:{signature : "da36cdffd2", url:encodeURI(s_url), format:"json", action:"shorturl"},
+					type: 'GET', dataType: 'json', cache: false, async: false,
+					success:function(result){
+						if(result.shorturl!=null && result.shorturl!="undefined" ){
+							s_url = result.shorturl;
+						}
+					},
+					error: function(xhr) {
+						//alert('Ajax request errors');
+					}
+				});
+				var appendcontent="<div class='listview_image'  onClick=\"g_trip="+data.trip_id+";g_tripname='"+ data.trip_name+"';g_tripIndex="+i+";	$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_shareuser', null);window.open('"+s_url+"', '_blank');\"><a class='listview' href=''><img src='" + mapurl + "'/><br/>" + data.trip_name  + "<br/>"+g_str_sharefromWho+data.username+"</a></div>";
+
+				if(appendToObj!=null && appendToObj!="undefined"){
+					appendToObj.append(appendcontent);
+				}
+			});
 	}
 
 	function shareTrip(){
@@ -231,10 +271,10 @@
 			success:function(result){
 				//alert(result.TripShareUser.length);
 				if(result.TripShareUser.length>0){
-					$("#ub_share_map").attr('src',im+'ub_share_map_enable.png');
+					$("#ub_share_map").attr('src',im+'sharemarker_enable.png');
 				}
 				else{
-					$("#ub_share_map").attr('src',im+'ub_share_map.png');
+					$("#ub_share_map").attr('src',im+'sharemarker.png');
 				}
 			}
 		});
@@ -278,7 +318,7 @@
 							friend_list += $(this).attr("name");
 						}
 						else{
-							$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/DelAuthFriend.php',
+							/*$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/DelAuthFriend.php',
 									data:{userid : sid, trip_id:g_trip, friend_id:$(this).attr("name")},
 									type: 'GET', dataType: 'jsonp', cache: false,
 									success:function(result){
@@ -287,11 +327,11 @@
 									error: function(xhr) {
 										//alert('Ajax request errors');
 									}
-							});
+							});*/
 						}
 					});
 					if(friend_list!=""){
-						$("#ub_share_map").attr('src',im+'ub_share_map_enable.png');
+						$("#ub_share_map").attr('src',im+'sharemarker_enable.png');
 						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/SetAuthFriendComponent.php',
 							data:{userid : sid, trip_id:g_trip, friend_id:friend_list},
 							type: 'GET', dataType: 'jsonp', cache: false,
@@ -304,7 +344,17 @@
 						});
 					}
 					else{
-						$("#ub_share_map").attr('src',im+'ub_share_map.png');
+						$("#ub_share_map").attr('src',im+'sharemarker.png');
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/SetAuthFriendComponent.php',
+							data:{userid : sid, trip_id:g_trip, friend_id:""},
+							type: 'GET', dataType: 'jsonp', cache: false,
+							success:function(result){
+								//alert('success');
+							},
+							error: function(xhr) {
+								//alert('Ajax request errors');
+							}
+						});
 					}
 				}
 			},
@@ -325,32 +375,35 @@
 					//alert(g_str_nofriend);
 					return false;
 				}
-				var checkbox_str = "<input type='checkbox' name='0' id='checkbox_0' class='custom' />";
-				//var index=0;
-				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripShareUser.php',
-						data:{userid : sid, trip_id:trip_id, friend_id:'0'},
-						type: 'GET', dataType: 'jsonp', cache: false, async: false,
-						success:function(result){
-							if(result.isShareTrip=="1"){
-								checkbox_str = "<input type='checkbox' checked='checked' name='0' id='checkbox_0' class='custom' />";
-								shared_friends.push(g_str_shareToAllUser);
-							}
-						}
-				});
-				div_data[0] ="<div id='div_alluser' data-role='fieldcontain' style='WHITE-SPACE:nowrap;margin-top:-5px;margin-right:0px;'><button class='class_friend_bt' style='margin:0 auto;width:80%;'><fieldset data-role='controlgroup'>"+checkbox_str+"<div class='listview_description listview' >"+g_str_shareToAllUser+"</div></fieldset></button></div>";
 				$.each(result.friend_list, function(i,data){
-					var checkbox_str = "<input type='checkbox' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
-					$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripShareUser.php',
-						data:{userid : sid, trip_id:trip_id, friend_id:data.id},
-						type: 'GET', dataType: 'jsonp', cache: false, async: false,
-						success:function(result){
-							if(result.isShareTrip=="1"){
-								checkbox_str = "<input type='checkbox' checked='checked' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
-								shared_friends.push(data.id);
+					if(i==0){
+						var checkbox_str = "<input type='checkbox' name='0' id='checkbox_0' class='custom' />";
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripShareUser.php',
+							data:{userid : sid, trip_id:trip_id, friend_id:'0'},
+							type: 'GET', dataType: 'jsonp', cache: false, async: false,
+							success:function(result){
+								if(result.isShareTrip=="1"){
+									checkbox_str = "<input type='checkbox' name='0' id='checkbox_0' class='custom'  checked='checked' />";
+									shared_friends.push('0');
+								}
+								div_data[0] ="<div id='div_alluser' data-role='fieldcontain' style='WHITE-SPACE:nowrap;margin-top:-5px;margin-right:0px;'><button class='class_friend_bt' style='margin:0 auto;width:80%;'><fieldset data-role='controlgroup'>"+checkbox_str+"<div class='listview_description listview' >"+g_str_shareToAllUser+"</div></fieldset></button></div>";
 							}
-							div_data[i+1] ="<div id='div_"+sid+data.id+"' data-role='fieldcontain' style='WHITE-SPACE:nowrap;margin-top:-5px;margin-right:0px;'><button class='class_friend_bt' style='margin:0 auto;width:80%;'><fieldset data-role='controlgroup'>"+checkbox_str+"<div class='listview_image' ><img src='" + data.image + "'/></div><div class='listview_description listview' >"+g_str_id+":" + data.name  + "</div></fieldset></button></div>";
-						}
-					});
+						});			
+					}
+					else{
+						var checkbox_str = "<input type='checkbox' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
+						$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripShareUser.php',
+							data:{userid : sid, trip_id:trip_id, friend_id:data.id},
+							type: 'GET', dataType: 'jsonp', cache: false, async: false,
+							success:function(result){
+								if(result.isShareTrip=="1"){
+									checkbox_str = "<input type='checkbox' checked='checked' name='"+data.id+"' id='checkbox_"+sid+data.id+"' class='custom' />";
+									shared_friends.push(data.id);
+								}
+								div_data[i] ="<div id='div_"+sid+data.id+"' data-role='fieldcontain' style='WHITE-SPACE:nowrap;margin-top:-5px;margin-right:0px;'><button class='class_friend_bt' style='margin:0 auto;width:80%;'><fieldset data-role='controlgroup'>"+checkbox_str+"<div class='listview_image' ><img src='" + data.image + "'/></div><div class='listview_description listview' >"+g_str_id+":" + data.name  + "</div></fieldset></button></div>";
+							}
+						});
+					}
 				});
 
 				$("div[id=products]").eq(0).append(div_data.join(''));
@@ -396,20 +449,30 @@
 		return shared_friends;
 	}
 
-	function showShareTrip(){
-		$("div[id=products]").eq(0).html("<br/><br/><br/>");
-		$("#overlay").css("display","block");
-		g_tripnum = 0;
+	function showPublicTripList(topOrder){
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetPublicTripInfo.php',
 			type: 'GET', dataType: 'jsonp', cache: false, async: false,
 			success:function(result){
 				if(result.tripInfoList.length>0){
-					g_tripnum += result.tripInfoList.length;
-					showPublicTripListResult(result);
+					if(topOrder!='undefined' && topOrder!=null){
+						g_tripnum += topOrder;
+						showPublicTripListResultInFirstPage(result, $("div[id=publicTrip]").eq(0), topOrder);
+					}
+					else{
+						g_tripnum += result.tripInfoList.length;
+						showPublicTripListResult(result);
+					}
 				}
 				//$("button","div[id*=products]" ).button();
 			}
 		});
+	}
+
+	function showShareTrip(){
+		$("div[id=products]").eq(0).html("<br/><br/><br/>");
+		$("#overlay").css("display","block");
+		g_tripnum = 0;
+		showPublicTripList();
 		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetFriendList.php',
 			data:{sid : sid},
 			type: 'GET', dataType: 'jsonp', cache: false, async: false,
@@ -419,8 +482,8 @@
 				}
 				$.each(result.friend_list, function(i,data){
 					var _result = showShareTripByFriend(data);
-					if(_result.getAuthTrip!="" && _result.getAuthTrip!='undefined'){
-						var trip_list=_result.getAuthTrip.toString().split(",");
+					if(_result.tripList!="" && _result.tripList!='undefined'){
+						var trip_list=_result.tripList.toString().split(",");
 						g_tripnum += trip_list.length;
 						$("div[id*=tripsum]").html(g_str_numberoftrip+g_tripnum);
 						showTripListByFriend(data, _result);
@@ -432,8 +495,8 @@
 	}
 	function showShareTripByFriend(user_data, appendToObj){
 		var _result = null;
-		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetAuthTripInfoComponent.php',
-			data:{userid : sid, friend_id:user_data.id},
+		$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripAuthData.php',
+			data:{userid :user_data.id, friend_id:sid},
 			type: 'GET', dataType: 'jsonp', cache: false, async: false,
 			success:function(result){
 				//alert(result.getAuthTrip);
@@ -452,29 +515,33 @@
 		return _result;
 	}
 	function showTripListByFriend(user_data, result, appendToObj){
-		var trip_list=result.getAuthTrip.toString().split(",");
+		var trip_list=result.tripList.toString().split(",");
 		var share_userid = user_data.id.toString();
 		var share_username = user_data.name.toString();
 		for(var index=0;index<trip_list.length;index++)
 		{
 			var trip_data = trip_list[index].toString();
-			if(result.getAuthTrip!=""&&result.getAuthTrip!=null){
+			//alert(share_userid);
+			//alert(trip_data);
+			if(result.tripList!=""&&result.tripList!=null){
 				$.ajax({url:'http://plash2.iis.sinica.edu.tw/api/GetTripInfoComponent.php',
 					data:{userid: share_userid, trip_id:trip_data},
 					type: 'GET', dataType: 'jsonp', cache: false, async: false,
 					success:function(result){
+						//alert(result);
+						//alert(trip_data);
 						if((result == null || result.length==0) ){
 							;
 						}
 						else{
-							g_trip = result.trip_id;
+							g_trip = trip_data;
 							g_tripname = result.trip_name;
-							g_tripLength = result.length;
+							g_tripLength = result.trip_length;
 							//tripnum ++;
 							
 							var width="100%";
 							if( $(window.frames['triipListFrame']) ){
-								var fixedValue = 150;
+								var fixedValue = 100;
 								width = top.window.frames["triipListFrame"].document.body.clientWidth - fixedValue;
 							}
 							var data = result;
@@ -485,7 +552,9 @@
 							}
 							var mapurl = "http://maps.google.com/maps/api/staticmap?center="+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"&zoom=12&size=100x100&sensor=false&markers=color:red|label:E|size:mid|"+ data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 +"";
 							var tripname = data.trip_name;
-							var appendcontent="<div id='div_"+share_userid+trip_data+"' style='margin-top:-5px;margin-right:0px;width:100%;display:table-row;'><button  id='button"+share_userid+trip_data+"' class='tripItem' onClick=\"g_trip="+trip_data+";g_tripname='"+ data.trip_name+"';$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('g_trip_st', '"+data.trip_st+"');$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_et', '"+data.trip_et+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_trip_st_address', '" + data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 + "');$.cookie('g_trip_et_address', '" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "');$.cookie('g_shareuser', '"+share_username+"');top.frames['tripMapFrame'].location='frame-1.html?userid="+share_userid+"';\"><div class='product' ><div class='wrapper' style='width:"+width+"px'><div class='listview_image' ><a class='listview' href=''><img src='" + mapurl + "'/></a></div><div class='listview_description' ><a class='listview' href=''>" + data.trip_name  + "<br/>"+g_str_start+": " + data.trip_st + "<br/>"+g_str_end+": " + data.trip_et  + "<br/>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "<br/>"+g_str_length+": " + data.trip_length  + " M<br/>"+g_str_sharefromWho+ ":" +share_username+"</a></div></div></div></button></div>"
+							data.trip_st = trimTimeFormat(data.trip_st);
+							data.trip_et = trimTimeFormat(data.trip_et);
+							var appendcontent="<div id='div_"+share_userid+trip_data+"' style='margin-top:-5px;margin-right:0px;width:100%;display:table-row;'><button  id='button"+share_userid+trip_data+"' class='tripItem' onClick=\"g_trip="+trip_data+";g_tripname='"+ data.trip_name+"';$.cookie('g_trip', g_trip);$.cookie('g_tripname', g_tripname);$.cookie('g_trip_st', '"+data.trip_st+"');$.cookie('hash', '"+data.hash+"');$.cookie('g_trip_et', '"+data.trip_et+"');$.cookie('g_trip_length', '"+data.trip_length+"');$.cookie('g_trip_st_address', '" + data.st_addr_prt2 + " " + data.st_addr_prt3 + " " + data.st_addr_prt4 + "');$.cookie('g_trip_et_address', '" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "');$.cookie('g_shareuser', '"+share_username+"');top.frames['tripMapFrame'].location='frame-1.html?userid="+share_userid+"';\"><div class='product' ><div class='wrapper' style='width:"+width+"px'><div class='listview_image' ><a class='listview' href=''><img src='" + mapurl + "'/></a></div><div class='listview_description' ><a class='listview' href=''>" + data.trip_name  + "<br/>"+g_str_start+": " + data.trip_st + "<br/>"+g_str_end+": " + data.trip_et  + "<br/>" + data.et_addr_prt2 + " " + data.et_addr_prt3 + " " + data.et_addr_prt4 + "<br/>"+g_str_length+": " + data.trip_length  + " M<br/>"+g_str_sharefromWho+share_username+"</a></div></div></div></button></div>"
 							
 							if(appendToObj!=null && appendToObj!="undefined"){
 								appendToObj.append(appendcontent);
@@ -524,8 +593,8 @@
 			$("#div_playMap").hide();
 		}
 		$("#ub_dynamic_map").attr('src',im+'ub_dynamic_map.png');
-		$("#ub_share_map").attr('src',im+'ub_share_map.png');
-		$("#ub_delete_map").attr('src',im+'ub_delete_map.png');
+		$("#ub_share_map").attr('src',im+'sharemarker.png');
+		$("#ub_delete_map").attr('src',im+'deletemarker.png');
 		$("#up-arrow").attr('src',im+'up-arrow.png');
 
 		$('img[class*=class_menu_bt]').each(function() {
@@ -549,13 +618,30 @@
 		var hash =  $.cookie("hash");
 		$("#div_dynamicMap").click(function(){
 			var strShowDLink = "/showDTripFrame.php?hash="+hash+"&g_lang="+g_lang+"&g_calUnit="+$("input:radio[name=radio]:checked").val();
-			window.prompt ("Copy to clipboard: Ctrl+C, Enter", getRootPath()+strShowDLink);
-			window.prompt ("Embeded code:", "<iframe width='550' height='600' src='"+getRootPath()+strShowDLink+"&width=550' frameborder='0' allowfullscreen='false'></iframe>");
+			var s_url = getRootPath()+strShowDLink;
+			$.ajax({url:'http://plash.tw/yourls-api.php',
+				data:{signature : "da36cdffd2", url:encodeURI(s_url), format:"json", action:"shorturl"},
+				type: 'GET', dataType: 'json', cache: false, async: false,
+				success:function(result){
+					if(result.shorturl!=null && result.shorturl!="undefined" ){
+						s_url = result.shorturl;
+					}
+					window.prompt ("Copy to clipboard: Ctrl+C, Enter", s_url);
+					window.prompt ("Embeded code:", "<iframe width='550' height='600' src='"+s_url+"&width=550' frameborder='0' allowfullscreen='false'></iframe>");
+				},
+				error: function(xhr) {
+					alert('Ajax request errors');
+				}
+			});
 		});
 		$("#copyStaticMap").click(function(){
 			captureStaticTripMap();
 		});
 		initTips();
+		//showNote(sid, g_trip);
+	}
+
+	function showTags(userid, tripid){
 		if($('#trip_tags').length>0){
 			$('#trip_tags').tagsInput({
 				'width':"auto", 
@@ -563,9 +649,9 @@
 				'defaultText':g_str_input_tags,
 				'autocomplete':{selectFirst:true,width:'200px',autoFill:true},
 				onAddTag: function(value){
-					if(sid == $.cookie("sid")){
+					if(userid == $.cookie("sid")){
 						$.ajax({url:'php/addtag.php',
-							data:{sid : sid, content: value, trip_id:g_trip},
+							data:{sid : userid, content: value, trip_id:tripid},
 							type: 'GET', dataType: 'json', cache: false,
 							success:function(result){
 							},
@@ -576,9 +662,9 @@
 					}
 				},
 				onRemoveTag: function(value){
-					if(sid == $.cookie("sid")){
+					if(userid == $.cookie("sid")){
 						$.ajax({url:'php/deleteTag.php',
-							data:{sid : sid, content: value, trip_id:g_trip},
+							data:{sid : userid, content: value, trip_id:tripid},
 							type: 'GET', dataType: 'json', cache: false,
 							success:function(result){
 							},
@@ -590,7 +676,7 @@
 				}
 			});
 			$.ajax({url:'php/getTag.php',
-				data:{sid : userid, trip_id:g_trip},
+				data:{sid : userid, trip_id:tripid},
 				type: 'GET', dataType: 'json', cache: false,
 				success:function(result){
 					$.each(result, function(i,data){
@@ -598,20 +684,23 @@
 					});
 				},
 				error: function(xhr) {
-					alert('Ajax request errors');
+					//alert('Ajax request errors');
 				}
 			});
 		}
 
-		if(sid != $.cookie("sid")){
+		if(userid != $.cookie("sid")){
 			 $('.tagsinput input').attr('disabled', 'disabled');
 		}
+	}
 
+	function showDescription(userid, tripid){
 		//init description
 		if($( "#des_textarea").length>0){
 			$( "#des_textarea").html(g_str_tripdescription);
+			
 			$.ajax({url:'php/getDescription.php',
-				data:{sid : userid, trip_id:g_trip},
+				data:{sid : userid, trip_id:tripid},
 				type: 'GET', dataType: 'json', cache: false,
 				success:function(result){
 					if(result==0){
@@ -622,26 +711,27 @@
 							if(data.text=="" || data.text==null || data.text=="undefined"){
 							}
 							else{
-								$( "#des_textarea").html(g_str_description_title + data.text);
+								$( "#des_textarea").html(data.text);
+								//alert($( "#des_textarea").html());
 								 g_des_value = data.text;
 							}
 						});
 					}
 				},
 				error: function(xhr) {
-					alert('Ajax request errors');
+					//alert('Ajax request errors');
 				}
 			});
-			if(sid == $.cookie("sid")){
+			if(userid == $.cookie("sid")){
 				$( "#des_textarea").editable(function(value, settings) { 
 							if(value=="" || value==null || value=="undefined"){
 								$( "#des_textarea").html(g_str_tripdescription);
 							}
 							else{
-								 $( "#des_textarea").html(g_str_description_title + value);
+								 $( "#des_textarea").html(value);
 								 g_des_value = value;
 								$.ajax({url:'php/addDescription.php',
-									data:{sid : sid, content: value, trip_id:g_trip},
+									data:{sid : userid, content: value, trip_id:tripid},
 									type: 'GET', dataType: 'json', cache: false,
 									success:function(result){
 									},
@@ -676,8 +766,6 @@
 				});
 			}
 		}
-
-		//showNote(sid, g_trip);
 	}
 
 	function showNote(userid, trip){

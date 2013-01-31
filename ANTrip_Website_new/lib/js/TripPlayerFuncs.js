@@ -11,7 +11,11 @@ var player1Icon;
 var player1Style;
 var player1GPS;
 var player1UserID;
-var player1GO; //player 1 ground overlay
+
+//player ground overlay
+var playerGO; 
+var playerGOOpacity;
+var playerGOOpacityInc; // opacity increment
 
 var player1Lat, player1NextLat;
 var player1Lon, player1Lon; 
@@ -20,7 +24,14 @@ var player1Lon, player1Lon;
 var player3DPM;
 var playerModel;
 
+var modelID;
+var car1URL = 'http://earth-api-samples.googlecode.com/svn/trunk/demos/drive-simulator/smart.kmz';
+var car0URL =
+	'http://sketchup.google.com/3dwarehouse/download?mid=3c9a1cac8c73c61b6284d71745f1efa9&rtyp=zip&fn=milktruck&ctyp=milktruck';	  
 
+var car2URL= 'http://ants.iis.sinica.edu.tw/PLASHTripPlayer/SF.zip';
+var car3URL= 'http://ants.iis.sinica.edu.tw/PLASHTripPlayer/LP640.zip';
+	                    
 
 //global trip data list
 var tripDataList;
@@ -53,10 +64,10 @@ var headingInc;
 //initialization function
 //Precondition: none
 //Postcondition: create an google earth instance
-var g_divCanvas;
-function ge_init(divCanvas) {
+var g_hashCode;
+function ge_init(divCanvas, hashCode) {
   google.earth.createInstance(divCanvas, ge_initCallback, ge_failureCallback);
-  g_divCanvas = divCanvas;
+  g_hashCode = hashCode;
 }//end function init
 
 //initialization call back
@@ -136,9 +147,10 @@ function ge_initCallback(object) {
 	player1UserID = -1;
 	
 	// Create the player GroundOverlay
-	player1GO = ge.createGroundOverlay('');
-	player1GO.setIcon(player1Icon);
-	ge.getFeatures().appendChild(player1GO);	
+	playerGO = ge.createGroundOverlay('');
+	playerGO.setIcon(player1Icon);
+	ge.getFeatures().appendChild(playerGO);	
+	playerGOOpacity = 1;
 	
 	//set up line
 
@@ -164,34 +176,30 @@ function ge_initCallback(object) {
 					
 
 	//3D player
-	var carModelURL =
-	'http://sketchup.google.com/3dwarehouse/download?'
-	+ 'mid=3c9a1cac8c73c61b6284d71745f1efa9&rtyp=zip&'
-	+ 'fn=milktruck&ctyp=milktruck';	
-	var player3DPM = ge.createPlacemark(''); 
-  	window.google.earth.fetchKml(ge, carModelURL, function(obj) { fetchTourKMLCallback(obj); });	
+	modelID = 0;
+  	window.google.earth.fetchKml(ge, car0URL, function(obj) { fetchModelKMLCallback(obj); });	
+
 	
 	//start the display loop
 	google.earth.addEventListener(ge,'frameend',generalLoop);	
 
-	$("#"+g_divCanvas).hide();
-
-	
+	loadTripIntoPlayer(g_hashCode);
 }//end function
 
 //call back when google failed to create
+//precondition
+var testKMLPtr;
 function ge_failureCallback(object) {
-	//alert("error has occurred");
+	alert("error has occurred");
 }//end function
 
 
 //callback function when kml is fetched	
 //precondition: a KML object that is fetched
 //postcondition: corresponding actions are performed
-function fetchTourKMLCallback(fetchedKML) {
-	
-	
-	  
+function fetchModelKMLCallback(fetchedKML) {
+	  // console.log(" called?");
+
    // Alert if no KML was found at the specified URL.
    if (!fetchedKML) {
       setTimeout(function() {
@@ -201,33 +209,54 @@ function fetchTourKMLCallback(fetchedKML) {
       return;
    } else {
 		// Add the fetched KML into this Earth instance.
-  		ge.getFeatures().appendChild(fetchedKML); //*/
+		testKMLPtr = fetchedKML;
+		ge.getFeatures().appendChild(testKMLPtr); //
+  		//ge.getFeatures().appendChild(fetchedKML); 
  	}//fi
-   // Walk through the KML to find the tour object; assign to variable 'tour.'
+	var tmpPM;
+   // Walk through the KML to find the  object
    walkKmlDom(fetchedKML, function() {   
 	if (this.getType() == 'KmlPlacemark' &&
 		this.getGeometry() &&
 		this.getGeometry().getType() == 'KmlModel') {
-			player3DPM = this;
-
+			
+			tmpPM = this;
+		
 		}//fi
-   });		 
-   
+   },false,true);		 
 
-	playerModel = player3DPM.getGeometry();
+  // console.log(" same? " + (tmpPM == player3DPM));
+   	
+
+	playerModel = tmpPM.getGeometry();
 	var loc = ge.createLocation(''); 
 	loc.setLatitude(25.04110); 
 	loc.setLongitude(121.614672); 
 	playerModel.setLocation(loc); 
 	
-	
+
 	var playerScale = ge.createScale('');
-	playerScale.set(4,4,4);
+	
+	if (modelID == 0) {
+		playerScale.set(4,4,4);
+	} else if (modelID == 1){
+		playerScale.set(7,7,7);
+	} else if (modelID == 2) {
+		playerScale.set(3,3,3);
+	} else if (modelID == 3) {
+		playerScale.set(3,3,3);
+	}//fi
+	
+	
+	
 	playerModel.setScale(playerScale);
+	player3DPM = ge.createPlacemark(''); 
 	player3DPM.setGeometry(playerModel);
+	 //console.log(" finished?");	
+	 
 	ge.getFeatures().appendChild(player3DPM); 
-     	
-}//end method
+     	  
+}//end method */
 
 
 
@@ -278,6 +307,7 @@ function updateDisplay() {
 		
 	} else {
 		step = projStep;
+		counter = 0;
 		//get new lat lon pair
 		player1Lat = TDLLat[currentPtIndex];
 		player1NextLat = TDLLat[currentPtIndex+1];
@@ -313,8 +343,9 @@ function updateDisplay() {
 			currentPtIndex ++;
 		} else {
 			currentPtIndex = 0;
+			
 		}//fi */
-		counter = 0;
+
 
 	}//fi
 
@@ -322,7 +353,7 @@ function updateDisplay() {
 	var latLonBox = ge.createLatLonBox('');
 		
 	latLonBox.setBox(player1Lat+0.0002, player1Lat-0.0002, player1Lon+0.0002, player1Lon-0.0002, playerHeading);
-	player1GO.setLatLonBox(latLonBox);
+	playerGO.setLatLonBox(latLonBox);
 	
 	var loc = ge.createLocation(''); 
 	loc.setLatitude(player1Lat); 
@@ -334,7 +365,17 @@ function updateDisplay() {
 	playerOrientation.setHeading(-playerHeading);
 	playerModel.setOrientation(playerOrientation);		
 		
+	if (modelID == 0) {
 
+	} else if (modelID == 1){
+
+	} else if (modelID == 2) {
+		playerOrientation.setHeading(-playerHeading);	
+		
+	} else if (modelID == 3) {
+		playerOrientation.setHeading(-playerHeading-90);		
+			
+	}//fi
 
 	
 	new_cam = ge.getView().copyAsLookAt(ge.ALTITUDE_ABSOLUTE );		
@@ -343,7 +384,14 @@ function updateDisplay() {
 	ge.getView().setAbstractView(new_cam); 
 
 
-
+	//car glow
+	if (playerGOOpacity > 0.95) {
+		playerGOOpacityInc = -0.05;
+	} else if (playerGOOpacity < 0.05) {
+		playerGOOpacityInc = 0.05;
+	}//end if
+	playerGOOpacity += playerGOOpacityInc;
+	playerGO.setOpacity(playerGOOpacity);
 	
 	
 	
@@ -428,7 +476,7 @@ function refreshPlayer() {
 //prepare and load trip
 //precondition: two arguments: user id and trip id
 //postcondition: trip data loaded
-function loadTripIntoPlayer(tmpUserID, tmpTripID) {
+function loadTripIntoPlayer(tmphashCode) {
 	
 	if (currentState != 0 ){
 		//TDLLat = new Array();
@@ -439,7 +487,7 @@ function loadTripIntoPlayer(tmpUserID, tmpTripID) {
 		
 	}//fi
 		
-	if (tmpUserID != "" && tmpTripID != "") {
+	if (tmphashCode != "") {
 		//alert("Now retrieving trip with user id: " + tmpUserID + " and trip id: " + tmpTripID +
 		//"\nWarning: erroneous user id and/or trip id may crash this program!"
 		//);
@@ -452,8 +500,8 @@ function loadTripIntoPlayer(tmpUserID, tmpTripID) {
 	var my_JSON_object = {};
 	//var baseURL = "https://plash3.iis.sinica.edu.tw:8080/GetTripDataComponent?field_mask=0100000000000000";
 	//var reqURL = baseURL + "&userid=" + tmpUserID + "&trip_id=" + tmpTripID;
-	var baseURL = "http://plash2.iis.sinica.edu.tw/api/GetTripDataComponent.php";
-	var reqURL = baseURL + "?userid=" + tmpUserID + "&trip_id=" + tmpTripID;	
+	var baseURL = "http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php";
+	var reqURL = baseURL + "?hash=" + tmphashCode;
 	var http_request = new XMLHttpRequest();
 	
 
@@ -465,15 +513,18 @@ function loadTripIntoPlayer(tmpUserID, tmpTripID) {
 		
 		  my_JSON_object = JSON.parse(http_request.responseText);
 											
-		  window.tripDataList = my_JSON_object.tripDataList;	
-		  tripDataList = my_JSON_object.tripDataList;
+		  window.tripDataList = my_JSON_object.CheckInDataList;	
+		  tripDataList = my_JSON_object.CheckInDataList;
 		  tripDataLength = tripDataList.length;
 			for (var tmpInx = 0; tmpInx < tripDataLength; tmpInx++) {
-				if (Math.abs(tripDataList[tmpInx].latitude) > 180 || Math.abs(tripDataList[tmpInx].longitude) > 180  ) {
+				//alert(tripDataList[tmpInx].lat);
+				tripDataList[tmpInx].lat = tripDataList[tmpInx].lat.valueOf() / 1000000;
+				tripDataList[tmpInx].lng = tripDataList[tmpInx].lng.valueOf() / 1000000;
+				if (Math.abs(tripDataList[tmpInx].lat) > 180 || Math.abs(tripDataList[tmpInx].lng) > 180  ) {
 					continue;
 				}//fi
-				TDLLat.push(tripDataList[tmpInx].latitude);
-				TDLLon.push(tripDataList[tmpInx].longitude);				
+				TDLLat.push(tripDataList[tmpInx].lat);
+				TDLLon.push(tripDataList[tmpInx].lng);				
 			}//rof
 
 		updateDisplay();	
@@ -494,7 +545,41 @@ function adjustSpeed(newSpeed) {
 	
 }//
 
+//change player model
+function changePlayerModel(newModelID) {
+	ge.getFeatures().removeChild(player3DPM); 
+	ge.getFeatures().removeChild(testKMLPtr); 
 
+	if (newModelID == 0 ) {
+		window.google.earth.fetchKml(ge, car0URL, function(obj) { fetchModelKMLCallback(obj); });	
+	} else if (newModelID == 1) {
+		window.google.earth.fetchKml(ge, car1URL, function(obj) { fetchModelKMLCallback(obj); });	
+	} else if (newModelID == 2) {
+		window.google.earth.fetchKml(ge, car2URL, function(obj) { fetchModelKMLCallback(obj); });				
+	} else if (newModelID == 3) {
+		window.google.earth.fetchKml(ge, car3URL, function(obj) { fetchModelKMLCallback(obj); });				
+	}//fi
+	
+	//*/
+	switch (modelID) {
+			
+		case 0:
+		  	//window.google.earth.fetchKml(ge, car0URL, function(obj) { fetchModelKMLCallback(obj); });		
+			break;
+		case 1:
+	//	console.log("fffff callled???? " + newModelID);
+		  	//window.google.earth.fetchKml(ge, car1URL, function(obj) { fetchModelKMLCallback(obj); });		
+		  	  	loadKMLTest(ge, car1URL);	
+			break;
+		case 2:
+		  	loadKMLTest(ge, car2URL);	
+		 // 	window.google.earth.fetchKml(ge, car2URL, function(obj) { fetchModelKMLCallback(obj); });		
+			break;
+		default:
+			break;
+	}//end switch */
+	modelID = newModelID;
+}//end method
 
 //Get bearing
 //precondition: 2 points, so 2 lat and 2 lon argument

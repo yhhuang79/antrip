@@ -62,19 +62,16 @@
 					var sid = $.cookie("sid");
 					var userid = sid;
 					if($.getUrlVar('userid')!=null && $.getUrlVar('userid')!='undefined'){
-						userid = $.getUrlVar('userid');
-						$('#img_seq_trip').hide();
-						$('#img_add_note').hide();
-						$('#img_exp_trip').hide();
-						$("#ub_share_map").hide();
-						$("#ub_delete_map").hide();
+						if($.getUrlVar('userid')!=$.cookie("username")){
+							userid = $.getUrlVar('userid');
+							showEdittedMenu(false);
+						}
+						else{
+							showEdittedMenu(true);
+						}
 					}
 					else{
-						$('#img_seq_trip').show();
-						$('#img_add_note').show();
-						$('#img_exp_trip').show();
-						$("#ub_share_map").show();
-						$("#ub_delete_map").show();
+						showEdittedMenu(true);
 					}
 					g_trip = $.cookie("g_trip");
 					hashCode = $.cookie("hash");
@@ -88,7 +85,9 @@
 						showTripMap(userid, g_trip, hashCode);
 					}
 					else{
-						alert(g_str_notripdisplay);
+						//alert(g_str_notripdisplay);
+						showEdittedMenu(false);
+						$("#div_dynamicMap").hide();
 					}
 
 
@@ -107,24 +106,37 @@
 					initCautionDialog();
 					inputNoteDialog();
 					initFriendListDialog();
-					
-					if(isPCMacOS()==true){
-						ge_init("player_canvas");
-					}
-					else{
-						$("#player_canvas").hide();
-					}
 
 					$("#overlay").css("display","none");
 			});
+			
+			function showEdittedMenu(isShow){
+					if(isShow == true){
+						$('#img_seq_trip').show();
+						$('#img_add_note').show();
+						$('#img_exp_trip').show();
+						$("#ub_share_map").show();
+						$("#ub_delete_map").show();
+					}
+					else{
+						$('#img_seq_trip').hide();
+						$('#img_add_note').hide();
+						$('#img_exp_trip').hide();
+						$("#ub_share_map").hide();
+						$("#ub_delete_map").hide();
+					}
+			}
 
 			function startToPlayTrip(){
-				var sid = $.cookie("sid");
-				var userid = sid;
-				loadTripIntoPlayer(userid, g_trip);
-				$("#player_canvas").show();
-				$("#map_canvas").hide();
-				hideAllMenu(true);
+				//var sid = $.cookie("sid");
+				//var userid = sid;
+				//ge_init("player_canvas", userid, g_trip);
+				hashCode = $.cookie("hash");
+				window.open("TripPlayer.html?hash="+hashCode, '_blank');
+				//loadTripIntoPlayer(hashCode);
+				//$("#player_canvas").show();
+				//$("#map_canvas").hide();
+				//hideAllMenu(true);
 			}
 
 			function openCautionDialog(){
@@ -197,7 +209,7 @@
 	<div class='tripMap_class' id='stage'>
 			<div id='topmenu_div'>
 			<div id="div_ub_home" class="class_top_bt" >	
-				<img alt="home page" class="class_top_bt " name="ub_home" id="ub_home" onClick="javascript:top.window.location = 'index.html';"  />		
+				<img alt="home page" class="class_top_bt " name="ub_home" id="ub_home" onClick="javascript:$.cookie('hash', null);top.window.location = 'index.html';"  />		
 				<span class="tip" id="home_tip"></span>
 			</div>
 			<div class="welcomeText">
@@ -217,46 +229,22 @@
 			</div>
 			<div id="topbuttonList" class="topbuttonList_class">
 				<div class="rightGroup">
-					<div id="b_open_trip" class="class_top_bt">	
-						<img  id="img_open_trip" class="class_top_bt"  onClick="showTripListInFrame();"  />
-						<span class="tip" id="open_trip_tip"></span>
-					</div>
-					<div id="div_friend" class="class_top_bt" >	
-						<img alt="show friends" class="class_top_bt " name="ub_friend" id="ub_friend" onClick="javascript:showFriendListInFrame();" />
-						<span class="tip" id="friend_tip"></span>
-					</div>
-					<div id="b_seq_trip" class="class_top_bt">	
-						<img  alt="segment trip" id="img_seq_trip" name="img_seq_trip" class="class_top_bt" onClick="changeCursorToCut($(this));" />				
-						<span class="tip" id="seg_trip_tip"></span>
-					</div>
-					<div id="b_add_note" class="class_top_bt">	
-						<img  alt="add note" id="img_add_note" class="class_top_bt" onClick="$('#dialog').dialog('open');" />
-						<span class="tip" id="add_note_tip"></span>
-					</div>
-					<div id="b_export_trip" class="class_top_bt">	
-						<img  alt="export trip" id="img_exp_trip" class="class_top_bt" onClick="$('#dialog-tripname').dialog('open');" />
-						<span class="tip" id="exp_trip_tip"></span>
-					</div>
-					<div id="div_openCheckIn" class="class_top_bt" >	
-						<img alt="open check-in" class="class_top_bt" name="ub_checkin" id="ub_checkin" onClick=""  />		
-						<span class="tip" id="openCheckIn_tip"></span>
-					</div>
+				</div>
+			</div>
+			<div class="leftGroup">
+				<div id="up_arrow_div" class="class_top_bt"><img alt="hide the menu" class="class_top_bt " name="up-arrow" id="up-arrow" onClick="hideAllMenu();" /></div>
+			</div>
+			<div class="centerPos">
+				<div class="centerBtn">
 					<div id="div_playMap" class="class_top_bt" >	
 						<img alt="play this map" class="class_top_bt" name="ub_play_map" id="ub_play_map" onClick="javascript:startToPlayTrip();"  />		
 						<span class="tip" id="playMap_tip"></span>
 					</div>
-					<div id="copyStaticMap" class="class_top_bt" >	
-						<img alt="show static map link" class="class_top_bt" name="ub_static_map" id="ub_static_map" onClick=""  />		
-						<span class="tip" id="showStaticMap_tip"></span>
-					</div>
-					<div id="div_dynamicMap" class="class_top_bt" >	
-						<img alt="show dynamic map link" class="class_top_bt" name="ub_dynamic_map" id="ub_dynamic_map" onClick=""  />		
-						<span class="tip" id="showDynamicMap_tip"></span>
-					</div>
-					<div id="div_share_triplist" class="class_top_bt" >	
-						<img alt="show shared trip list" class="class_top_bt " name="ub_shared_trip" id="ub_shared_trip" onClick="javascript:showShareTripInFrame();" />
-						<span class="tip" id="shared_triplist_tip"></span>
-					</div>
+				</div>
+			</div>
+			<div class="rightBtnList">
+				<div class="rightGroup">
+					<p>
 					<div id="shareMap" class="class_top_bt" >	
 						<img alt="share this map" class="class_top_bt" name="ub_share_map" id="ub_share_map" onClick="javascript:shareTrip();"  />		
 						<span class="tip" id="shareMap_tip"></span>
@@ -265,10 +253,36 @@
 						<img alt="delete this map" class="class_top_bt" name="ub_delete_map" id="ub_delete_map" onClick="javascript:confirmDelete(g_trip);"  />		
 						<span class="tip" id="deleteMap_tip"></span>
 					</div>
+					</p>
+					<p>
+					<br/>
+					<br/>
+					<div id="b_seq_trip" class="class_top_bt">	
+						<img  alt="segment trip" id="img_seq_trip" name="img_seq_trip" class="class_top_bt" onClick="changeCursorToCut($(this));" />				
+						<span class="tip" id="seg_trip_tip"></span>
+					</div>
+					<br/>
+					<div id="b_add_note" class="class_top_bt">	
+						<img  alt="add note" id="img_add_note" class="class_top_bt" onClick="$('#dialog').dialog('open');" />
+						<span class="tip" id="add_note_tip"></span>
+					</div>
+					<br/>
+					<div id="b_export_trip" class="class_top_bt">	
+						<img  alt="export trip" id="img_exp_trip" class="class_top_bt" onClick="$('#dialog-tripname').dialog('open');" />
+						<span class="tip" id="exp_trip_tip"></span>
+					</div>
+					<br/>
+					<div id="div_openCheckIn" class="class_top_bt" >	
+						<img alt="open check-in" class="class_top_bt" name="ub_checkin" id="ub_checkin" onClick=""  />		
+						<span class="tip" id="openCheckIn_tip"></span>
+					</div>
+					<br/>
+					<div id="div_dynamicMap" class="class_top_bt" >	
+						<img alt="show dynamic map link" class="class_top_bt" name="ub_dynamic_map" id="ub_dynamic_map" onClick=""  />		
+						<span class="tip" id="showDynamicMap_tip"></span>
+					</div>
+					</p>
 				</div>
-			</div>
-			<div class="leftGroup">
-				<div id="up_arrow_div" class="class_top_bt"><img alt="hide the menu" class="class_top_bt " name="up-arrow" id="up-arrow" onClick="hideAllMenu();" /></div>
 			</div>
 			</div>
 			<div id="map_canvas">

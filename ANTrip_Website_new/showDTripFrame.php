@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta property="og:type" content="site" /> 
 	<?php $url = "http://plash2.iis.sinica.edu.tw/api/GetCheckInData.php";  $para = "?hash=".$_GET['hash']; $ch = curl_init(); curl_setopt($ch, CURLOPT_URL,$url.$para); curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT,10); $result= curl_exec ($ch);  curl_close ($ch);  $json = json_decode(utf8_encode($result), true);
-	foreach( $json['CheckInDataList'] as $obj ){ if($obj['CheckIn']) {echo "<meta property=\"og:image\" content=\"http://plash2.iis.sinica.edu.tw/picture/".$json["userid"]."/".$json['trip_id']."/thumb/".$obj['CheckIn']['picture_uri']."\" />\r\n";} } ?>
+	foreach( $json['CheckInDataList'] as $obj ){ if($obj['CheckIn']) {echo "<meta property=\"og:image\" content=\"http://plash2.iis.sinica.edu.tw/picture/".$json["userid"]."/".$json['trip_id']."/thumb.s/".$obj['CheckIn']['picture_uri']."\" />\r\n";} } ?>
 
 	<meta property="og:title" content="ANTrip雲水途誌:<?php echo utf8_decode($json['tripName']); ?>"/>
 	<?php $url = "http://plash2.iis.sinica.edu.tw/antrip/php/getNote.php";  $para = "?sid=".$json["userid"]."&trip_id=".$json["trip_id"]; $ch = curl_init(); curl_setopt($ch, CURLOPT_URL,$url.$para); curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1); curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT,10); $result= curl_exec ($ch);  curl_close ($ch);  $json_s = json_decode(utf8_encode($result), true); foreach( $json_s as $obj ){ if($obj['uri']) {echo "<meta property=\"og:image\" content=\"http://plash2.iis.sinica.edu.tw/picture/".$json["userid"]."/".$json['trip_id']."/".$obj['uri']."\" />\r\n";} } ?>
@@ -41,7 +41,7 @@
 			$("#c-c-iframe").attr('src',strShowDLink);  
 			 $("#c-c-iframe").load(function(){
 				var framewidth = 1100;
-				var frameheight = 900;
+				var frameheight = 1030;
 				
 				var swidth = $.getUrlVar('width');
 				var sheight = $.getUrlVar('height');

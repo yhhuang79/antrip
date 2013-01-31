@@ -76,9 +76,14 @@
 				$( "#radio_triplist" ).buttonset();
 				$('input:radio[name=radio_triplist]').click(
 						function(){
+							$.cookie("g_triporder",  $("input:radio[name=radio_triplist]:checked").val());
 							showDefaultTripList();
 						}
 				);
+
+				if($.cookie("g_triporder")!=null){
+					$("input[name=radio_triplist][value=" + $.cookie("g_triporder") + "]").attr('checked', 'checked');
+				}
 
 				//init scroll
 				$("#img_scroll").attr('src', im+"scroll.png");
@@ -93,6 +98,8 @@
 					//$("#unit_radio_trip").css("float", "right");
 					$("#unit_radio_trip").css("right", "0");
 				}
+
+				showTripEditBtList();
 			});
 
 			function showDefaultTripList(){
@@ -197,7 +204,7 @@
 	</script>
 <!---->
 </head>
-<body>
+<body style="background-color:#e7e1d9">
 		<div class='tripList_class' id='stage'>
 			<div id="images_scroll"><div id="img_scrollbar_div" class="class_scroll"><img id="img_scroll"/></div>
 			<div id='img_body' class='img_body_class'>
@@ -209,6 +216,22 @@
 			</div>
 			<div id="unit_radio_trip">
 				<table id="atable">
+					<tr>
+						<td colspan="4">
+							<div id="b_open_trip" class="class_top_bt">	
+								<img  id="img_open_trip" class="class_top_bt"  onClick="showTripListInFrame();"  />
+								<span class="tip" id="open_trip_tip"></span>
+							</div>
+							<div id="div_friend" class="class_top_bt" >	
+								<img alt="show friends" class="class_top_bt " name="ub_friend" id="ub_friend" onClick="javascript:showFriendListInFrame();" />
+								<span class="tip" id="friend_tip"></span>
+							</div>
+							<div id="div_share_triplist" class="class_top_bt" >	
+								<img alt="show shared trip list" class="class_top_bt " name="ub_shared_trip" id="ub_shared_trip" onClick="javascript:showShareTripInFrame();" />
+								<span class="tip" id="shared_triplist_tip"></span>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td class="aradio_trip">
 							<input type="radio" id="radio_trip_id" name="radio_triplist" value="trip_id"/><label for="radio_trip_id" id="radio_trip_id_label"></label>

@@ -91,6 +91,8 @@
 			if(result.sid != "0"){ 
 				$.cookie("sid", result.sid, { expires: 1});
 				$.cookie("username", username, { expires: 1});
+				$.cookie("g_trip", null);
+				$.cookie("hash", null);
 				top.window.location = "frame.html";
 			} else { 
 				alert(g_str_loginfail);
