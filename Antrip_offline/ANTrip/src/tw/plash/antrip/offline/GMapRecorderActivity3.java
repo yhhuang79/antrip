@@ -301,6 +301,10 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 				break;
 			case AntripService2.MSG_AUTO_STOP_RECORDING_CONFIRMED:
 				Log.w("activity", "MSG_AUTO_STOP_RECORDING_CONFIRMED");
+				firstPoint = null;
+				zoomtoextentcameraupdate = null;
+				zoomtoextent.setVisibility(View.GONE);
+				movetofirst.setVisibility(View.GONE);
 				checkinBtn.setVisibility(View.GONE);
 				recordBtn.setImageResource(R.color.button_state_startrecord);
 				break;
