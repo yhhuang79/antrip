@@ -407,6 +407,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 		
 		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		pref.registerOnSharedPreferenceChangeListener(ospcl);
+		autostopBatteryLevel = Integer.valueOf(pref.getString("auto_stop_threshold", "25"));
 		
 		skyhook = null;
 		
