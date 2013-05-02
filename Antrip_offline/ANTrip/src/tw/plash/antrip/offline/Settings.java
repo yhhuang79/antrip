@@ -22,6 +22,7 @@ public class Settings extends PreferenceActivity{
 	
 	private Preference username;
 	private Preference recorder_mode;
+	private Preference autostop;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +80,12 @@ public class Settings extends PreferenceActivity{
 		} else{
 			recorder_mode.setSummary("-");
 		}
+		
+		autostop = findPreference("auto_stop_threshold");
+		String autostopSumPrefix = mContext.getString(R.string.setting_title_autostop_summary_prefix);
+		String autostopSumPostfix = mContext.getString(R.string.setting_title_autostop_summary_postfix);
+		String level = pref.getString("auto_stop_threshold", "-");
+		autostop.setSummary(autostopSumPrefix + " " + level + " " + autostopSumPostfix);
 		
 		findPreference("license").setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
@@ -145,6 +152,12 @@ public class Settings extends PreferenceActivity{
 				} else{
 					recorder_mode.setSummary("-");
 				}
+			}
+			if(key.equals("auto_stop_threshold")){
+				String autostopSumPrefix = mContext.getString(R.string.setting_title_autostop_summary_prefix);
+				String autostopSumPostfix = mContext.getString(R.string.setting_title_autostop_summary_postfix);
+				String level = sharedPreferences.getString("auto_stop_threshold", "-");
+				autostop.setSummary(autostopSumPrefix + " " + level + " " + autostopSumPostfix);
 			}
 		}
 	};

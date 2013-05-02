@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.prefs.PreferenceChangeEvent;
+import java.util.prefs.PreferenceChangeListener;
 
 import org.json.JSONObject;
 
@@ -15,6 +17,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,8 +31,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 public class AntripService2 extends Service implements LocationPublisher{
 	
@@ -41,7 +45,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 	
 	private static String currentTid;
 	
-//	private SharedPreferences pref;
+	private SharedPreferences pref;
 	private TripStats stats;
 	
 	private Timer mTimer;
@@ -77,16 +81,18 @@ public class AntripService2 extends Service implements LocationPublisher{
 	
 	static final int MSG_LOCATION_UPDATE = 10;
 	
+	private int autostopBatteryLevel = 25; //default value
+	
 	private BroadcastReceiver br = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if(intent != null && intent.getAction() != null){
 				if(intent.getAction().equals(Intent.ACTION_BATTERY_CHANGED)){
-					if(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 999) < 25){
+					if(intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 999) < autostopBatteryLevel){
 						if(isRecording){
 							//don't care if you're not recording...
 							Notification notification = new Notification(R.drawable.antrip_status_icon, mContext.getString(R.string.lowbatteryautostopnotification_title), System.currentTimeMillis());
-							notification.setLatestEventInfo(mContext, mContext.getString(R.string.lowbatteryautostopnotification_title), mContext.getString(R.string.lowbatteryautostopnotification_message), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+							notification.setLatestEventInfo(mContext, mContext.getString(R.string.lowbatteryautostopnotification_title), mContext.getString(R.string.lowbatteryautostopnotification_message) + " " + autostopBatteryLevel + mContext.getString(R.string.setting_title_autostop_summary_postfix), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
 							((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(1384, notification);
 							
 							try {
@@ -381,13 +387,26 @@ public class AntripService2 extends Service implements LocationPublisher{
 		startForeground(1377, notification);
 	}
 	
+	private final OnSharedPreferenceChangeListener ospcl = new OnSharedPreferenceChangeListener() {
+		
+		@Override
+		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+			
+			if(key.equals("auto_stop_threshold")){
+				autostopBatteryLevel = Integer.valueOf(sharedPreferences.getString("auto_stop_threshold", "25"));
+				Log.i("antripservice2", "auto stop battery level changed to " + autostopBatteryLevel);
+			}
+		}
+	};
+	
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		
 		mContext = this;
 		
-//		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+		pref = PreferenceManager.getDefaultSharedPreferences(mContext);
+		pref.registerOnSharedPreferenceChangeListener(ospcl);
 		
 		skyhook = null;
 		
@@ -427,6 +446,8 @@ public class AntripService2 extends Service implements LocationPublisher{
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		
+		pref.unregisterOnSharedPreferenceChangeListener(ospcl);
 		
 		shouldSkiptimertask = true;
 		if(mTimer != null){

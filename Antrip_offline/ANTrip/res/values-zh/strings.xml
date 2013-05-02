@@ -19,7 +19,7 @@
     <string name="gmapviewer_marker_start">起點</string>
     <string name="universal_loading">載入中...</string>
     <string name="lowbatteryautostopnotification_title">雲水途誌已自動儲存並關閉</string>
-    <string name="lowbatteryautostopnotification_message">剩餘電力已達系統設定的門檻值(20%)</string>
+    <string name="lowbatteryautostopnotification_message">剩餘電力已達門檻值</string>
     <string name="friendfinder_emptylist">尋無此人</string>
     <string name="friendlist_sharedtrips">已分享給你的旅誌:</string>
     <string name="public_trip_available">公開分享的旅誌數量:</string>
@@ -35,7 +35,10 @@
     
     <string name="setting_title_recordermode">記錄模式</string>
     <string name="setting_title_account">帳號資訊</string>
-    <string name="setting_title_recorder">記錄設定</string>
+    <string name="setting_title_power">電池設定</string>
+    <string name="setting_title_autostop">電池門檻</string>
+    <string name="setting_title_autostop_summary_prefix">雲水途誌將在電力剩餘 </string>
+    <string name="setting_title_autostop_summary_postfix"> 時自動停止</string>
     <string name="setting_title_general">一般設定</string>
     <string name="setting_contact">聯絡 PLASH 團隊</string>
     <string name="setting_privacy">隱私權政策</string>

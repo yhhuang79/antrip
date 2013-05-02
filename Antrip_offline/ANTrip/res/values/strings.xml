@@ -19,7 +19,7 @@
     <string name="gmapviewer_marker_start">Start</string>
     <string name="universal_loading">Loading...</string>
     <string name="lowbatteryautostopnotification_title">Antrip auto-saved</string>
-    <string name="lowbatteryautostopnotification_message">Battery below threshold(25%)</string>
+    <string name="lowbatteryautostopnotification_message">Battery below threshold</string>
     <string name="friendfinder_emptylist">No results found for your query</string>
 	<string name="friendlist_sharedtrips">Trips shared with you:</string>
     <string name="public_trip_available">Number of public trips:</string>
@@ -35,7 +35,10 @@
     
     <string name="setting_title_recordermode">Recorder Mode</string>
     <string name="setting_title_account">Account Information</string>
-    <string name="setting_title_recorder">Recorder Settings</string>
+    <string name="setting_title_power">Power Settings</string>
+    <string name="setting_title_autostop">Battery Threshold</string>
+    <string name="setting_title_autostop_summary_prefix">Antrip will stop when battery reached </string>
+    <string name="setting_title_autostop_summary_postfix">%%</string>
     <string name="setting_title_general">General Settings</string>
     <string name="setting_contact">Contact PLASH Team</string>
     <string name="setting_privacy">Privacy Policy</string>
@@ -158,6 +161,30 @@
         <item >0</item>
         <item >1</item>
         <item >2</item>
+    </string-array>
+    <string-array name="setting_autostop_threshold">
+        <item >15%</item>
+        <item >20%</item>
+        <item >25%</item>
+        <item >30%</item>
+        <item >35%</item>
+        <item >40%</item>
+        <item >45%</item>
+        <item >50%</item>
+        <item >55%</item>
+        <item >60%</item>
+    </string-array>
+    <string-array name="setting_autostop_threshold_value">
+        <item >15</item>
+        <item >20</item>
+        <item >25</item>
+        <item >30</item>
+        <item >35</item>
+        <item >40</item>
+        <item >45</item>
+        <item >50</item>
+        <item >55</item>
+        <item >60</item>
     </string-array>
     <string-array name="triplist_contextmenu_local">
         <item >Upload</item>
