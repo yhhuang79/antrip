@@ -82,6 +82,8 @@ public class AntripService2 extends Service implements LocationPublisher{
 	static final int MSG_LOCATION_UPDATE = 10;
 	
 	private int autostopBatteryLevel = 25; //default value
+	private final int AUTO_STOP_NOTIFICATION_ID = 1384;
+	private final int NORMAL_NOTIFICATION_ID = 1377;
 	
 	private BroadcastReceiver br = new BroadcastReceiver() {
 		@Override
@@ -93,7 +95,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 							//don't care if you're not recording...
 							Notification notification = new Notification(R.drawable.antrip_status_icon, mContext.getString(R.string.lowbatteryautostopnotification_title), System.currentTimeMillis());
 							notification.setLatestEventInfo(mContext, mContext.getString(R.string.lowbatteryautostopnotification_title), mContext.getString(R.string.lowbatteryautostopnotification_message) + " " + autostopBatteryLevel + mContext.getString(R.string.setting_title_autostop_summary_postfix), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
-							((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(1384, notification);
+							((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(AUTO_STOP_NOTIFICATION_ID, notification);
 							
 							try {
 								inMessenger.send(Message.obtain(null, priMSG_LOW_BATTERY_AUTO_STOP));
@@ -279,6 +281,9 @@ public class AntripService2 extends Service implements LocationPublisher{
 					stats.setButtonStartTime(new Date().getTime());
 					currentTid = String.valueOf(new Date().getTime());
 					
+					//clear the auto stop notification
+					((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).cancel(AUTO_STOP_NOTIFICATION_ID);
+					
 					//create a new entry in db
 					Log.e("new recording!", "tripid= " + currentTid);
 					isRecording = true;
@@ -384,7 +389,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 		Notification notification = new Notification(R.drawable.antrip_status_icon, mContext.getString(R.string.notification_new_trip_started), System.currentTimeMillis());
 		PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, new Intent(mContext, GMapRecorderActivity3.class), PendingIntent.FLAG_UPDATE_CURRENT);
 		notification.setLatestEventInfo(mContext, getResources().getString(R.string.app_name), getResources().getString(R.string.notification_is_recording_a_trip), pendingIntent);
-		startForeground(1377, notification);
+		startForeground(NORMAL_NOTIFICATION_ID, notification);
 	}
 	
 	private final OnSharedPreferenceChangeListener ospcl = new OnSharedPreferenceChangeListener() {
