@@ -84,6 +84,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 	private int autostopBatteryLevel = 25; //default value
 	private final int AUTO_STOP_NOTIFICATION_ID = 1384;
 	private final int NORMAL_NOTIFICATION_ID = 1377;
+	private boolean autostopActivated = false;
 	
 	private BroadcastReceiver br = new BroadcastReceiver() {
 		@Override
@@ -96,6 +97,8 @@ public class AntripService2 extends Service implements LocationPublisher{
 							Notification notification = new Notification(R.drawable.antrip_status_icon, mContext.getString(R.string.lowbatteryautostopnotification_title), System.currentTimeMillis());
 							notification.setLatestEventInfo(mContext, mContext.getString(R.string.lowbatteryautostopnotification_title), mContext.getString(R.string.lowbatteryautostopnotification_message) + " " + autostopBatteryLevel + mContext.getString(R.string.setting_title_autostop_summary_postfix), PendingIntent.getActivity(mContext, 0, new Intent(), 0));
 							((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).notify(AUTO_STOP_NOTIFICATION_ID, notification);
+							
+							autostopActivated = true;
 							
 							try {
 								inMessenger.send(Message.obtain(null, priMSG_LOW_BATTERY_AUTO_STOP));
@@ -211,6 +214,8 @@ public class AntripService2 extends Service implements LocationPublisher{
 						Location loc = dh2.getLatestGoodPointFromCurrentTripData(currentTid);
 						sendMessageToUI(MSG_LOCATION_UPDATE, loc);
 					}
+				} else if(autostopActivated){
+					sendMessageToUI(MSG_AUTO_STOP_RECORDING_CONFIRMED, null);
 				}
 				break;
 			case MSG_UNREGISTER_CLIENT:
@@ -283,6 +288,7 @@ public class AntripService2 extends Service implements LocationPublisher{
 					
 					//clear the auto stop notification
 					((NotificationManager)mContext.getSystemService(NOTIFICATION_SERVICE)).cancel(AUTO_STOP_NOTIFICATION_ID);
+					autostopActivated = false;
 					
 					//create a new entry in db
 					Log.e("new recording!", "tripid= " + currentTid);
