@@ -15,7 +15,7 @@ public class LocationFilter {
 		//make sure input parameter is not null
 		if(inputLocation != null){
 			//make sure provider column is not null nor "null" provider, as seen in null location case
-			if(!inputLocation.getProvider().isEmpty() && !inputLocation.getProvider().equalsIgnoreCase("null")){
+			if(!(inputLocation.getProvider().length() == 0) && !inputLocation.getProvider().equalsIgnoreCase("null")){
 				//test if accuracy of input location object is within accuracy threshold
 				if(inputLocation.getAccuracy() < ACCURACY_THRESHOLD){
 					return true;
@@ -29,7 +29,7 @@ public class LocationFilter {
 		final double VALIDITY_THRESHOLD = -998.0;
 		if(inputLocation != null){
 			//at least input is not null
-			if(!inputLocation.getProvider().isEmpty() && !inputLocation.getProvider().equalsIgnoreCase("null")){
+			if(!(inputLocation.getProvider().length() == 0) && !inputLocation.getProvider().equalsIgnoreCase("null")){
 				//location provider value should not be empty or "null"
 				if(inputLocation.getLatitude() > VALIDITY_THRESHOLD){
 					//latitude value is larger then -999, meaning -998~infinity, thus assume valid

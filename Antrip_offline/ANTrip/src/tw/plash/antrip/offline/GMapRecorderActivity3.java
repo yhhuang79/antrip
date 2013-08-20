@@ -1,9 +1,11 @@
 package tw.plash.antrip.offline;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,12 +17,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.MediaRecorder;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -36,10 +41,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +69,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 
 public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindowAdapter, CheckinQuickActionCallback{
 	
+	protected static Object audio_ss;
 	private GoogleMap gmap;
 	private Context mContext;
 	
@@ -84,8 +92,9 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	private Location latestLocation;
 	private CandidateCheckinObject cco;
 	private Uri imageUri;
-	final private int REQUEST_CODE_TAKE_PICTURE = 1377;
-	final private int REQUEST_CODE_SETTINGS = 1378;
+	final private int REQUEST_CODE_SETTINGS = 1375;
+	final private int REQUEST_CODE_TAKE_PICTURE = 1376;	
+	final private int REQUEST_CODE_TAKE_VIDEO = 1377;
 	private Polyline trajectory;
 	
 	private boolean mIsBound;
@@ -93,6 +102,7 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	private Messenger inMessenger;
 	private IncomingHandler ih;
 	private antripLocationSource als;
+	
 	
 //	private Timer mTimer;
 //	private boolean shouldSkipTimertask;
@@ -482,6 +492,8 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		});
 		
 		isMapAvailable();
+		
+		
 	}
 	
 	private void doBindService(){
@@ -540,14 +552,53 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		int duration = Toast.LENGTH_SHORT;
+
 		switch(requestCode){
 		case REQUEST_CODE_TAKE_PICTURE:
 			Log.e("gmaprecorderactivity3", "onactivityresult: take picture done");
-			if(imageUri != null && imageUri.getPath() != null && !imageUri.getPath().isEmpty()){
+			if(imageUri != null && imageUri.getPath() != null && !(imageUri.getPath().length() == 0)){
 				ExifEditor.GeoTagPicture(imageUri.getPath(), cco.getLocation().getLatitude(), cco.getLocation().getLongitude(), String.valueOf(cco.getLocation().getTime()/1000));
 				checkinDiag.setPicture(imageUri.getPath());
 				cco.setPicturePath(imageUri.getPath());
+				
+				CharSequence text = "Picture saved to " + imageUri.getPath();
+				Toast toast = Toast.makeText(mContext, text, duration);
+				toast.show();
 			}
+			break;
+		case REQUEST_CODE_TAKE_VIDEO:
+			Log.e("gmaprecorderactivity3", "onactivityresult: take video done"); 
+			File videoFile = getFile(REQUEST_CODE_TAKE_VIDEO);
+			AssetFileDescriptor videoAsset;
+			if (data != null)	{
+				try {
+					videoAsset = getContentResolver().openAssetFileDescriptor(data.getData(), "r");
+					
+					FileInputStream fis = videoAsset.createInputStream(); 
+					FileOutputStream fos = new FileOutputStream(videoFile);
+					
+					byte[] buffer = new byte[1024];
+					int length;
+					while ((length = fis.read(buffer)) > 0) {
+						fos.write(buffer, 0, length);
+					}       
+					fis.close();
+					
+						fos.close();
+				} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+		
+				checkinDiag.setVideoThumbnail(videoFile.getPath());
+				cco.setPicturePath(videoFile.getPath());
+				
+				CharSequence text = "Video saved to " + videoFile.getPath();
+				Toast toast = Toast.makeText(mContext, text, duration);
+				toast.show();
+			}
+			
 			break;
 		case REQUEST_CODE_SETTINGS:
 			switch(resultCode){
@@ -658,7 +709,10 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 			if(cco.indexOf(";pic:") + 5 < cco.length()){
 				tmp = cco.substring(cco.indexOf(";pic:") + 5);
 //				Log.e("tmp", "pic:" + tmp);
-				((ImageView) root.findViewById(R.id.checkin_marker_picture)).setImageBitmap(BitmapUtility.getPreview(tmp, 200));
+				if (tmp.substring(tmp.length()-4, tmp.length()).equals(".jpg"))
+					((ImageView) root.findViewById(R.id.checkin_marker_picture)).setImageBitmap(BitmapUtility.getPreview(tmp, 200));
+				else if (tmp.substring(tmp.length()-4, tmp.length()).equals(".mp4"))
+					((ImageView) root.findViewById(R.id.checkin_marker_picture)).setImageBitmap(Bitmap.createScaledBitmap(ThumbnailUtils.createVideoThumbnail(tmp, MediaStore.Video.Thumbnails.MICRO_KIND), 200, 200, true));	
 			}
 			return root;
 		}
@@ -680,48 +734,65 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 			//error
 		}
 	}
+	
+	
+	private File getFile(int requestCode){
+		File imagefile = null;
+		String imagename = "";
+		
+		switch (requestCode)	{
+			case REQUEST_CODE_TAKE_PICTURE:
+				imagename = String.format("%1$d.jpg", System.currentTimeMillis());
+				break;
+			case REQUEST_CODE_TAKE_VIDEO:
+				imagename = String.format("%1$d.mp4", System.currentTimeMillis());
+				break;
+		}
+			
+		
+		String path = "/mnt/sdcard/";
+//		Log.e("gmaprecorderactivity3", "path= " + path);
+//		Log.e("gmaprecorderactivity3w", "system path= " + Environment.getExternalStorageDirectory().getAbsolutePath());
+		File tester = new File(path);
+		if (tester.exists() && tester.isDirectory()) {
+			Log.w("sdcard/dcim", "exists");
+			File dir = new File(path + "antrip");
+			dir.mkdir();
+			if (dir.exists() && dir.isDirectory()) {
+				Log.w("sdcard/dcim", "antrip dir created");
+				imagefile = new File(path + "antrip", imagename);
+			} else {
+				Log.w("sdcard/dcim", "cannot create antrip/not a dir");
+				imagefile = null;
+			}
+			
+		} else {
+			path = "/mnt/emmc/";
+			tester = new File(path);
+			if (tester.exists() && tester.isDirectory()) {
+				Log.w("emmc/dcim", "exists");
+				File dir = new File(path + "antrip");
+				dir.mkdirs();
+				if (dir.exists() && dir.isDirectory()) {
+					Log.w("emmc/dcim", "antrip dir created");
+					imagefile = new File(path + "antrip", imagename);
+				} else {
+					Log.w("emmc/dcim", "cannot create antrip/not a dir");
+					imagefile = null;
+				}
+			}
+		}
+	return imagefile;
+		
+	}
+
 
 	@Override
 	public void startCamera() {
 		Log.w("gmaprecorderactivity3", "start camera called");
 		
-		File imagefile = null;
+		File imagefile = getFile(REQUEST_CODE_TAKE_PICTURE);	
 		
-		{
-			String imagename = String.format("%1$d.jpg", System.currentTimeMillis());
-			String path = "/mnt/sdcard/";
-//			Log.e("gmaprecorderactivity3", "path= " + path);
-//			Log.e("gmaprecorderactivity3w", "system path= " + Environment.getExternalStorageDirectory().getAbsolutePath());
-			File tester = new File(path);
-			if (tester.exists() && tester.isDirectory()) {
-				Log.w("sdcard/dcim", "exists");
-				File dir = new File(path + "antrip");
-				dir.mkdir();
-				if (dir.exists() && dir.isDirectory()) {
-					Log.w("sdcard/dcim", "antrip dir created");
-					imagefile = new File(path + "antrip", imagename);
-				} else {
-					Log.w("sdcard/dcim", "cannot create antrip/not a dir");
-					imagefile = null;
-				}
-				
-			} else {
-				path = "/mnt/emmc/";
-				tester = new File(path);
-				if (tester.exists() && tester.isDirectory()) {
-					Log.w("emmc/dcim", "exists");
-					File dir = new File(path + "antrip");
-					dir.mkdirs();
-					if (dir.exists() && dir.isDirectory()) {
-						Log.w("emmc/dcim", "antrip dir created");
-						imagefile = new File(path + "antrip", imagename);
-					} else {
-						Log.w("emmc/dcim", "cannot create antrip/not a dir");
-						imagefile = null;
-					}
-				}
-			}
-		}
 		if(imagefile != null){
 			imageUri = Uri.fromFile(imagefile);
 //			Log.w("startcamera", "imageUri= " + imageUri.getPath());
@@ -734,6 +805,55 @@ public class GMapRecorderActivity3 extends FragmentActivity implements InfoWindo
 		}
 	}
 
+	@Override
+	public void startVideo() {
+		Log.w("gmaprecorderactivity3", "start video called");
+		
+		
+//			Log.w("startcamera", "imageUri= " + imageUri.getPath());
+			// intent to launch Android camera app to take pictures
+			Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+			// input the desired filepath + filename
+			intent.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 15);
+			// launch the intent with code
+			startActivityForResult(intent, REQUEST_CODE_TAKE_VIDEO);
+		
+	}
+	/*
+	public void startAudio()	{
+		Log.w("gmaprecorderactivity3", "start audio called");
+		isRecording = false;
+		MediaRecorder mRecorder = new MediaRecorder();
+		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		mRecorder.setOutputFile(getFile(REQUEST_CODE_TAKE_AUDIO).getPath());
+		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		try	{
+			mRecorder.prepare();
+		}
+		catch (IOException e)	{
+			Log.e("Audio Record", "prepare() failed");
+		}
+
+		LayoutInflater inflater = (LayoutInflater)getBaseContext().getSystemService(LAYOUT_INFLATER_SERVICE);
+		View popupView = inflater.inflate(R.layout.audio_ui, null);
+		final PopupWindow popup = new PopupWindow(popupView, LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+		final Button audio_ss = (Button)findViewById(R.id.audio_ss);
+		Button audio_final = (Button)findViewById(R.id.audio_final);
+		
+		audio_ss.setOnClickListener(new Button.OnClickListener(){
+
+			   @Override
+			   public void onClick(View arg0) {
+				  if (isRecording == true){
+					  ((TextView) GMapRecorderActivity3.audio_ss).setText("Record");
+					  
+				  }
+				  
+			   }
+		});
+	}*/
+	
 	@Override
 	public void setMood(int mood) {
 //		Log.w("gmaprecorderactivity3", "setMood: " + mood);

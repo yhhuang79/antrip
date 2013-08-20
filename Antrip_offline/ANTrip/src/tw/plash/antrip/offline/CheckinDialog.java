@@ -1,16 +1,24 @@
 package tw.plash.antrip.offline;
 
+import java.io.File;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.media.ThumbnailUtils;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
+
+
 
 public class CheckinDialog extends Dialog implements MoodCallback{
 	
@@ -20,6 +28,8 @@ public class CheckinDialog extends Dialog implements MoodCallback{
 	private ImageView cancel_btn;
 	private ImageView mood_btn;
 	private ImageView picture_btn;
+	private Context con;
+
 	
 	private EditText checkin_text;
 	
@@ -27,6 +37,7 @@ public class CheckinDialog extends Dialog implements MoodCallback{
 		super(context);
 		
 		this.cqac = c;
+		this.con = context;
 		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setCancelable(true);
@@ -47,9 +58,12 @@ public class CheckinDialog extends Dialog implements MoodCallback{
 		picture_btn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				cqac.startCamera();
-			}
-		});
+				registerForContextMenu(v);
+				openContextMenu(v);
+				unregisterForContextMenu(v);
+		
+				}
+			});
 		
 		commit_btn = (ImageView) findViewById(R.id.checkin_commit);
 		commit_btn.setOnClickListener(new View.OnClickListener() {
@@ -73,9 +87,48 @@ public class CheckinDialog extends Dialog implements MoodCallback{
 		});
 	}
 	
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo){
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuInflater inflater = new MenuInflater(con);
+		inflater.inflate(R.menu.recorder_menu, menu);
+		
+	}
+	
+	public boolean onMenuItemSelected(int aFeatureId, MenuItem aMenuItem)	{
+		if (aFeatureId==Window.FEATURE_CONTEXT_MENU)
+			return onContextItemSelected(aMenuItem);
+		else
+			return super.onMenuItemSelected(aFeatureId, aMenuItem);
+	}
+	
+	@Override
+	public boolean onContextItemSelected(android.view.MenuItem item) {
+		switch (item.getItemId())	{
+		case R.id.Picture:
+			cqac.startCamera();
+			return true;
+		case R.id.Video:
+			cqac.startVideo();
+			return true;
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+	
+	
 	public void setPicture(String imagepath){
 		Log.e("checkindialog", "setpicture received: " + imagepath);
 		Bitmap bitmap = BitmapUtility.getPreview(imagepath, picture_btn.getHeight());
+		if(bitmap != null){
+			picture_btn.setScaleType(ScaleType.CENTER_CROP);
+			picture_btn.setImageBitmap(bitmap);
+		}
+	}
+	
+	public void setVideoThumbnail(String mediapath){
+		Log.e("checkindialog", "setvideoThumbnail received: " + mediapath);
+		Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(new File(mediapath).getAbsolutePath(), MediaStore.Video.Thumbnails.MICRO_KIND);
 		if(bitmap != null){
 			picture_btn.setScaleType(ScaleType.CENTER_CROP);
 			picture_btn.setImageBitmap(bitmap);
@@ -127,3 +180,4 @@ public class CheckinDialog extends Dialog implements MoodCallback{
 		}
 	}
 }
+

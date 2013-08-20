@@ -40,7 +40,7 @@ public class CheckinJSONConverter {
 	
 	static public JSONObject fromLocationtoCheckinJSON(Location loc){
 		if(loc != null){
-			if(!loc.getProvider().isEmpty() && !loc.getProvider().equalsIgnoreCase("null")){
+			if(!(loc.getProvider().length() == 0) && !loc.getProvider().equalsIgnoreCase("null")){
 				JSONObject result = new JSONObject();
 				try {
 					JSONArray array = new JSONArray();
@@ -62,7 +62,7 @@ public class CheckinJSONConverter {
 	
 	static public JSONObject fromCCOtoCheckinJSON(CandidateCheckinObject cco){
 		if(cco != null){
-			if(!cco.getLocation().getProvider().isEmpty() && !cco.getLocation().getProvider().equalsIgnoreCase("null")){
+			if(!(cco.getLocation().getProvider().length() == 0) && !cco.getLocation().getProvider().equalsIgnoreCase("null")){
 				JSONObject result = new JSONObject();
 				try {
 					JSONArray array = new JSONArray();
