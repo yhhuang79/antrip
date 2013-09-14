@@ -2,6 +2,8 @@ package tw.plash.antrip.offline;
 
 import java.sql.Timestamp;
 
+import tw.plash.antrip.offline.utility.LocationFilter;
+
 import android.location.Location;
 
 public class TripStats {

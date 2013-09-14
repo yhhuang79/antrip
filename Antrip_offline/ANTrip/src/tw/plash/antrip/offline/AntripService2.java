@@ -6,6 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import org.json.JSONObject;
 
+import tw.plash.antrip.offline.utility.LocationFilter;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -33,7 +35,7 @@ import android.util.Log;
 
 public class AntripService2 extends Service implements LocationPublisher{
 	
-	final static int CONNECTION_TIMEOUT = 5000; //5 seconds connection timeout
+	public final static int CONNECTION_TIMEOUT = 5000; //5 seconds connection timeout
 	
 	final private int timeout_FirstLocationFix = 60000; //60 seconds timeout for first location fix
 	final private int timeout_locationFixInterval = 30000;//30 seconds timeout between locations...

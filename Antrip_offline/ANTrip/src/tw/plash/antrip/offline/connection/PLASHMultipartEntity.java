@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.connection;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -7,8 +7,8 @@ import java.nio.charset.Charset;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 
-import tw.plash.antrip.offline.PLASHUrlEncodedFormEntity.CountingOutputStream;
-import tw.plash.antrip.offline.PLASHUrlEncodedFormEntity.ProgressListener;
+import tw.plash.antrip.offline.connection.PLASHUrlEncodedFormEntity.CountingOutputStream;
+import tw.plash.antrip.offline.connection.PLASHUrlEncodedFormEntity.ProgressListener;
 
 public class PLASHMultipartEntity extends MultipartEntity {
 	

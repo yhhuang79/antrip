@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.connection;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -1,5 +1,7 @@
 package tw.plash.antrip.offline;
 
+import tw.plash.antrip.offline.friend.FriendListActivityTEMP;
+import tw.plash.antrip.offline.trip.TripListActivity4;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;

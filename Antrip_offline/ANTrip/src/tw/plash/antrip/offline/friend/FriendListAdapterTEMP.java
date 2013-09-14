@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.friend;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,6 +7,9 @@ import org.apache.commons.math3.stat.correlation.Covariance;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import tw.plash.antrip.offline.R;
+import tw.plash.antrip.offline.utility.JSONUtility;
 
 import android.content.Context;
 import android.util.Log;

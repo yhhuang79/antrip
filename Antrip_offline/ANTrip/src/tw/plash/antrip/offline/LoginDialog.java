@@ -16,6 +16,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import tw.plash.antrip.offline.connection.InternetUtility;
+import tw.plash.antrip.offline.utility.StringValidityChecker;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;

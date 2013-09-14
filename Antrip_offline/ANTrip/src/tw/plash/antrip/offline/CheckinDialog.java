@@ -2,6 +2,8 @@ package tw.plash.antrip.offline;
 
 import java.io.File;
 
+import tw.plash.antrip.offline.utility.BitmapUtility;
+
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;

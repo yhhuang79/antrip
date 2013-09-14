@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.trip;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import tw.plash.antrip.offline.R;
+import tw.plash.antrip.offline.utility.JSONUtility;
 
 import android.content.Context;
 import android.util.Log;

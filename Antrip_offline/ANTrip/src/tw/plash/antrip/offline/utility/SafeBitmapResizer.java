@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.utility;
 
 import java.io.File;
 import java.io.FileInputStream;

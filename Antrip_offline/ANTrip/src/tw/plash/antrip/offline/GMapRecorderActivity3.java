@@ -10,6 +10,9 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import tw.plash.antrip.offline.utility.BitmapUtility;
+import tw.plash.antrip.offline.utility.ExifEditor;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ComponentName;

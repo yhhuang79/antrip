@@ -1,5 +1,6 @@
 package tw.plash.antrip.offline;
 
+import tw.plash.antrip.offline.friend.FriendFinder;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Configuration;

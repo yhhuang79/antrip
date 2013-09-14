@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.friend;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,6 +16,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import tw.plash.antrip.offline.AntripService2;
+import tw.plash.antrip.offline.InvalidateViewsCallback;
+import tw.plash.antrip.offline.R;
+import tw.plash.antrip.offline.connection.InternetUtility;
 
 import android.app.Activity;
 import android.content.Context;

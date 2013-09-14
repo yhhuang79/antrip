@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.utility;
 
 import java.util.regex.Pattern;
 

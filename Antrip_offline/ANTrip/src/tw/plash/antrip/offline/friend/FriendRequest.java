@@ -1,8 +1,11 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.friend;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONTokener;
+
+import tw.plash.antrip.offline.InvalidateViewsCallback;
+import tw.plash.antrip.offline.R;
 
 import android.app.Activity;
 import android.content.Context;

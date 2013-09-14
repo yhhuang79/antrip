@@ -1,4 +1,4 @@
-package tw.plash.antrip.offline;
+package tw.plash.antrip.offline.trip;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,6 +20,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import tw.plash.antrip.offline.AntripService2;
+import tw.plash.antrip.offline.DBHelper2;
+import tw.plash.antrip.offline.DropdownFunctionList;
+import tw.plash.antrip.offline.GMapViewer;
+import tw.plash.antrip.offline.R;
+import tw.plash.antrip.offline.Settings;
+import tw.plash.antrip.offline.connection.UploadThread;
+import tw.plash.antrip.offline.utility.JSONUtility;
 
 import android.app.Activity;
 import android.app.ActivityManager;
