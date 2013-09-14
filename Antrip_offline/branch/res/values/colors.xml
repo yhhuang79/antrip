@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="plash_blue">#51A4D8</color>
+    <color name="mntf_blue">#6297bc</color>
+    <color name="mntf_green">#9ec630</color>
+    <color name="mntf_grey">#bfbfbf</color>
+    <color name="mntf_white">#ffffff</color>
+    <color name="android_green">#A4C639</color>
+    <color name="devils_grey">#666666</color>
+	
+    <color name="antrip_red">#dd0e3e</color>
+    <color name="antrip_beige">#e9e5da</color>
+    <color name="mood_clicked_bg">#26c1c1</color>
+</resources>

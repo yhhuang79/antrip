@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dip">
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="70dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/listitem_background"
+        android:paddingTop="6dip"
+        android:paddingLeft="5dip"
+        android:paddingRight="5dip"/>
+	
+    <ImageView 
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/listitem_bell"
+        android:layout_gravity="left"/>
+    
+    <ImageView 
+        android:layout_width="30dip"
+        android:layout_height="30dip"
+        android:scaleType="fitXY"
+        android:src="@drawable/listitem_bell"
+        android:layout_gravity="right"/>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dip"
+        android:orientation="vertical"
+        android:layout_gravity="center"
+        android:paddingTop="5dip"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip">
+
+        <TextView
+            android:id="@+id/friendtriplistitem_name"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" 
+            android:text="TSETSETS"
+            android:gravity="center_horizontal"/>
+
+        <TextView
+            android:id="@+id/friendtriplistitem_starttime"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" 
+            android:gravity="center_horizontal"/>
+        
+        <TextView
+            android:id="@+id/friendtriplistitem_sharer"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:textSize="14sp" 
+            android:gravity="center_horizontal"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+</FrameLayout>

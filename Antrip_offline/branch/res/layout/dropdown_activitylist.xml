@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@color/antrip_beige"
+    android:orientation="vertical" >
+	
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_state"
+        android:clickable="true"
+        android:orientation="horizontal"
+        android:tag="recorder">
+
+        <ImageView
+            android:layout_width="55dip"
+            android:layout_height="50dip"
+            android:adjustViewBounds="true"
+            android:clickable="false"
+            android:padding="3dip"
+            android:scaleType="fitEnd"
+            android:src="@drawable/dropdown_recorder" />
+	
+        <TextView 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="left|center_vertical"
+            android:padding="3dip"
+            android:text="@string/dropdown_recorder"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_state"
+        android:clickable="true"
+        android:orientation="horizontal"
+        android:tag="triplist">
+
+        <ImageView
+            android:layout_width="55dip"
+            android:layout_height="50dip"
+            android:adjustViewBounds="true"
+            android:clickable="false"
+            android:padding="3dip"
+            android:scaleType="fitEnd"
+            android:src="@drawable/dropdown_triplist" />
+	
+        <TextView 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="left|center_vertical"
+            android:padding="3dip"
+            android:text="@string/dropdown_triplist"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
+     
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_state"
+        android:clickable="true"
+        android:orientation="horizontal"
+        android:tag="friendlist">
+
+        <ImageView
+            android:layout_width="55dip"
+            android:layout_height="50dip"
+            android:adjustViewBounds="true"
+            android:clickable="false"
+            android:padding="3dip"
+            android:scaleType="fitEnd"
+            android:src="@drawable/dropdown_friendlist" />
+	
+        <TextView 
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="left|center_vertical"
+            android:padding="3dip"
+            android:text="@string/dropdown_friendlist"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"/>
+    </LinearLayout>
+
+</LinearLayout>
