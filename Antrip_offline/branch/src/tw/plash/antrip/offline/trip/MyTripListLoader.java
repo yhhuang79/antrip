@@ -49,9 +49,10 @@ public class MyTripListLoader extends AsyncTaskLoader<List<String>> {
 			
 			int code = result.getInt("status code");
 			if (code == 200) {
-				JSONArray data = result.getJSONArray("query result");
-				for (int i = 0; i < data.length(); i++) {
-					JSONObject obj = data.getJSONObject(i);
+				JSONObject queryresult = result.getJSONObject("query result");
+				JSONArray array = queryresult.getJSONArray("my");
+				for (int i = 0; i < array.length(); i++) {
+					JSONObject obj = array.getJSONObject(i);
 					String name = obj.getString("tripname");
 					String time = obj.getString("starttime");
 					trips.add(name + "\n" + time);

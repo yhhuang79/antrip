@@ -34,7 +34,7 @@ public class ShareTripListLoader extends AsyncTaskLoader<List<String>> {
 		
 		try {
 			
-			URL url = new URL("http://192.168.56.102/getTrips.php?userid=123");
+			URL url = new URL("http://192.168.56.102/getTrips.php?userid=123&view=share");
 			
 			conn = (HttpURLConnection) url.openConnection();
 			conn.setConnectTimeout(3000);
@@ -49,9 +49,10 @@ public class ShareTripListLoader extends AsyncTaskLoader<List<String>> {
 			
 			int code = result.getInt("status code");
 			if (code == 200) {
-				JSONArray data = result.getJSONArray("query result");
-				for (int i = 0; i < data.length(); i++) {
-					JSONObject obj = data.getJSONObject(i);
+				JSONObject queryresult = result.getJSONObject("query result");
+				JSONArray array = queryresult.getJSONArray("share");
+				for (int i = 0; i < array.length(); i++) {
+					JSONObject obj = array.getJSONObject(i);
 					String name = obj.getString("tripname");
 					String time = obj.getString("starttime");
 					trips.add(name + "\n" + time);
