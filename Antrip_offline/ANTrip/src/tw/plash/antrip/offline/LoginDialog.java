@@ -3,6 +3,7 @@ package tw.plash.antrip.offline;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 
 import org.apache.commons.math3.analysis.solvers.RegulaFalsiSolver;
 import org.apache.http.HttpResponse;
@@ -15,6 +16,10 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.widget.LoginButton;
 
 import tw.plash.antrip.offline.connection.InternetUtility;
 import tw.plash.antrip.offline.utility.StringValidityChecker;
@@ -65,6 +70,7 @@ public class LoginDialog extends Dialog{
 		setContentView(R.layout.dialog_login);
 		
 		Button register = (Button) findViewById(R.id.login_register);
+		
 		register.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -337,6 +343,7 @@ public class LoginDialog extends Dialog{
 //				Toast.makeText(mContext, R.string.toast_function_coming_soon, Toast.LENGTH_SHORT).show();
 //			}
 //		});
+		
 	}
 	
 	private login mlogin;

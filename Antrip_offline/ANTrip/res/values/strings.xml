@@ -116,7 +116,7 @@
     <string name="dialog_donthaveaccount">\nDon\'t have an account? you can...</string>
     <string name="dialog_registernewaccount">register a new account</string>
     <string name="dialog_or">or</string>
-    <string name="dialog_loginwithfacebook">login with facebook</string>
+    <string name="dialog_loginwithfacebook">Or you can login with facebook</string>
     <string name="dialog_button_register">Register</string>
     <string name="dialog_agreetostuff">I agree to the PLASH <a href="http://www.plash.tw/html/antrip.html">Terms of Service</a></string>
     <string name="dropdown_recorder">Trip Recorder</string>
@@ -200,4 +200,5 @@
         <item >Terrain</item>
         <item >Hybrid</item>
     </string-array>
+    <string name="app_id">314048998686760</string>
 </resources>

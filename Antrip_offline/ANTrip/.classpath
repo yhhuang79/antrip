@@ -3,14 +3,18 @@
 	<classpathentry excluding="tw/plash/antrip/GetTripListAsync.java|tw/plash/antrip/RotateImageView.java|tw/plash/antrip/test21.java|tw/plash/antrip/TestMain.java|tw/plash/antrip/FocusRectangle.java|tw/plash/antrip/GetTripList.java|tw/plash/antrip/PLASHCameraPreview.java|tw/plash/antrip/LocationServiceGPS.java|tw/plash/antrip/LocationService.java|tw/plash/antrip/UploadService.java|tw/plash/antrip/AntripLocation.java|tw/plash/antrip/PLASHLocationObject.java|tw/plash/antrip/UnfinishedUploadThread.java|tw/plash/antrip/TripListActivity.java|tw/plash/antrip/TripListAdapter.java" kind="src" path="src"/>
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="lib" path="libs/wpsapi.jar"/>
 	<classpathentry kind="lib" path="libs/apache-mime4j-core-0.7.2.jar"/>
 	<classpathentry kind="lib" path="libs/httpclient-4.2.1.jar"/>
 	<classpathentry kind="lib" path="libs/httpcore-4.2.1.jar"/>
 	<classpathentry kind="lib" path="libs/httpmime-4.2.1.jar"/>
 	<classpathentry kind="lib" path="libs/crittercism_v3_0_3_sdkonly.jar"/>
-	<classpathentry kind="lib" path="libs/android-support-v4.jar"/>
 	<classpathentry kind="lib" path="libs/mapsforge-map-0.3.0-jar-with-dependencies.jar"/>
+	<classpathentry kind="lib" path="libs/android-support-v7-appcompat.jar"/>
+	<classpathentry kind="lib" path="libs/android-support-v4.jar"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/FacebookSDK"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/google-play-services_lib"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>
