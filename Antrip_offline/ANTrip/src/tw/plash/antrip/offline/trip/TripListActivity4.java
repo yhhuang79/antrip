@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import org.apache.http.HttpResponse;
@@ -63,6 +65,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.emilsjolander.components.StickyListHeaders.StickyListHeadersListView;
+import com.facebook.FacebookRequestError;
+import com.facebook.HttpMethod;
+import com.facebook.Request;
+import com.facebook.RequestAsyncTask;
+import com.facebook.Response;
+import com.facebook.Session;
 
 public class TripListActivity4 extends Activity implements TripListReloader{
 	
@@ -81,6 +89,9 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 	
 	private ImageButton dropdownList;
 //	private ImageButton refreshBtn;
+	
+	// Facebook Permission
+	private static final List<String> PERMISSIONS = Arrays.asList("publish_actions");
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -257,6 +268,8 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 					//is a remote tripinfo entry
 					new AlertDialog.Builder(mContext).setItems(R.array.triplist_contextmenu_remote,
 							new DialogInterface.OnClickListener() {
+								private String tripHash = null;
+								private String friendids = null;
 								@Override
 								public void onClick(DialogInterface dialog, int which) {
 									switch (which) {
@@ -274,6 +287,8 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 													
 													try {
 														tripid = obj.getString("trip_id");
+														tripHash = obj.getString("hash");
+														Log.d("Trip Hash", tripHash);
 													} catch (JSONException e1) {
 														e1.printStackTrace();
 													}
@@ -430,7 +445,7 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 																
 																new AsyncTask<Void, Void, Boolean>(){
 																	
-																	private String friendids = null;
+																	//private String friendids = null;
 																	
 																	private ProgressDialog diag;
 																	
@@ -538,6 +553,11 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 													}
 												}
 											}.execute();
+											//if(friendids != null){
+												//String[] fids = friendids.split(",");
+												//if(Arrays.asList(fids).contains("0"))
+													publishStory(tripHash);
+											//}
 										break;
 									case 1:
 										try {
@@ -999,5 +1019,75 @@ public class TripListActivity4 extends Activity implements TripListReloader{
 	public void shouldReloadTripList(int position) {
 		loadTripList(position);
 		//XXX need to also reload remote trip list, in stead of just removing local trip...
+	}
+	
+	
+	// Facebook permission checker
+	private boolean isSubsetOf(Collection<String> subset, Collection<String> superset) {
+	    for (String string : subset) {
+	        if (!superset.contains(string)) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}	
+	
+	// Facebook publish 
+	private void publishStory(String hash) {
+	    Session session = Session.getActiveSession();
+
+	    if (session != null){
+
+	        // Check for publish permissions    
+	        List<String> permissions = session.getPermissions();
+	        if (!isSubsetOf(PERMISSIONS, permissions)) {
+//	            pendingPublishReauthorization = true;
+	            Session.NewPermissionsRequest newPermissionsRequest = new Session
+	                    .NewPermissionsRequest(this, PERMISSIONS);
+	        session.requestNewPublishPermissions(newPermissionsRequest);
+	            return;
+	        }
+
+	        Bundle postParams = new Bundle();
+	        String shareUrl = "http://www.plash.tw/antrip/showDTripFrame.php?hash="+hash+"&g_lang=Chinese&g_calUnit=undefined";
+	        //postParams.putString("name", "Facebook SDK for Android");
+	        //postParams.putString("caption", "Build great social apps and get more installs.");
+	        //postParams.putString("description", "The Facebook SDK for Android makes it easier and faster to develop Facebook integrated Android apps.");
+	        postParams.putString("link", shareUrl);
+	        //postParams.putString("picture", "https://raw.github.com/fbsamples/ios-3.x-howtos/master/Images/iossdk_logo.png");
+
+	        Request.Callback callback= new Request.Callback() {
+	            public void onCompleted(Response response) {
+	                JSONObject graphResponse = response
+	                                           .getGraphObject()
+	                                           .getInnerJSONObject();
+	                String postId = null;
+	                try {
+	                    postId = graphResponse.getString("id");
+	                } catch (JSONException e) {
+	                    //Log.i(TAG, "JSON error "+ e.getMessage());
+	                }
+//	                FacebookRequestError error = response.getError();
+//	                if (error != null) {
+//	                    Toast.makeText(getActivity()
+//	                         .getApplicationContext(),
+//	                         error.getErrorMessage(),
+//	                         Toast.LENGTH_SHORT).show();
+//	                    } else {
+//	                        Toast.makeText(getActivity()
+//	                             .getApplicationContext(), 
+//	                             postId,
+//	                             Toast.LENGTH_LONG).show();
+//	                }
+	            }
+	        };
+
+	        Request request = new Request(session, "me/feed", postParams, 
+	                              HttpMethod.POST, callback);
+
+	        RequestAsyncTask task = new RequestAsyncTask(request);
+	        task.execute();
+	    }
+
 	}
 }
